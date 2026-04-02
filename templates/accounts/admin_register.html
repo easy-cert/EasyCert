@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{% if edit_mode %}Edit Admin{% else %}Register Admin{% endif %} • EasyCert{% endblock %}
+
+{% block body %}
+<!-- HEADER -->
+<header class="sticky top-0 z-50 glass border-b border-white/50 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-x-4">
+        <div class="flex items-center gap-x-3">
+            <a href="{% url 'superadmin_dashboard' %}"
+                class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-[#2C7BE5] transition-all">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight text-[#0D1B2A]">{% if edit_mode %}Update Administrator{%
+                    else %}New Barangay Admin{% endif %}</h1>
+                <p class="text-xs text-[#333333]/50 font-medium -mt-1 uppercase tracking-wider">Super Admin Console</p>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+    <div class="glass p-10 sm:p-12 rounded-[3rem] border border-white/60 shadow-2xl relative">
+        <div
+            class="absolute -top-12 left-12 w-24 h-24 bg-gradient-to-br from-[#2C7BE5] to-[#1a68d1] text-white flex items-center justify-center rounded-[2.5rem] shadow-2xl shadow-[#2C7BE5]/40 text-4xl transform -rotate-12 group-hover:rotate-0 transition-transform">
+            <i class="fa-solid {% if edit_mode %}fa-user-pen text-3xl{% else %}fa-user-plus{% endif %}"></i>
+        </div>
+
+        <form method="POST" action="" class="space-y-10 mt-10">
+            {% csrf_token %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
+                <!-- Personal Info -->
+                <div class="md:col-span-2">
+                    <h3
+                        class="text-xs font-black text-[#2C7BE5] uppercase tracking-[0.3em] mb-6 flex items-center gap-x-3">
+                        <i class="fa-solid fa-id-card"></i> IDENTIFICATION
+                    </h3>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black text-[#333333]/40 uppercase tracking-widest ml-1">Full
+                        Name</label>
+                    <div class="relative">
+                        <i class="fa-regular fa-user absolute left-5 top-1/2 -translate-y-1/2 text-[#333333]/30"></i>
+                        {{ form.full_name }}
+                    </div>
+                    {% if form.full_name.errors %}<p class="text-red-500 text-xs font-bold mt-1">{{
+                        form.full_name.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black text-[#333333]/40 uppercase tracking-widest ml-1">Email
+                        Address</label>
+                    <div class="relative">
+                        <i
+                            class="fa-regular fa-envelope absolute left-5 top-1/2 -translate-y-1/2 text-[#333333]/30"></i>
+                        {{ form.email }}
+                    </div>
+                    {% if form.email.errors %}<p class="text-red-500 text-xs font-bold mt-1">{{ form.email.errors.0 }}
+                    </p>{% endif %}
+                </div>
+
+                <div class="space-y-2">
+                    <label
+                        class="block text-[10px] font-black text-[#333333]/40 uppercase tracking-widest ml-1">Birthdate</label>
+                    <div class="relative">
+                        <i
+                            class="fa-regular fa-calendar absolute left-5 top-1/2 -translate-y-1/2 text-[#333333]/30"></i>
+                        {{ form.birthdate }}
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label
+                        class="block text-[10px] font-black text-[#333333]/40 uppercase tracking-widest ml-1">Age</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-hashtag absolute left-5 top-1/2 -translate-y-1/2 text-[#333333]/30"></i>
+                        {{ form.age }}
+                    </div>
+                </div>
+
+                <div class="md:col-span-2 space-y-2">
+                    <label class="block text-[10px] font-black text-[#333333]/40 uppercase tracking-widest ml-1">Home
+                        Address</label>
+                    <div class="relative">
+                        <i
+                            class="fa-solid fa-location-dot absolute left-5 top-1/2 -translate-y-1/2 text-[#333333]/30"></i>
+                        {{ form.address }}
+                    </div>
+                </div>
+
+                <!-- Assignment & Security -->
+                <div class="md:col-span-2 mt-8">
+                    <h3
+                        class="text-xs font-black text-[#2C7BE5] uppercase tracking-[0.3em] mb-6 flex items-center gap-x-3">
+                        <i class="fa-solid fa-lock"></i> JURISDICTION & SECURITY
+                    </h3>
+                </div>
+
+                <div class="space-y-2">
+                    <label
+                        class="block text-[10px] font-black text-[#333333]/40 uppercase tracking-widest ml-1">Barangay
+                        Assignment</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-building absolute left-5 top-1/2 -translate-y-1/2 text-[#333333]/30"></i>
+                        {{ form.barangay }}
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black text-[#333333]/40 uppercase tracking-widest ml-1">Contact
+                        Number</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-phone absolute left-5 top-1/2 -translate-y-1/2 text-[#333333]/30"></i>
+                        {{ form.contact_number }}
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label
+                        class="block text-[10px] font-black text-[#333333]/40 uppercase tracking-widest ml-1">Position /
+                        Role</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-user-tag absolute left-5 top-1/2 -translate-y-1/2 text-[#333333]/30"></i>
+                        {{ form.position }}
+                    </div>
+                </div>
+
+                <div
+                    class="md:col-span-2 bg-[#2C7BE5]/5 p-8 rounded-[2rem] border border-[#2C7BE5]/10 mt-6 shadow-inner">
+                    <div class="flex flex-col sm:flex-row items-center gap-6">
+                        <div
+                            class="w-16 h-16 bg-[#2C7BE5] text-white flex items-center justify-center rounded-2xl shrink-0 shadow-lg">
+                            <i class="fa-solid fa-key text-2xl"></i>
+                        </div>
+                        <div class="flex-1 text-center sm:text-left">
+                            <h4 class="font-bold text-[#0D1B2A] text-xl">{% if edit_mode %}Security Configuration{% else
+                                %}Primary Security PIN{% endif %}</h4>
+                            <p class="text-xs text-[#333333]/50 font-medium">{% if edit_mode %}Leave the PIN field blank
+                                to keep the current one. Use 6 digits for the new PIN.{% else %}Set a 6-digit PIN for
+                                the admin. This will be their primary login credential.{% endif %}</p>
+                        </div>
+                        <div class="w-full sm:w-48">
+                            {{ form.pin }}
+                        </div>
+                    </div>
+                    {% if form.pin.errors %}<p class="text-red-500 text-xs font-bold mt-2 text-center">{{
+                        form.pin.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center justify-end gap-5 mt-16">
+                <a href="{% url 'superadmin_dashboard' %}"
+                    class="w-full sm:w-auto px-10 py-5 text-sm font-bold text-[#333333]/50 hover:bg-black/5 rounded-2xl transition-all text-center">CANCEL</a>
+                <button type="submit"
+                    class="w-full sm:w-auto px-16 py-5 bg-[#2C7BE5] hover:bg-[#1a68d1] text-white rounded-[1.5rem] font-black shadow-2xl shadow-[#2C7BE5]/30 transform active:scale-95 transition-all text-lg">
+                    {% if edit_mode %}SAVE UPDATES{% else %}CREATE ACCOUNT{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<style>
+    input,
+    select {
+        background-color: rgba(255, 255, 255, 0.4);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: 1rem;
+        padding-left: 3rem;
+        padding-right: 3rem;
+        padding-top: 1.25rem;
+        padding-bottom: 1.25rem;
+        outline: 2px solid transparent;
+        outline-offset: 2px;
+        transition-property: all;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 150ms;
+        font-weight: 700;
+        font-size: 15px;
+    }
+
+    input:focus,
+    select:focus {
+        border-color: #2C7BE5;
+        background-color: white;
+    }
+
+    input::placeholder {
+        color: rgba(51, 51, 51, 0.25);
+        font-weight: normal;
+    }
+
+    select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23CAD5E2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1.25rem center;
+        background-size: 1rem;
+    }
+</style>
+{% endblock %}

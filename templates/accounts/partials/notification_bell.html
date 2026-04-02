@@ -1,0 +1,178 @@
+{% load static %}
+<!-- NOTIFICATIONS BELL -->
+<div class="relative items-center flex">
+    <button onclick="toggleNotifDropdown(); markNotificationsRead();" id="notif-bell-btn" title="Notifications" class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-2xl border border-[#2C7BE5]/20 bg-white hover:bg-[#F2F9FF] text-[#2C7BE5] transition-all relative">
+        <i id="notif-bell-icon" class="fa-solid fa-bell {% if unread_notifications_count > 0 %}animate-pulse{% endif %}"></i>
+        
+        <span id="notif-badge" class="{% if unread_notifications_count == 0 %}hidden{% endif %} absolute top-0 right-0 -mt-1 -mr-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold shadow-md">
+            {{ unread_notifications_count }}
+        </span>
+    </button>
+    
+    <div id="notif-dropdown" class="absolute top-12 right-0 w-80 bg-white rounded-2xl shadow-xl border border-[#333333]/10 hidden z-50 overflow-hidden translate-y-2 opacity-0 transition-all duration-200">
+        <div class="bg-[#2C7BE5] text-white text-xs font-bold px-4 py-3 flex justify-between items-center">
+            <span>Alerts & Notifications</span>
+            {% if my_notifications %}
+            <button onclick="clearNotifications()" title="Clear All" class="hover:text-red-200 transition-colors bg-white/10 px-2 py-1 rounded flex items-center gap-x-1">
+                <i class="fa-solid fa-trash-can text-[10px]"></i> Clear All
+            </button>
+            {% endif %}
+        </div>
+        
+        <div id="notif-list" class="max-h-64 overflow-y-auto">
+            {% for notif in my_notifications %}
+            <div id="notif-item-{{ notif.id }}" class="notif-item px-4 py-3 border-b border-[#333333]/5 text-xs hover:bg-slate-50 transition cursor-default {% if not notif.is_read %}bg-blue-50/20{% endif %}">
+                <div class="flex justify-between items-start gap-x-2">
+                    <strong class="text-[#2C7BE5] block {% if notif.notification_type == 'alert' %}text-red-500{% elif notif.notification_type == 'otp' %}text-amber-600{% endif %}">
+                        {{ notif.notification_type|title }}
+                    </strong>
+                    {% if not notif.is_read %}
+                    <span class="w-1.5 h-1.5 bg-[#2C7BE5] rounded-full shrink-0 mt-1"></span>
+                    {% endif %}
+                </div>
+                <span class="text-[#333333]/80 leading-snug block mt-0.5">{{ notif.message }}</span>
+                <span class="text-[#333333]/40 text-[10px] block mt-1">{{ notif.timestamp|timesince }} ago</span>
+            </div>
+            {% empty %}
+            <div id="empty-notif" class="px-4 py-8 text-center text-[#333333]/40 text-xs flex flex-col items-center">
+                <div class="w-12 h-12 bg-[#F2F9FF] rounded-full flex items-center justify-center mb-3">
+                    <i class="fa-solid fa-bell-slash text-xl text-[#2C7BE5]/30"></i>
+                </div>
+                <p class="font-medium text-[#333333]/60">You're all caught up!</p>
+                <p class="mt-1">No new notifications at this time.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+let notifDropdownOpen = false;
+
+function toggleNotifDropdown() {
+    const dropdown = document.getElementById('notif-dropdown');
+    notifDropdownOpen = !notifDropdownOpen;
+    
+    if (notifDropdownOpen) {
+        dropdown.classList.remove('hidden');
+        // Small timeout to allow transition
+        setTimeout(() => {
+            dropdown.classList.remove('opacity-0', 'translate-y-2');
+        }, 10);
+    } else {
+        dropdown.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => {
+            dropdown.classList.add('hidden');
+        }, 200);
+    }
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('notif-dropdown');
+    const bellBtn = document.getElementById('notif-bell-btn');
+    if (notifDropdownOpen && !dropdown.contains(event.target) && !bellBtn.contains(event.target)) {
+        toggleNotifDropdown();
+    }
+});
+
+function markNotificationsRead() {
+    const badge = document.getElementById('notif-badge');
+    if (!badge || badge.classList.contains('hidden')) return;
+
+    fetch('{% url "mark_notifications_read" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Instantly hide badge
+            badge.classList.add('hidden');
+            badge.innerText = '0';
+            document.getElementById('notif-bell-icon').classList.remove('animate-pulse');
+            
+            // Remove unread indicators
+            document.querySelectorAll('.notif-item').forEach(item => {
+                item.classList.remove('bg-blue-50/20');
+                const dot = item.querySelector('.bg-[#2C7BE5].rounded-full');
+                if (dot) dot.remove();
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error marking notifications read:', error);
+    });
+}
+
+function clearNotifications() {
+    if (!confirm('Are you sure you want to clear all notifications?')) {
+        return;
+    }
+    
+    fetch('{% url "clear_notifications" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // UI Update: Hide Badge & Stop Animation
+            const badge = document.getElementById('notif-badge');
+            if (badge) {
+                badge.classList.add('hidden');
+                badge.innerText = '0';
+            }
+            document.getElementById('notif-bell-icon').classList.remove('animate-pulse');
+            
+            // UI Update: Empty the list and show empty state
+            const list = document.getElementById('notif-list');
+            list.innerHTML = `
+                <div id="empty-notif" class="px-4 py-8 text-center text-[#333333]/40 text-xs flex flex-col items-center">
+                    <div class="w-12 h-12 bg-[#F2F9FF] rounded-full flex items-center justify-center mb-3">
+                        <i class="fa-solid fa-bell-slash text-xl text-[#2C7BE5]/30"></i>
+                    </div>
+                    <p class="font-medium text-[#333333]/60">You're all caught up!</p>
+                    <p class="mt-1">No new notifications at this time.</p>
+                </div>
+            `;
+            
+            // Remove the clear button from header
+            const clearBtn = document.querySelector('button[onclick="clearNotifications()"]');
+            if (clearBtn) clearBtn.remove();
+
+            if (typeof showToast === 'function') {
+                showToast('All notifications have been cleared.');
+            }
+        }
+    })
+    .catch(error => console.error('Error clearing notifications:', error));
+}
+
+// Simple polling for new notifications every 60 seconds
+setInterval(() => {
+    if (document.visibilityState === 'visible') {
+        fetch('{% url "get_notification_count" %}')
+        .then(response => response.json())
+        .then(data => {
+            const badge = document.getElementById('notif-badge');
+            const bellIcon = document.getElementById('notif-bell-icon');
+            if (data.unread_count > 0) {
+                badge.innerText = data.unread_count;
+                badge.classList.remove('hidden');
+                bellIcon.classList.add('animate-pulse');
+            } else {
+                badge.classList.add('hidden');
+                bellIcon.classList.remove('animate-pulse');
+            }
+        })
+        .catch(err => { /* fail silently */ });
+    }
+}, 60000);
+</script>

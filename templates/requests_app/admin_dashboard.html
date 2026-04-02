@@ -1,0 +1,512 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Admin Dashboard • EasyCert{% endblock %}
+
+{% block body %}
+
+<!-- HEADER -->
+<header class="sticky top-0 z-50 glass border-b border-white/50 shadow-sm">
+    <div
+        class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-x-2 flex-wrap gap-y-2">
+        <div class="flex items-center gap-x-3">
+            <img src="{% static 'Icon.png' %}" alt="EasyCert Logo" 
+                class="w-10 h-10 sm:w-12 sm:h-12 rounded-full shadow-inner object-cover" />
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold tracking-tight"><span class="easycert-easy">Easy</span><span class="text-[#28DF97]">Cert</span></h1>
+                <p class="text-xs text-[#00B894] font-medium -mt-1">
+                    {% if user.barangay %}{{ user.barangay.barangay_name }} • {{ user.barangay.location }}{% else %}Super Admin Mode{% endif %}
+                </p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-x-1 bg-white/80 rounded-3xl p-1 shadow-inner order-3 sm:order-2">
+            <button id="admin-tab" class="px-3 sm:px-6 py-2 sm:py-3 rounded-3xl font-semibold transition-all flex items-center gap-x-2 text-sm sm:text-base active-tab">
+                <i class="fa-solid fa-file-signature"></i>
+                <span class="hidden sm:inline">Certificates</span>
+                <span class="sm:hidden">Certs</span>
+            </button>
+            <a href="{% url 'admin_memberships' %}" id="memberships-tab"
+                class="px-3 sm:px-6 py-2 sm:py-3 rounded-3xl font-semibold transition-all flex items-center gap-x-2 text-sm sm:text-base text-[#333333]/60 hover:text-[#2C7BE5] hover:bg-[#2C7BE5]/5">
+                <i class="fa-solid fa-users"></i>
+                <span class="hidden sm:inline">Memberships</span>
+                <span class="sm:hidden">Members</span>
+            </a>
+        </div>
+
+        <div class="flex items-center gap-x-3 sm:gap-x-6 order-2 sm:order-3">
+            <div class="flex items-center gap-x-2 text-xs sm:text-sm">
+                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-[#00B894] rounded-full animate-pulse"></div>
+                <span class="font-medium text-[#00B894]">Online</span>
+            </div>
+            <button onclick="toggleDarkMode()" id="dark-mode-btn" title="Toggle Dark Mode"
+                class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-2xl border border-[#2C7BE5]/20 bg-white hover:bg-[#F2F9FF] dark-toggle-btn transition-all text-[#2C7BE5]">
+                <i id="dark-mode-icon" class="fa-solid fa-moon text-sm"></i>
+            </button>
+            <a href="{% url 'logout' %}"
+                class="px-5 py-3 bg-red-50 hover:bg-red-100 text-red-600 rounded-2xl flex items-center gap-x-2 text-sm font-medium border border-red-200 transition-all">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                Logout
+            </a>
+        </div>
+    </div>
+</header>
+
+<!-- DASHBOARD CONTENT -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+
+    <!-- DASHBOARD HEADER -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+        <div>
+            <h2 class="text-2xl sm:text-3xl font-bold">Admin Dashboard</h2>
+            <p class="text-[#333333]/60 text-sm mt-1">
+                <span class="font-medium text-[#2C7BE5]">{{ user.full_name }}</span> •
+                <span id="dashboard-date"></span>
+            </p>
+        </div>
+        <div class="flex items-center gap-x-3">
+            <button onclick="refreshDashboard()"
+                class="px-5 py-3 bg-white rounded-2xl flex items-center gap-x-2 text-sm font-medium border border-[#2C7BE5]/20 hover:bg-[#F2F9FF] transition-all">
+                <i class="fa-solid fa-rotate"></i>
+                Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-10">
+        <div class="glass rounded-3xl p-5 sm:p-6 card-hover">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs sm:text-sm text-[#333333]/60">Today's Requests</p>
+                    <p id="stat-today" class="text-4xl sm:text-5xl font-bold text-[#2C7BE5]">{{ stats.today }}</p>
+                </div>
+                <i class="fa-solid fa-calendar-day text-3xl sm:text-4xl text-[#2C7BE5]/20"></i>
+            </div>
+        </div>
+        <div class="glass rounded-3xl p-5 sm:p-6 card-hover">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs sm:text-sm text-[#333333]/60">Pending</p>
+                    <p id="stat-pending" class="text-4xl sm:text-5xl font-bold text-amber-500">{{ stats.pending }}</p>
+                </div>
+                <i class="fa-solid fa-hourglass text-3xl sm:text-4xl text-amber-200"></i>
+            </div>
+        </div>
+        <div class="glass rounded-3xl p-5 sm:p-6 card-hover">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs sm:text-sm text-[#333333]/60">Approved</p>
+                    <p id="stat-approved" class="text-4xl sm:text-5xl font-bold text-[#00B894]">{{ stats.approved }}</p>
+                </div>
+                <i class="fa-solid fa-circle-check text-3xl sm:text-4xl text-[#00B894]/20"></i>
+            </div>
+        </div>
+        <div class="glass rounded-3xl p-5 sm:p-6 card-hover">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs sm:text-sm text-[#333333]/60">Total Requests</p>
+                    <p id="stat-month" class="text-4xl sm:text-5xl font-bold text-[#2C7BE5]">{{ stats.total }}</p>
+                </div>
+                <i class="fa-solid fa-chart-line text-3xl sm:text-4xl text-[#2C7BE5]/20"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILTER BAR + TABLE -->
+    <div class="glass rounded-3xl overflow-hidden">
+        <div
+            class="px-6 sm:px-8 py-5 sm:py-6 border-b border-white/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <h4 class="font-semibold text-lg">All Requests</h4>
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+                <select id="status-filter" onchange="filterDashboard()"
+                    class="px-4 py-3 rounded-2xl border border-[#2C7BE5]/20 text-sm outline-none bg-white w-full sm:w-40">
+                    <option value="">All Status</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+                <select id="type-filter" onchange="filterDashboard()"
+                    class="px-4 py-3 rounded-2xl border border-[#2C7BE5]/20 text-sm outline-none bg-white w-full sm:w-48">
+                    <option value="">All Types</option>
+                    {% for code, label in certificate_types %}
+                    <option value="{{ code }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <input id="search-input" type="text" placeholder="Search name or tracking..."
+                    oninput="filterDashboard()"
+                    class="px-5 py-3 rounded-2xl border border-[#2C7BE5]/20 text-sm w-full sm:w-64 outline-none">
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-[700px]" id="requests-table">
+                <thead class="bg-white/60">
+                    <tr class="text-left text-xs font-medium text-[#333333]/60 uppercase tracking-wider">
+                        <th class="px-6 sm:px-8 py-4 sm:py-5">Tracking</th>
+                        <th class="px-6 sm:px-8 py-4 sm:py-5">Name</th>
+                        <th class="px-6 sm:px-8 py-4 sm:py-5">Certificate</th>
+                        <th class="px-6 sm:px-8 py-4 sm:py-5">Status</th>
+                        <th class="px-6 sm:px-8 py-4 sm:py-5">Date</th>
+                        <th class="px-6 sm:px-8 py-4 sm:py-5 text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="requests-tbody" class="text-sm divide-y divide-white/50">
+                    <!-- Populated by JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <div id="table-empty" class="hidden text-center py-16 text-[#333333]/40">
+            <i class="fa-solid fa-inbox text-5xl mb-4"></i>
+            <p class="font-medium">No requests found</p>
+        </div>
+    </div>
+</div>
+
+<!-- REVIEW MODAL -->
+<div id="review-modal" class="fixed inset-0 hidden items-center justify-center z-[99999] p-4"
+    style="background: rgba(220,235,255,0.50); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
+    <div class="modal w-full max-w-2xl rounded-3xl max-h-[90vh] overflow-y-auto"
+        style="background: rgba(255,255,255,0.78); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); border: 1px solid rgba(255,255,255,0.75); box-shadow: 0 8px 40px rgba(44,123,229,0.14);">
+        <div class="p-6 sm:p-8">
+            <div class="flex items-start justify-between mb-6 sm:mb-8">
+                <div>
+                    <h3 class="text-xl sm:text-2xl font-bold flex items-center gap-x-3 flex-wrap gap-y-2">
+                        <span>Review Request</span>
+                        <span id="review-tracking"
+                            class="font-mono text-sm bg-white/80 px-4 py-1 rounded-2xl text-[#2C7BE5]"></span>
+                    </h3>
+                </div>
+                <button onclick="closeReviewModal()"
+                    class="w-9 h-9 flex items-center justify-center hover:bg-black/5 rounded-xl text-[#333333]/50 transition-colors shrink-0">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div id="review-content" class="space-y-6 sm:space-y-8 text-sm">
+                <!-- JS populated -->
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-8 sm:mt-12">
+                <button onclick="updateRequestStatus('Rejected')"
+                    class="flex-1 py-5 sm:py-6 bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded-3xl transition-colors flex items-center justify-center gap-x-2">
+                    <i class="fa-solid fa-xmark"></i> REJECT
+                </button>
+                <button onclick="updateRequestStatus('Approved')"
+                    class="flex-1 py-5 sm:py-6 bg-[#00B894] hover:bg-[#00a382] text-white font-semibold rounded-3xl transition-colors flex items-center justify-center gap-x-2">
+                    <i class="fa-solid fa-check"></i> APPROVE
+                </button>
+                <!-- CERTIFICATE PREVIEW MODAL -->
+                <div id="cert-preview-modal"
+                    class="fixed inset-0 hidden items-center justify-center z-[99999] p-3 sm:p-4"
+                    style="background: rgba(220,235,255,0.50); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
+                    <div class="max-w-[850px] w-full max-h-[95vh] overflow-y-auto">
+                        <div class="flex justify-end mb-3 sm:mb-4">
+                            <button onclick="closeCertModal()"
+                                class="px-5 sm:px-6 py-2.5 sm:py-3 bg-white/90 hover:bg-black/5 text-[#333333] rounded-3xl flex items-center gap-x-2 text-sm">
+                                <i class="fa-solid fa-xmark"></i> Close
+                            </button>
+                        </div>
+
+                        <div id="certificate-content"
+                            class="certificate mx-auto p-8 sm:p-12 relative bg-white rounded-3xl"
+                            style="border: 1px solid rgba(255,255,255,0.75); box-shadow: 0 8px 40px rgba(44,123,229,0.14);">
+                            <!-- Official Header -->
+                            <div class="flex flex-col sm:flex-row justify-between items-start mb-8 sm:mb-10 gap-4">
+                                <div>
+                                    <div class="flex items-center gap-x-3 sm:gap-x-4">
+                                        <img src="{% static 'Icon.png' %}" alt="EasyCert Logo" class="w-12 h-12 sm:w-14 sm:h-14 object-cover rounded-full" />
+                                        <div>
+                                            <p id="cert-barangay-name" class="text-[#2C7BE5] text-xl sm:text-2xl font-bold tracking-widest uppercase">
+                                                BARANGAY POBLACION</p>
+                                            <p id="cert-barangay-location" class="text-xs text-[#333333] uppercase">CEBU CITY • PHILIPPINES</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-left sm:text-right">
+                                    <div class="text-xs font-medium uppercase tracking-widest text-[#333333]/60">
+                                        OFFICIAL
+                                        CERTIFICATE</div>
+                                    <div id="cert-type" class="text-2xl sm:text-3xl font-bold text-[#2C7BE5]"></div>
+                                </div>
+                            </div>
+
+                            <div class="border border-dashed border-[#2C7BE5]/50 p-6 sm:p-8 mb-8 sm:mb-10">
+                                <div
+                                    class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 sm:gap-x-12 gap-y-4 sm:gap-y-6 text-sm sm:text-base">
+                                    <div><span class="font-medium text-[#333333]/60">Name:</span> <span id="cert-name"
+                                            class="font-semibold ml-1"></span></div>
+                                    <div><span class="font-medium text-[#333333]/60">Date Issued:</span> <span
+                                            id="cert-date" class="font-semibold ml-1"></span></div>
+                                    <div><span class="font-medium text-[#333333]/60">Address:</span> <span
+                                            id="cert-address" class="font-semibold ml-1"></span></div>
+                                    <div><span class="font-medium text-[#333333]/60">Purpose:</span> <span
+                                            id="cert-purpose" class="font-semibold ml-1"></span></div>
+                                    <div><span class="font-medium text-[#333333]/60">Precinct:</span> <span
+                                            id="cert-precinct" class="font-semibold ml-1"></span></div>
+                                    <div><span class="font-medium text-[#333333]/60">Residency:</span> <span
+                                            id="cert-residency" class="font-semibold ml-1"></span></div>
+                                </div>
+                            </div>
+
+                            <!-- Certifying text -->
+                            <div class="text-center text-sm text-[#333333]/70 mb-8 px-4">
+                                <p>This is to certify that the above-named person is a <strong>bona fide</strong>
+                                    resident of this
+                                    barangay and is known to be of good moral character and standing in the community.
+                                </p>
+                            </div>
+
+                            <!-- QR -->
+                            <div class="flex justify-center mb-8">
+                                <div class="p-3 sm:p-4 bg-white border-4 border-[#2C7BE5] rounded-2xl">
+                                    <img id="cert-qr" src="" alt="QR Code" class="w-28 h-28 sm:w-40 sm:h-40">
+                                </div>
+                            </div>
+
+                            <div class="text-center text-xs text-[#333333]/50 mb-4">
+                                Verified by EasyCert System • <span id="cert-tracking-display"></span>
+                            </div>
+
+                            <!-- Signature -->
+                            <div class="flex justify-end">
+                                <div class="text-center">
+                                    <div class="border-t border-[#2C7BE5] w-40 sm:w-48 pt-2">
+                                        <p id="cert-captain-name" class="font-bold text-sm">Hon. Roberto L. Garcia</p>
+                                        <p class="text-xs text-[#333333]/60">Barangay Captain</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mt-5 sm:mt-8">
+                            <button onclick="printCertificate()"
+                                class="flex-1 max-w-xs py-4 sm:py-5 bg-[#00B894] text-white rounded-3xl font-semibold flex items-center justify-center gap-x-3 mx-auto sm:mx-0 hover:bg-[#00a382] transition-colors">
+                                <i class="fa-solid fa-print"></i> PRINT
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {% endblock %}
+
+                {% block extra_scripts %}
+                <script>
+                    // ── Admin Dashboard JS (Django-powered) ──
+                    let dashboardRequests = [];
+                    let currentReviewRequest = null;
+
+                    // Set date display
+                    document.getElementById("dashboard-date").textContent = new Date().toLocaleDateString("en-PH", {
+                        weekday: "long", year: "numeric", month: "long", day: "numeric"
+                    });
+
+                    // ── Load requests from Django API ──
+                    function loadDashboardRequests() {
+                        const status = document.getElementById("status-filter").value;
+                        const type = document.getElementById("type-filter").value;
+                        const search = document.getElementById("search-input").value.trim();
+
+                        let url = "{% url 'admin_requests_api' %}?";
+                        if (status) url += "status=" + encodeURIComponent(status) + "&";
+                        if (type) url += "type=" + encodeURIComponent(type) + "&";
+                        if (search) url += "q=" + encodeURIComponent(search) + "&";
+
+                        fetch(url)
+                            .then(r => r.json())
+                            .then(data => {
+                                dashboardRequests = data.requests || [];
+                                // Map Django fields to what script.js expects
+                                dashboardRequests.forEach(r => {
+                                    r.fields = r.form_data || {};
+                                    r.sitio = r.sitio || r.fields.sitio || r.fields.address || "";
+                                    r.address = r.sitio;
+                                });
+                                allRequests = dashboardRequests; // Link to global variable for script.js
+                                isAdminLoggedIn = true;          // So charts render dark mode correctly
+                                renderDashboardTable(dashboardRequests);
+                                renderCharts();                  // Draw charts with database data
+                            })
+                            .catch(err => console.error("Failed to load requests:", err));
+                    }
+
+                    function renderDashboardTable(reqs) {
+                        const tbody = document.getElementById("requests-tbody");
+                        const empty = document.getElementById("table-empty");
+                        tbody.innerHTML = "";
+
+                        if (reqs.length === 0) { empty.classList.remove("hidden"); return; }
+                        empty.classList.add("hidden");
+
+                        reqs.forEach(req => {
+                            const bc = req.status === "Approved" ? "badge-approved" : req.status === "Rejected" ? "badge-rejected" : "badge-pending";
+                            const row = document.createElement("tr");
+                            row.className = "hover:bg-white/50 transition-colors cursor-pointer";
+
+                            // Add View Cert button if approved
+                            const actionBtn = req.status === "Approved"
+                                ? `<button onclick="showCertificatePreview(dashboardRequests.find(r=>r.id===${req.id})); event.stopImmediatePropagation()"
+                    class="px-4 sm:px-6 py-1.5 sm:py-2 text-xs border border-[#00B894]/40
+                           hover:bg-[#00B894] hover:text-white hover:border-[#00B894]
+                           transition-all rounded-xl font-semibold text-[#00B894]">
+                    VIEW CERT
+                </button>`
+                                : `<button onclick="openAdminReview(${req.id}); event.stopImmediatePropagation()"
+                    class="px-4 sm:px-6 py-1.5 sm:py-2 text-xs border border-[#2C7BE5]/40
+                           hover:bg-[#2C7BE5] hover:text-white hover:border-[#2C7BE5]
+                           transition-all rounded-xl font-semibold text-[#2C7BE5]">
+                    REVIEW
+                </button>`;
+
+                            row.innerHTML = `
+            <td class="px-6 sm:px-8 py-4 sm:py-6 font-mono text-[#2C7BE5] text-xs sm:text-sm font-medium">${req.tracking}</td>
+            <td class="px-6 sm:px-8 py-4 sm:py-6 font-medium">${req.name}</td>
+            <td class="px-6 sm:px-8 py-4 sm:py-6 text-[#333333]/70 text-xs sm:text-sm">${req.type}</td>
+            <td class="px-6 sm:px-8 py-4 sm:py-6"><span class="${bc}">${req.status}</span></td>
+            <td class="px-6 sm:px-8 py-4 sm:py-6 text-[#333333]/50 text-xs">${req.date}</td>
+            <td class="px-6 sm:px-8 py-4 sm:py-6 text-right">
+                ${actionBtn}
+            </td>`;
+                            row.onclick = () => openAdminReview(req.id);
+                            tbody.appendChild(row);
+                        });
+                    }
+
+                    function filterDashboard() { loadDashboardRequests(); }
+                    function refreshDashboard() { loadDashboardRequests(); showToast("Dashboard refreshed.", "Done", "success"); }
+
+                    // ── Review modal ──
+                    const fieldLabels = {
+                        "last-name": "Last Name", "first-name": "First Name", "middle-name": "Middle Name",
+                        "sitio": "Sitio / Zone", "address": "Address", "gender": "Gender",
+                        "age": "Age", "birthday": "Birthday", "birthplace": "Birthplace",
+                        "income": "Annual Income (₱)", "years-of-living": "Years of Living",
+                        "monthly-income": "Monthly Income (₱)", "work": "Occupation",
+                        "permit-type": "Application Type", "business-type": "Business Type",
+                        "business-name": "Business Name", "capital": "Capital (₱)", "gross-income": "Gross Income (₱)"
+                    };
+
+                    function openAdminReview(id) {
+                        const req = dashboardRequests.find(r => r.id === id);
+                        if (!req) return;
+                        currentReviewRequest = req;
+
+                        const rows = Object.entries(req.form_data || {})
+                            .filter(([k, v]) => v && k !== "scholarshipData")
+                            .map(([k, v]) => ({ label: fieldLabels[k] || k, value: v }));
+
+                        rows.push(
+                            { label: "Certificate Type", value: req.type },
+                            { label: "Purpose", value: req.purpose || "—" },
+                            { label: "Appointment", value: req.appointment || "Not set" },
+                            { label: "Date Submitted", value: req.date }
+                        );
+
+                        if (req.form_data?.scholarshipData) {
+                            const sd = req.form_data.scholarshipData;
+                            if (sd.studentName) rows.push({ label: "Student Name", value: sd.studentName });
+                            if (sd.school) rows.push({ label: "School", value: sd.school });
+                            if (sd.yearLevel) rows.push({ label: "Year Level", value: sd.yearLevel });
+                        }
+
+                        document.getElementById("review-content").innerHTML = `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+            ${rows.map(f => `
+                <div class="review-field">
+                    <div class="text-xs text-[#333333]/50 uppercase tracking-widest mb-0.5">${f.label}</div>
+                    <div class="font-semibold">${f.value}</div>
+                </div>`).join('')}
+        </div>
+        <div class="pt-4 border-t border-white/60 text-xs text-[#333333]/40 mt-4">
+            Tracking: ${req.tracking} • Submitted on ${req.date}
+        </div>`;
+
+                        document.getElementById("review-tracking").textContent = req.tracking;
+                        openModal("review-modal");
+                    }
+
+                    function closeReviewModal() { closeModal("review-modal"); }
+
+                    function updateRequestStatus(newStatus) {
+                        if (!currentReviewRequest) return;
+
+                        const csrfTokenEl = document.querySelector('[name=csrfmiddlewaretoken]');
+                        // Get CSRF from cookie if not in DOM
+                        const csrfVal = csrfTokenEl ? csrfTokenEl.value : getCookie("csrftoken");
+
+                        fetch(`/api/update/${currentReviewRequest.id}/`, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRFToken": csrfVal,
+                            },
+                            body: JSON.stringify({ status: newStatus }),
+                        })
+                            .then(r => r.json())
+                            .then(data => {
+                                if (data.ok) {
+                                    closeReviewModal();
+                                    loadDashboardRequests();
+                                    // Also refresh stats
+                                    fetch("{% url 'admin_stats_api' %}")
+                                        .then(r => r.json())
+                                        .then(s => {
+                                            animateCounter("stat-today", s.today);
+                                            animateCounter("stat-pending", s.pending);
+                                            animateCounter("stat-approved", s.approved);
+                                            animateCounter("stat-month", s.total);
+                                        });
+                                    showToast(
+                                        newStatus === "Approved" ? "Certificate approved!" : "Request rejected.",
+                                        newStatus === "Approved" ? "Approved" : "Rejected",
+                                        newStatus === "Approved" ? "success" : "error"
+                                    );
+                                } else {
+                                    showToast(data.error || "Something went wrong.", "Error", "error");
+                                }
+                            })
+                            .catch(err => {
+                                console.error(err);
+                                showToast("Network error.", "Error", "error");
+                            });
+                    }
+
+                    // Helper: animate counter
+                    function animateCounter(id, target) {
+                        const el = document.getElementById(id); if (!el) return;
+                        const start = parseInt(el.textContent) || 0, diff = target - start, t0 = performance.now();
+                        const step = now => {
+                            const p = Math.min((now - t0) / 600, 1);
+                            el.textContent = Math.round(start + diff * (1 - Math.pow(1 - p, 3)));
+                            if (p < 1) requestAnimationFrame(step);
+                        };
+                        requestAnimationFrame(step);
+                    }
+
+                    // Helper: get CSRF cookie
+                    function getCookie(name) {
+                        const v = `; ${document.cookie}`;
+                        const parts = v.split(`; ${name}=`);
+                        if (parts.length === 2) return parts.pop().split(';').shift();
+                        return '';
+                    }
+
+                    // ── Setup backdrop close for review modal ──
+                    (function () {
+                        const el = document.getElementById("review-modal");
+                        if (el) el.addEventListener("click", e => { if (e.target === el) closeModal("review-modal"); });
+                        const certEl = document.getElementById("cert-preview-modal");
+                        if (certEl) certEl.addEventListener("click", e => { if (e.target === certEl) closeModal("cert-preview-modal"); });
+                    })();
+
+                    // Prevent script.js initializeApp from running and breaking the dashboard
+                    window.onload = function () {
+                        applyStoredDarkMode();
+                        // Do NOT call switchView or loadFromLocalStorage
+                    };
+
+                    // ── Initial load ──
+                    loadDashboardRequests();
+                </script>
+                {% endblock %}

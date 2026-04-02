@@ -1,0 +1,669 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Resident Management • EasyCert{% endblock %}
+
+{% block body %}
+
+<!-- HEADER -->
+<header class="sticky top-0 z-50 glass border-b border-white/50 shadow-sm">
+    <div
+        class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-x-2 flex-wrap gap-y-2">
+        <div class="flex items-center gap-x-3">
+            <img src="{% static 'Icon.png' %}" alt="EasyCert Logo"
+                class="w-10 h-10 sm:w-12 sm:h-12 rounded-full shadow-inner object-cover" />
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold tracking-tight"><span class="easycert-easy">Easy</span><span
+                        class="text-[#28DF97]">Cert</span></h1>
+                <p class="text-xs text-[#00B894] font-medium -mt-1">
+                    {% if user.barangay %}{{ user.barangay.barangay_name }}{% else %}Super Admin Mode{% endif %}
+                </p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-x-1 bg-white/80 rounded-3xl p-1 shadow-inner order-3 sm:order-2">
+            <a href="{% url 'admin_dashboard' %}"
+                class="px-4 sm:px-6 py-2 sm:py-3 rounded-3xl font-semibold transition-all flex items-center gap-x-2 text-sm sm:text-base text-[#333333]/60 hover:text-[#2C7BE5] hover:bg-[#2C7BE5]/5">
+                <i class="fa-solid fa-file-signature text-[#2C7BE5]"></i>
+                <span class="hidden sm:inline">Certificates</span>
+            </a>
+            <button id="residents-tab-btn" onclick="switchManagementTab('residents')"
+                class="px-4 sm:px-6 py-2 sm:py-3 rounded-3xl font-semibold transition-all flex items-center gap-x-2 text-sm sm:text-base active-tab">
+                <i class="fa-solid fa-users"></i>
+                <span class="hidden sm:inline">Residents</span>
+            </button>
+            <button id="memberships-tab-btn" onclick="switchManagementTab('memberships')"
+                class="px-4 sm:px-6 py-2 sm:py-3 rounded-3xl font-semibold transition-all flex items-center gap-x-2 text-sm sm:text-base text-[#333333]/60 hover:text-[#2C7BE5] hover:bg-[#2C7BE5]/5">
+                <i class="fa-solid fa-user-clock"></i>
+                <span class="hidden sm:inline">Applications</span>
+                <span id="pending-badge"
+                    class="hidden w-5 h-5 bg-amber-500 text-white rounded-full flex items-center justify-center text-[10px]">0</span>
+            </button>
+        </div>
+
+        <div class="flex items-center gap-x-3 sm:gap-x-6 order-2 sm:order-3">
+            {% if user.is_super_admin %}
+            <a href="{% url 'superadmin_dashboard' %}"
+                class="w-10 h-10 flex items-center justify-center rounded-2xl bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-lg"
+                title="Super Admin">
+                <i class="fa-solid fa-shield-halved"></i>
+            </a>
+            {% endif %}
+            <a href="{% url 'logout' %}"
+                class="px-5 py-3 bg-red-50 hover:bg-red-100 text-red-600 rounded-2xl flex items-center gap-x-2 text-sm font-medium border border-red-200 transition-all">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                Logout
+            </a>
+        </div>
+    </div>
+</header>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+
+    <!-- PAGE HEADER -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+        <div>
+            <h2 id="page-title" class="text-3xl font-bold text-[#0D1B2A]">Brgy. Residents</h2>
+            <p id="page-subtitle" class="text-[#333333]/60 text-sm mt-1">Manage official resident records and
+                information</p>
+        </div>
+        <div class="flex items-center gap-x-3">
+            <button onclick="openCreateModal()" id="create-resident-btn"
+                class="px-6 py-3.5 bg-[#2C7BE5] text-white rounded-2xl flex items-center gap-x-3 text-sm font-bold shadow-lg shadow-[#2C7BE5]/20 hover:bg-[#1a68d1] transition-all transform hover:-translate-y-0.5 active:scale-95">
+                <i class="fa-solid fa-user-plus"></i>
+                New Resident
+            </button>
+        </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+        <div class="glass p-6 rounded-[2rem] border border-white/40 shadow-xl relative overflow-hidden group">
+            <div
+                class="absolute -right-4 -top-4 w-20 h-20 bg-[#2C7BE5]/5 rounded-full group-hover:scale-150 transition-transform duration-700">
+            </div>
+            <p class="text-xs font-semibold text-[#333333]/40 mb-1">Total Residents</p>
+            <p id="stat-total" class="text-4xl font-bold text-[#2C7BE5]">-</p>
+        </div>
+        <div class="glass p-6 rounded-[2rem] border border-white/40 shadow-xl relative overflow-hidden group">
+            <div
+                class="absolute -right-4 -top-4 w-20 h-20 bg-amber-500/5 rounded-full group-hover:scale-150 transition-transform duration-700">
+            </div>
+            <p class="text-xs font-semibold text-[#333333]/40 mb-1">New Applications</p>
+            <p id="stat-pending" class="text-4xl font-bold text-amber-500">-</p>
+        </div>
+        <div class="glass p-6 rounded-[2rem] border border-white/40 shadow-xl relative overflow-hidden group">
+            <div
+                class="absolute -right-4 -top-4 w-20 h-20 bg-green-500/5 rounded-full group-hover:scale-150 transition-transform duration-700">
+            </div>
+            <p class="text-xs font-semibold text-[#333333]/40 mb-1">Approved Nodes</p>
+            <p id="stat-approved" class="text-4xl font-bold text-[#00B894]">-</p>
+        </div>
+        <div class="glass p-6 rounded-[2rem] border border-white/40 shadow-xl relative overflow-hidden group">
+            <div
+                class="absolute -right-4 -top-4 w-20 h-20 bg-red-500/5 rounded-full group-hover:scale-150 transition-transform duration-700">
+            </div>
+            <p class="text-xs font-semibold text-[#333333]/40 mb-1">Denied / Left</p>
+            <p id="stat-rejected" class="text-4xl font-bold text-red-500">-</p>
+        </div>
+    </div>
+
+    <!-- FILTER BAR + TABLE -->
+    <div class="glass-dark rounded-[2.5rem] overflow-hidden border border-white/40 shadow-2xl">
+        <div
+            class="px-8 py-6 border-b border-black/5 flex flex-col sm:flex-row items-center justify-between gap-6 bg-white/40">
+            <div class="flex items-center gap-x-4 w-full sm:w-auto">
+                <div class="relative flex-1 sm:w-80">
+                    <i
+                        class="fa-solid fa-magnifying-glass absolute left-5 top-1/2 -translate-y-1/2 text-[#333333]/30"></i>
+                    <input id="search-input" type="text" placeholder="Search by name, email or address..."
+                        oninput="debounceSearch()"
+                        class="w-full pl-14 pr-6 py-4 rounded-2xl border border-black/5 bg-white/70 outline-none focus:border-[#2C7BE5] focus:bg-white transition-all text-sm shadow-inner">
+                </div>
+            </div>
+            <div class="flex items-center gap-x-3 w-full sm:w-auto">
+                <p class="text-[10px] font-semibold text-[#333333]/40 uppercase tracking-widest">Filter Status:</p>
+                <select id="status-filter" onchange="runSearch()"
+                    class="pl-4 pr-10 py-3 rounded-xl border border-black/5 bg-white/70 text-sm font-bold outline-none focus:border-[#2C7BE5] transition-all">
+                    <option value="approved">Official Residents</option>
+                    <option value="pending">Pending Review</option>
+                    <option value="rejected">Rejected Entries</option>
+                    <option value="">All Records</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-[800px]">
+                <thead>
+                    <tr class="text-left text-xs font-semibold text-[#333333]/40 uppercase tracking-wider bg-white/10">
+                        <th class="px-8 py-6">Resident Information</th>
+                        <th class="px-6 py-6">Location / Address</th>
+                        <th class="px-6 py-6">Age / Birth</th>
+                        <th class="px-6 py-6">Status</th>
+                        <th class="px-8 py-6 text-right">Operations</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body" class="divide-y divide-black/5">
+                    <!-- Dynamic -->
+                </tbody>
+            </table>
+        </div>
+
+        <div id="table-empty" class="hidden flex flex-col items-center justify-center py-24 text-[#333333]/30">
+            <div class="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center text-4xl mb-6">
+                <i class="fa-solid fa-user-slash"></i>
+            </div>
+            <p class="font-bold text-xl">No search results found</p>
+            <p class="text-sm">Try adjusting your filters or search keywords.</p>
+        </div>
+    </div>
+</div>
+
+<!-- CREATE/EDIT MODAL -->
+<div id="resident-modal"
+    class="fixed inset-0 hidden items-center justify-center z-[99999] p-4 bg-slate-900/40 backdrop-blur-md">
+    <div class="bg-white w-full max-w-2xl rounded-[3rem] shadow-2xl overflow-hidden relative">
+        <div class="bg-[#2C7BE5] p-8 text-white flex items-center justify-between">
+            <div class="flex items-center gap-x-4">
+                <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-2xl">
+                    <i id="modal-icon" class="fa-solid fa-user-plus"></i>
+                </div>
+                <div>
+                    <h3 id="modal-title" class="text-2xl font-bold tracking-tight">Register Resident</h3>
+                    <p class="text-white/60 text-xs font-bold uppercase tracking-widest">Manual entry system</p>
+                </div>
+            </div>
+            <button onclick="closeResidentModal()"
+                class="w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-xl transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <form id="resident-form" onsubmit="handleResidentSubmit(event)" class="p-8 sm:p-10 space-y-8 bg-slate-50/30">
+            <input type="hidden" id="edit-resident-id">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                <div class="md:col-span-2">
+                    <label
+                        class="block text-[10px] font-semibold text-[#333333]/40 uppercase tracking-widest ml-2 mb-2">Resident
+                        Full Name</label>
+                    <input type="text" id="res-name" required class="form-input-box w-full"
+                        placeholder="e.g. Maria Clara Dela Cruz">
+                </div>
+
+                <div>
+                    <label
+                        class="block text-[10px] font-semibold text-[#333333]/40 uppercase tracking-widest ml-2 mb-2">Email
+                        Address</label>
+                    <input type="email" id="res-email" required class="form-input-box w-full"
+                        placeholder="name@example.com">
+                </div>
+
+                <div>
+                    <label
+                        class="block text-[10px] font-semibold text-[#333333]/40 uppercase tracking-widest ml-2 mb-2">Contact
+                        Number</label>
+                    <input type="text" id="res-contact" class="form-input-box w-full" placeholder="09XX XXX XXXX">
+                </div>
+
+                <div class="md:col-span-2">
+                    <label
+                        class="block text-[10px] font-semibold text-[#333333]/40 uppercase tracking-widest ml-2 mb-2">Full
+                        Home Address</label>
+                    <input type="text" id="res-address" required class="form-input-box w-full"
+                        placeholder="Sitio / Zone / House #">
+                </div>
+
+                <div>
+                    <label
+                        class="block text-[10px] font-semibold text-[#333333]/40 uppercase tracking-widest ml-2 mb-2">Age</label>
+                    <input type="number" id="res-age" class="form-input-box w-full" placeholder="25">
+                </div>
+
+                <div>
+                    <label
+                        class="block text-[10px] font-semibold text-[#333333]/40 uppercase tracking-widest ml-2 mb-2">Birthdate</label>
+                    <input type="date" id="res-birthdate" class="form-input-box w-full">
+                </div>
+            </div>
+
+            <div class="flex gap-4 pt-6">
+                <button type="button" onclick="closeResidentModal()"
+                    class="flex-1 py-4 font-bold text-[#333333]/40 hover:bg-slate-100 rounded-2xl transition-all">Cancel</button>
+                <button type="submit" id="submit-btn"
+                    class="flex-[1.5] py-5 bg-[#2C7BE5] text-white font-bold rounded-2xl shadow-xl shadow-[#2C7BE5]/20 hover:bg-[#1a68d1] transition-all text-lg">Save
+                    Record</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div id="delete-modal"
+    class="fixed inset-0 hidden items-center justify-center z-[99999] p-4 bg-slate-900/40 backdrop-blur-md">
+    <div class="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl p-10 text-center">
+        <div
+            class="w-20 h-20 bg-red-100 text-red-600 rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-3xl shadow-lg shadow-red-500/10">
+            <i class="fa-solid fa-trash-can"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-[#0D1B2A] mb-2">Remove Resident?</h3>
+        <p class="text-[#333333]/60 mb-10">Are you sure you want to delete <b id="delete-name" class="text-red-600"></b>
+            from your barangay records? This action cannot be undone.</p>
+
+        <div class="flex gap-4">
+            <button onclick="closeDeleteModal()"
+                class="flex-1 py-4 font-bold text-[#333333]/60 hover:bg-slate-100 rounded-2xl transition-all">KEEP
+                RECORD</button>
+            <button id="delete-confirm-btn" onclick="executeResidentDelete()"
+                class="flex-1 py-4 bg-red-500 text-white font-bold rounded-2xl shadow-xl shadow-red-500/20 hover:bg-red-600 transition-all">DELETE</button>
+        </div>
+    </div>
+</div>
+
+<!-- REVIEW APPLICATION MODAL (EXISTING) -->
+<div id="application-modal"
+    class="fixed inset-0 hidden items-center justify-center z-[99999] p-4 bg-slate-900/40 backdrop-blur-md">
+    <div class="bg-white w-full max-w-xl rounded-[3rem] shadow-2xl p-10">
+        <div class="flex items-start justify-between mb-8">
+            <h3 class="text-2xl font-bold text-[#0D1B2A]">Review Application</h3>
+            <button onclick="closeAppModal()"
+                class="w-10 h-10 flex items-center justify-center hover:bg-slate-100 rounded-xl transition-all">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div id="app-content" class="space-y-6 bg-slate-50 p-8 rounded-[2rem] border border-slate-100 mb-8">
+            <!-- Dynamic -->
+        </div>
+
+        <div id="notes-entry" class="hidden mb-6">
+            <label class="block text-[10px] font-bold text-red-600 uppercase tracking-widest mb-2 ml-2">Reason for
+                Rejection</label>
+            <textarea id="app-notes"
+                class="w-full p-5 rounded-2xl border-2 border-red-100 focus:border-red-400 focus:bg-white outline-none transition-all font-medium text-sm"
+                placeholder="Please explain why the application is being rejected..."></textarea>
+        </div>
+
+        <div id="app-actions" class="flex gap-4">
+            <button onclick="rejectApplicationUI()"
+                class="flex-1 py-4 bg-red-50 text-red-600 font-bold border border-red-100 rounded-2xl hover:bg-red-100 transition-all">Deny</button>
+            <button onclick="approveApplication()"
+                class="flex-1 py-4 bg-[#00B894] text-white font-bold rounded-2xl shadow-lg shadow-[#00B894]/20 hover:bg-[#00a382] transition-all">Approve
+                User</button>
+        </div>
+        <div id="reject-confirm-actions" class="hidden flex gap-4">
+            <button onclick="cancelRejectUI()"
+                class="flex-1 py-4 font-bold text-slate-400 hover:bg-slate-50 rounded-2xl transition-all">Cancel</button>
+            <button onclick="executeApplicationReject()"
+                class="flex-1 py-4 bg-red-600 text-white font-bold rounded-2xl shadow-lg shadow-red-600/20 hover:bg-red-700 transition-all">Reject
+                Now</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let currentTab = 'residents';
+    let dataList = [];
+    let currentId = null;
+    let searchDebounce = null;
+
+    function getCsrf() {
+        return '{{ csrf_token }}';
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        runSearch();
+    });
+
+    function switchManagementTab(tab) {
+        currentTab = tab;
+        document.getElementById('residents-tab-btn').className = tab === 'residents' ? 'px-4 sm:px-6 py-2 sm:py-3 rounded-3xl font-semibold transition-all flex items-center gap-x-2 text-sm sm:text-base active-tab' : 'px-4 sm:px-6 py-2 sm:py-3 rounded-3xl font-semibold transition-all flex items-center gap-x-2 text-sm sm:text-base text-[#333333]/60 hover:text-[#2C7BE5] hover:bg-[#2C7BE5]/5';
+        document.getElementById('memberships-tab-btn').className = tab === 'memberships' ? 'px-4 sm:px-6 py-2 sm:py-3 rounded-3xl font-semibold transition-all flex items-center gap-x-2 text-sm sm:text-base active-tab' : 'px-4 sm:px-6 py-2 sm:py-3 rounded-3xl font-semibold transition-all flex items-center gap-x-2 text-sm sm:text-base text-[#333333]/60 hover:text-[#2C7BE5] hover:bg-[#2C7BE5]/5';
+
+        // Update Title/Description
+        if (tab === 'residents') {
+            document.getElementById('page-title').textContent = 'Brgy. Residents';
+            document.getElementById('page-subtitle').textContent = 'Manage official resident records and information';
+            document.getElementById('status-filter').value = 'approved';
+            document.getElementById('create-resident-btn').classList.remove('hidden');
+        } else {
+            document.getElementById('page-title').textContent = 'Applications';
+            document.getElementById('page-subtitle').textContent = 'Review new residents requesting to join your barangay';
+            document.getElementById('status-filter').value = 'pending';
+            document.getElementById('create-resident-btn').classList.add('hidden');
+        }
+
+        runSearch();
+    }
+
+    function debounceSearch() {
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(runSearch, 400);
+    }
+
+    function runSearch() {
+        const status = document.getElementById('status-filter').value;
+        const q = document.getElementById('search-input').value;
+
+        let url = `/api/memberships/?status=${status}&q=${encodeURIComponent(q)}`;
+
+        fetch(url)
+            .then(r => r.json())
+            .then(data => {
+                dataList = data.memberships || [];
+                renderTable(dataList);
+                updateStats(data.stats);
+            });
+    }
+
+    function updateStats(stats) {
+        document.getElementById('stat-total').textContent = stats.total;
+        document.getElementById('stat-pending').textContent = stats.pending;
+        document.getElementById('stat-approved').textContent = stats.approved;
+        document.getElementById('stat-rejected').textContent = stats.rejected;
+
+        // Badge
+        const badge = document.getElementById('pending-badge');
+        if (stats.pending > 0) {
+            badge.textContent = stats.pending;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+    }
+
+    function renderTable(mems) {
+        const tbody = document.getElementById('table-body');
+        const empty = document.getElementById('table-empty');
+        tbody.innerHTML = '';
+
+        if (mems.length === 0) { empty.classList.remove('hidden'); return; }
+        empty.classList.add('hidden');
+
+        mems.forEach(mem => {
+            const statusClass = mem.status === 'approved' ? 'bg-[#00B894]/10 text-[#00B894]' : (mem.status === 'pending' ? 'bg-amber-500/10 text-amber-500' : 'bg-red-500/10 text-red-500');
+            const row = document.createElement('tr');
+            row.className = 'group transition-colors hover:bg-slate-50/80 cursor-pointer';
+
+            let actions = '';
+            if (mem.status === 'approved') {
+                actions = `
+                    <div class="flex justify-end gap-x-2">
+                        <button onclick="openEditModal(${mem.id}); event.stopPropagation()" class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center transition-colors shadow-sm"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="openDeleteModal(${mem.id}, '${mem.name}'); event.stopPropagation()" class="w-9 h-9 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center transition-colors shadow-sm"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                `;
+            } else if (mem.status === 'pending') {
+                actions = `
+                    <div class="flex justify-end">
+                        <button onclick="openAppModal(${mem.id}); event.stopPropagation()" class="px-5 py-2 bg-[#2C7BE5] text-white rounded-xl text-xs font-bold shadow-lg shadow-[#2C7BE5]/20 hover:bg-[#1a68d1] transition-all">Review</button>
+                    </div>
+                `;
+            } else {
+                actions = `
+                    <div class="flex justify-end">
+                         <button onclick="openAppModal(${mem.id}); event.stopPropagation()" class="px-5 py-2 bg-slate-100 text-[#333333]/50 rounded-xl text-xs font-bold hover:bg-slate-200 transition-all">View</button>
+                    </div>
+                `;
+            }
+
+            row.innerHTML = `
+                <td class="px-8 py-6">
+                    <div class="flex items-center gap-x-4">
+                        <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-[#2C7BE5] font-bold shadow-inner">
+                            ${mem.name.charAt(0)}
+                        </div>
+                        <div>
+                            <p class="font-bold text-[#0D1B2A] leading-tight">${mem.name}</p>
+                            <p class="text-[11px] font-bold text-[#333333]/40 tracking-wider">${mem.email}</p>
+                        </div>
+                    </div>
+                </td>
+                <td class="px-6 py-6 font-bold text-[#333333]/60 text-xs">${mem.address || '—'}</td>
+                <td class="px-6 py-6 text-xs text-[#333333]/60">
+                    <span class="font-bold text-[#0D1B2A]">${mem.age || '?'}</span> years old
+                </td>
+                <td class="px-6 py-6">
+                    <span class="px-3 py-1.5 ${statusClass} text-[10px] font-bold uppercase tracking-wider rounded-lg border border-current/10">
+                        ${mem.status.charAt(0).toUpperCase() + mem.status.slice(1)}
+                    </span>
+                </td>
+                <td class="px-8 py-6 text-right">${actions}</td>
+            `;
+
+            row.onclick = () => {
+                if (mem.status === 'pending' || mem.status === 'rejected') openAppModal(mem.id);
+                else openEditModal(mem.id);
+            };
+            tbody.appendChild(row);
+        });
+    }
+
+    // CREATE / EDIT LOGIC
+    function openCreateModal() {
+        document.getElementById('modal-title').textContent = 'Register Resident';
+        document.getElementById('modal-icon').className = 'fa-solid fa-user-plus';
+        document.getElementById('resident-form').reset();
+        document.getElementById('edit-resident-id').value = '';
+        document.getElementById('submit-btn').textContent = 'SAVE RECORD';
+
+        document.getElementById('resident-modal').classList.remove('hidden');
+        document.getElementById('resident-modal').classList.add('flex');
+    }
+
+    function openEditModal(id) {
+        const mem = dataList.find(m => m.id === id);
+        if (!mem) return;
+
+        document.getElementById('modal-title').textContent = 'Modify Resident';
+        document.getElementById('modal-icon').className = 'fa-solid fa-user-pen';
+        document.getElementById('edit-resident-id').value = id;
+        document.getElementById('res-name').value = mem.name;
+        document.getElementById('res-email').value = mem.email;
+        document.getElementById('res-contact').value = mem.contact;
+        document.getElementById('res-address').value = mem.address;
+        document.getElementById('res-age').value = mem.age;
+        // Birthdate is not in data currently, would need api update
+        document.getElementById('submit-btn').textContent = 'UPDATE RECORD';
+
+        document.getElementById('resident-modal').classList.remove('hidden');
+        document.getElementById('resident-modal').classList.add('flex');
+    }
+
+    function closeResidentModal() {
+        document.getElementById('resident-modal').classList.add('hidden');
+        document.getElementById('resident-modal').classList.remove('flex');
+    }
+
+    function handleResidentSubmit(e) {
+        e.preventDefault();
+        const id = document.getElementById('edit-resident-id').value;
+        const data = {
+            full_name: document.getElementById('res-name').value,
+            name: document.getElementById('res-name').value,
+            email: document.getElementById('res-email').value,
+            contact: document.getElementById('res-contact').value,
+            address: document.getElementById('res-address').value,
+            age: document.getElementById('res-age').value,
+            birthdate: document.getElementById('res-birthdate').value
+        };
+
+        const url = id ? `/api/residents/update/${id}/` : `/api/residents/create/`;
+
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+            body: JSON.stringify(data)
+        })
+            .then(r => r.json())
+            .then(res => {
+                if (res.ok) {
+                    showToast(res.message || 'Resident record saved!', 'Done', 'success');
+                    closeResidentModal();
+                    runSearch();
+                } else {
+                    showToast(res.error || 'Operation failed', 'Error', 'error');
+                }
+            });
+    }
+
+    // DELETE LOGIC
+    function openDeleteModal(id, name) {
+        currentId = id;
+        document.getElementById('delete-name').textContent = name;
+        document.getElementById('delete-modal').classList.remove('hidden');
+        document.getElementById('delete-modal').classList.add('flex');
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('delete-modal').classList.add('hidden');
+        document.getElementById('delete-modal').classList.remove('flex');
+    }
+
+    function executeResidentDelete() {
+        fetch(`/api/residents/delete/${currentId}/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCsrf() }
+        })
+            .then(r => r.json())
+            .then(res => {
+                if (res.ok) {
+                    showToast('Resident record deleted.', 'Done', 'success');
+                    closeDeleteModal();
+                    runSearch();
+                }
+            });
+    }
+
+    // APPLICATION LOGIC
+    function openAppModal(id) {
+        const mem = dataList.find(m => m.id === id);
+        if (!mem) return;
+        currentId = id;
+
+        const content = document.getElementById('app-content');
+        content.innerHTML = `
+            <div class="flex items-center gap-x-5 mb-8 pb-8 border-b border-black/5">
+                 <div class="w-16 h-16 bg-slate-200 rounded-[1.5rem] flex items-center justify-center text-[#2C7BE5] text-2xl font-bold">
+                    ${mem.name.charAt(0)}
+                </div>
+                <div>
+                     <p class="text-2xl font-bold text-[#0D1B2A] leading-tight">${mem.name}</p>
+                     <p class="text-sm font-bold text-[#2C7BE5]">${mem.email}</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-y-6 gap-x-8">
+                <div>
+                    <p class="text-[10px] font-semibold text-[#333333]/40 uppercase tracking-widest mb-1">Status</p>
+                    <p class="font-bold text-sm uppercase">${mem.status}</p>
+                </div>
+                 <div>
+                    <p class="text-[10px] font-semibold text-[#333333]/40 uppercase tracking-widest mb-1">Age</p>
+                    <p class="font-bold text-sm">${mem.age || '—'}</p>
+                </div>
+                <div class="col-span-2">
+                    <p class="text-[10px] font-semibold text-[#333333]/40 uppercase tracking-widest mb-1">Declared Home Address</p>
+                    <p class="font-bold text-sm px-4 py-3 bg-white rounded-xl border border-black/5">${mem.address || '—'}</p>
+                </div>
+                ${mem.notes ? `<div class="col-span-2 pt-2"><p class="text-[10px] font-semibold text-red-600 uppercase tracking-widest mb-1">Admin Remarks</p><p class="text-sm font-medium text-red-700 bg-red-50 p-4 rounded-xl border border-red-100">${mem.notes}</p></div>` : ''}
+            </div>
+        `;
+
+        cancelRejectUI();
+        document.getElementById('application-modal').classList.remove('hidden');
+        document.getElementById('application-modal').classList.add('flex');
+    }
+
+    function closeAppModal() {
+        document.getElementById('application-modal').classList.add('hidden');
+        document.getElementById('application-modal').classList.remove('flex');
+    }
+
+    function approveApplication() {
+        fetch('/api/memberships/approve/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+            body: JSON.stringify({ id: currentId })
+        })
+            .then(r => r.json())
+            .then(res => {
+                if (res.ok) {
+                    showToast('Resident has been approved!', 'Done', 'success');
+                    closeAppModal();
+                    runSearch();
+                }
+            });
+    }
+
+    function rejectApplicationUI() {
+        document.getElementById('app-actions').classList.add('hidden');
+        document.getElementById('notes-entry').classList.remove('hidden');
+        document.getElementById('reject-confirm-actions').classList.remove('hidden');
+    }
+
+    function cancelRejectUI() {
+        document.getElementById('app-actions').classList.remove('hidden');
+        document.getElementById('notes-entry').classList.add('hidden');
+        document.getElementById('reject-confirm-actions').classList.add('hidden');
+    }
+
+    function executeApplicationReject() {
+        const notes = document.getElementById('app-notes').value;
+        if (!notes) return alert('Please enter rejection notes');
+
+        fetch('/api/memberships/reject/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+            body: JSON.stringify({ id: currentId, notes: notes })
+        })
+            .then(r => r.json())
+            .then(res => {
+                if (res.ok) {
+                    showToast('Application rejected.', 'Notice', 'info');
+                    closeAppModal();
+                    runSearch();
+                }
+            });
+    }
+
+</script>
+<style>
+    .form-input-box {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        border-radius: 1rem;
+        border-width: 2px;
+        border-color: #f1f5f9;
+        background-color: white;
+        outline: 2px solid transparent;
+        outline-offset: 2px;
+        transition-property: all;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 150ms;
+        font-weight: 700;
+        font-size: 0.875rem;
+        width: 100%;
+    }
+
+    .form-input-box:focus {
+        border-color: #2C7BE5;
+    }
+
+    .active-tab {
+        background-color: #2C7BE5;
+        color: white;
+    }
+
+    .glass-dark {
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(40px);
+        -webkit-backdrop-filter: blur(40px);
+    }
+</style>
+{% endblock %}

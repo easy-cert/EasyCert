@@ -1,0 +1,89 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EasyCert • Barangay Certificate System{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{% static 'Icon.png' %}">
+
+    <!-- External CDN resources -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <!-- Project stylesheet -->
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="bg-[#F2F9FF] font-sans text-[#333333]">
+
+    {% block body %}{% endblock %}
+
+    <!-- TOAST (shared across all pages) -->
+    <div id="toast" class="fixed bottom-6 sm:bottom-8 right-4 sm:right-8 z-[999999] max-w-xs sm:max-w-sm"
+        style="display:none;">
+        <div
+            class="toast-inner flex items-start gap-x-3 bg-[#0f172a] text-white px-5 py-4 rounded-2xl shadow-2xl border border-white/10">
+            <div id="toast-icon-wrap" class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+                <i id="toast-icon" class="fa-solid fa-check text-sm"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p id="toast-title" class="font-semibold text-sm leading-tight"></p>
+                <p id="toast-text" class="text-white/55 text-xs mt-0.5 leading-snug">
+                    {% if user.is_authenticated %}
+                        {% if user.barangay %}
+                            {{ user.barangay.barangay_name }}, {{ user.barangay.location }}
+                        {% elif user.memberships.exists %}
+                            {{ user.memberships.first.barangay.barangay_name }}, {{ user.memberships.first.barangay.location }}
+                        {% else %}
+                            EasyCert Central, Online Portal
+                        {% endif %}
+                    {% else %}
+                        EasyCert Central, Online Portal
+                    {% endif %}
+                </p>
+            </div>
+            <button onclick="dismissToast()"
+                class="text-white/30 hover:text-white/70 transition-colors flex-shrink-0 mt-0.5 ml-1">
+                <i class="fa-solid fa-xmark text-xs"></i>
+            </button>
+        </div>
+        <div id="toast-progress" class="h-0.5 rounded-full mt-1.5 mx-1"></div>
+    </div>
+
+    <!-- Global Dynamic Context -->
+    <script>
+        {% with membership=user.memberships.first %}
+        window.BARANGAY_NAME = "{% if user.is_authenticated %}{% if user.barangay %}{{ user.barangay.barangay_name|escapejs }}{% elif membership %}{{ membership.barangay.barangay_name|escapejs }}{% else %}EasyCert Central{% endif %}{% else %}EasyCert Central{% endif %}";
+        window.BARANGAY_LOCATION = "{% if user.is_authenticated %}{% if user.barangay %}{{ user.barangay.location|escapejs }}{% elif membership %}{{ membership.barangay.location|escapejs }}{% else %}Online Portal{% endif %}{% else %}Online Portal{% endif %}";
+        {% endwith %}
+    </script>
+
+    <!-- Project scripts -->
+    <script src="{% static 'script.js' %}?v={% now 'U' %}"></script>
+
+    {% block extra_scripts %}{% endblock %}
+
+    <!-- Flash messages from Django → toast notifications -->
+    {% if messages %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            {% for msg in messages %}
+            setTimeout(function () {
+                showToast(
+                    "{{ msg.message|escapejs }}",
+                    "{% if msg.tags == 'success' %}Done{% elif msg.tags == 'error' %}Error{% else %}Notice{% endif %}",
+                    "{{ msg.tags|default:'info' }}"
+                );
+            }, {{ forloop.counter }} * 400 + 800);
+        {% endfor %}
+        });
+    </script>
+    {% endif %}
+</body>
+
+</html>

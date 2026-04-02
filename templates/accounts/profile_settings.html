@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Account Settings • EasyCert{% endblock %}
+
+{% block body %}
+
+<!-- HEADER (same as dashboard) -->
+<header class="sticky top-0 z-50 glass border-b border-white/50 shadow-sm">
+    <div
+        class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-x-2 flex-wrap gap-y-2">
+        <div class="flex items-center gap-x-3">
+            <img src="{% static 'Icon.png' %}" alt="EasyCert Logo"
+                class="w-10 h-10 sm:w-12 sm:h-12 rounded-full shadow-inner object-cover" />
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold tracking-tight"><span class="easycert-easy">Easy</span><span class="text-[#28DF97]">Cert</span></h1>
+                <p class="text-xs text-[#00B894] font-medium -mt-1">
+                    {% if user.barangay %}Barangay {{ user.barangay.barangay_name }}{% else %}Barangay {{ membership.barangay.barangay_name }}{% endif %}
+                </p>
+            </div>
+        </div>
+
+        <!-- NAVIGATION TABS -->
+        <div class="flex items-center gap-x-1 bg-white/80 rounded-3xl p-1 shadow-inner order-3 sm:order-2">
+            <a href="{% url 'home' %}"
+                class="px-4 sm:px-6 py-2 sm:py-2.5 rounded-3xl font-semibold transition-all flex items-center gap-x-2 text-sm text-[#333333]/60 hover:bg-white/60">
+                <i class="fa-solid fa-file-signature"></i>
+                <span>Certificates</span>
+            </a>
+            <a href="{% url 'user_dashboard' %}"
+                class="px-4 sm:px-6 py-2 sm:py-2.5 rounded-3xl font-semibold transition-all flex items-center gap-x-2 text-sm
+                      {% if active_page == 'dashboard' %}bg-[#2C7BE5] text-white shadow-md{% else %}text-[#333333]/60 hover:bg-white/60{% endif %}">
+                <i class="fa-solid fa-gauge-high"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{% url 'profile_settings' %}"
+                class="px-4 sm:px-6 py-2 sm:py-2.5 rounded-3xl font-semibold transition-all flex items-center gap-x-2 text-sm
+                      {% if active_page == 'settings' %}bg-[#2C7BE5] text-white shadow-md{% else %}text-[#333333]/60 hover:bg-white/60{% endif %}">
+                <i class="fa-solid fa-gear"></i>
+                <span class="hidden sm:inline">Settings</span>
+            </a>
+        </div>
+
+        <div class="flex items-center gap-x-3 sm:gap-x-4 order-2 sm:order-3">
+            
+            <div class="flex items-center gap-x-2 text-xs sm:text-sm">
+                <div class="w-2.5 h-2.5 bg-[#00B894] rounded-full animate-pulse"></div>
+                <span class="font-medium text-[#00B894]">Verified</span>
+            </div>
+            <button onclick="toggleDarkMode()" id="dark-mode-btn" title="Toggle Dark Mode"
+                class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-2xl border border-[#2C7BE5]/20 bg-white hover:bg-[#F2F9FF] dark-toggle-btn transition-all text-[#2C7BE5]">
+                <i id="dark-mode-icon" class="fa-solid fa-moon text-sm"></i>
+            </button>
+            <a href="{% url 'home' %}"
+                class="px-4 py-2.5 bg-[#2C7BE5] hover:bg-[#1e5ab3] text-white rounded-2xl text-sm font-medium flex items-center gap-x-2 transition-all">
+                <i class="fa-solid fa-file-signature"></i>
+                <span class="hidden sm:inline">Request Certificate</span>
+            </a>
+            
+            {% include "accounts/partials/notification_bell.html" %}
+
+            <a href="{% url 'logout' %}"
+                class="px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-2xl text-sm font-medium border border-red-200 flex items-center gap-x-2 transition-all">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span class="hidden sm:inline">Logout</span>
+            </a>
+        </div>
+    </div>
+</header>
+
+<!-- MAIN CONTENT -->
+<div class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+
+    <!-- PAGE TITLE -->
+    <div class="flex items-center gap-x-3 mb-8">
+        <div
+            class="w-12 h-12 bg-gradient-to-br from-[#2C7BE5] to-[#00B894] rounded-2xl flex items-center justify-center text-white text-xl">
+            <i class="fa-solid fa-user-gear"></i>
+        </div>
+        <div>
+            <h2 class="text-2xl sm:text-3xl font-bold">Account Settings</h2>
+            <p class="text-sm text-[#333333]/50">Manage your profile information and security</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- PROFILE INFORMATION -->
+        <div class="glass rounded-3xl overflow-hidden">
+            <div class="px-6 sm:px-8 py-5 border-b border-white/60 bg-white/50">
+                <h4 class="font-semibold text-lg flex items-center gap-x-2">
+                    <i class="fa-solid fa-id-card text-[#2C7BE5]"></i> Personal Information
+                </h4>
+                <p class="text-xs text-[#333333]/50 mt-1">Update your personal details</p>
+            </div>
+
+            <form method="post" class="p-6 sm:p-8 space-y-5">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update_profile">
+
+                <div>
+                    <label class="block text-sm font-semibold text-[#333333]/70 mb-2">
+                        <i class="fa-solid fa-user mr-1 text-[#2C7BE5]"></i> Full Name
+                    </label>
+                    {{ profile_form.full_name }}
+                    {% if profile_form.full_name.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ profile_form.full_name.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-[#333333]/70 mb-2">
+                            <i class="fa-solid fa-envelope mr-1 text-[#2C7BE5]"></i> Email
+                        </label>
+                        {{ profile_form.email }}
+                        {% if profile_form.email.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ profile_form.email.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-[#333333]/70 mb-2">
+                            <i class="fa-solid fa-phone mr-1 text-[#2C7BE5]"></i> Phone
+                        </label>
+                        {{ profile_form.contact_number }}
+                        {% if profile_form.contact_number.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ profile_form.contact_number.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-[#333333]/70 mb-2">
+                        <i class="fa-solid fa-location-dot mr-1 text-[#2C7BE5]"></i> Address
+                    </label>
+                    {{ profile_form.address }}
+                    {% if profile_form.address.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ profile_form.address.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-[#333333]/70 mb-2">
+                            <i class="fa-solid fa-calendar mr-1 text-[#2C7BE5]"></i> Age
+                        </label>
+                        {{ profile_form.age }}
+                        {% if profile_form.age.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ profile_form.age.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-[#333333]/70 mb-2">
+                            <i class="fa-solid fa-cake-candles mr-1 text-[#2C7BE5]"></i> Birthdate
+                        </label>
+                        {{ profile_form.birthdate }}
+                        {% if profile_form.birthdate.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ profile_form.birthdate.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-4 bg-gradient-to-r from-[#2C7BE5] to-[#1e5ab3]
+                           text-white font-semibold text-sm rounded-2xl
+                           hover:opacity-90 transition-opacity flex items-center justify-center gap-x-2">
+                    <i class="fa-solid fa-floppy-disk"></i> Save Changes
+                </button>
+            </form>
+        </div>
+
+        <!-- PASSWORD & SECURITY -->
+        <div class="space-y-6">
+
+            <!-- Change Password -->
+            <div class="glass rounded-3xl overflow-hidden">
+                <div class="px-6 sm:px-8 py-5 border-b border-white/60 bg-white/50">
+                    <h4 class="font-semibold text-lg flex items-center gap-x-2">
+                        <i class="fa-solid fa-lock text-[#00B894]"></i> Change Password
+                    </h4>
+                    <p class="text-xs text-[#333333]/50 mt-1">Keep your account secure</p>
+                </div>
+
+                <form method="post" class="p-6 sm:p-8 space-y-5">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="change_password">
+
+                    <div>
+                        <label class="block text-sm font-semibold text-[#333333]/70 mb-2">
+                            <i class="fa-solid fa-key mr-1 text-amber-500"></i> Current Password
+                        </label>
+                        {{ password_form.current_password }}
+                        {% if password_form.current_password.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ password_form.current_password.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-[#333333]/70 mb-2">
+                            <i class="fa-solid fa-lock mr-1 text-[#00B894]"></i> New Password
+                        </label>
+                        {{ password_form.new_password }}
+                        {% if password_form.new_password.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ password_form.new_password.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-[#333333]/70 mb-2">
+                            <i class="fa-solid fa-lock mr-1 text-[#00B894]"></i> Confirm New Password
+                        </label>
+                        {{ password_form.confirm_new_password }}
+                        {% if password_form.confirm_new_password.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ password_form.confirm_new_password.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <button type="submit" class="w-full py-4 bg-gradient-to-r from-[#00B894] to-[#00a382]
+                               text-white font-semibold text-sm rounded-2xl
+                               hover:opacity-90 transition-opacity flex items-center justify-center gap-x-2">
+                        <i class="fa-solid fa-shield-halved"></i> Update Password
+                    </button>
+                </form>
+            </div>
+
+            <!-- Account Info Card -->
+            <div class="glass rounded-3xl p-6 sm:p-8">
+                <h4 class="font-semibold text-lg flex items-center gap-x-2 mb-5">
+                    <i class="fa-solid fa-circle-info text-[#2C7BE5]"></i> Account Info
+                </h4>
+                <div class="space-y-4 text-sm">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[#333333]/50">Account Type</span>
+                        <span
+                            class="inline-flex items-center gap-x-1 px-3 py-1 bg-[#2C7BE5]/10 text-[#2C7BE5] rounded-full text-xs font-semibold">
+                            <i class="fa-solid fa-user"></i> Resident
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-[#333333]/50">Barangay</span>
+                        <span class="font-semibold text-[#2C7BE5]">
+                            {% if user.barangay %}{{ user.barangay.barangay_name }}{% else %}{{ membership.barangay.barangay_name }}{% endif %}
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-[#333333]/50">Membership Status</span>
+                        <span
+                            class="inline-flex items-center gap-x-1 px-3 py-1 bg-[#00B894]/10 text-[#00B894] rounded-full text-xs font-semibold">
+                            <i class="fa-solid fa-circle-check"></i> Verified
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-[#333333]/50">Member Since</span>
+                        <span class="font-semibold">{{ membership.date_reviewed|date:"M d, Y"|default:"—" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Login & Device History -->
+            <div class="glass rounded-3xl overflow-hidden mt-6">
+                <div class="px-6 sm:px-8 py-5 border-b border-white/60 bg-white/50">
+                    <h4 class="font-semibold text-lg flex items-center gap-x-2">
+                        <i class="fa-solid fa-desktop text-[#2C7BE5]"></i> Login History & Devices
+                    </h4>
+                    <p class="text-xs text-[#333333]/50 mt-1">Review your recent active sessions securely</p>
+                </div>
+                <div class="p-6 sm:p-8 space-y-4">
+                    {% for device in user_devices %}
+                    <div class="p-4 rounded-xl border border-[#2C7BE5]/20 bg-white/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-x-3">
+                            <i class="fa-solid fa-laptop text-2xl text-[#2C7BE5]/60 block mt-1"></i>
+                            <div>
+                                <p class="text-xs text-[#333333]/80 font-bold max-w-xs truncate" title="{{ device.user_agent }}">{{ device.user_agent|truncatechars:45|default:"Unknown Device" }}</p>
+                                <p class="text-xs text-[#333333]/50 mt-0.5">IP: <span class="font-mono text-[#2C7BE5]">{{ device.ip_address }}</span> • {{ device.last_login|date:"M d, Y h:i A" }}</p>
+                            </div>
+                        </div>
+                        <div class="shrink-0 flex items-center gap-x-2">
+                            {% if device.is_trusted %}
+                                <span class="inline-flex items-center gap-x-1 px-2.5 py-1 bg-[#00B894]/10 text-[#00B894] rounded-lg text-xs font-semibold whitespace-nowrap"><i class="fa-solid fa-shield-check"></i> Trusted</span>
+                            {% elif request.session.session_key == device.session_key %}
+                                <span class="inline-flex items-center gap-x-1 px-2.5 py-1 bg-[#2C7BE5]/10 text-[#2C7BE5] rounded-lg text-xs font-semibold whitespace-nowrap"><i class="fa-solid fa-circle-dot"></i> This Session</span>
+                            {% else %}
+                                <span class="inline-flex items-center gap-x-1 px-2.5 py-1 bg-red-100 text-red-600 rounded-lg text-xs font-semibold whitespace-nowrap"><i class="fa-solid fa-triangle-exclamation"></i> Unverified</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-center text-sm text-[#333333]/50 py-4">No recent history available.</p>
+                    {% endfor %}
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

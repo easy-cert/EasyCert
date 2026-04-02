@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Login • EasyCert{% endblock %}
+
+{% block body %}
+
+<!-- TOP BAR -->
+<div class="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 py-3">
+    <div class="max-w-md mx-auto flex items-center justify-between">
+        <a href="{% url 'home' %}"
+            class="flex items-center gap-x-2 px-4 py-2.5 bg-white/80 backdrop-blur-md hover:bg-white border border-white/60 rounded-2xl text-[#2C7BE5] font-semibold text-sm shadow-sm transition-all">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Back to Home</span>
+        </a>
+        <button onclick="toggleDarkMode()" id="dark-mode-btn" title="Toggle Dark Mode"
+            class="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/80 backdrop-blur-md hover:bg-white border border-white/60 shadow-sm dark-toggle-btn transition-all text-[#2C7BE5]">
+            <i id="dark-mode-icon" class="fa-solid fa-moon text-sm"></i>
+        </button>
+    </div>
+</div>
+
+<div class="min-h-screen flex items-center justify-center px-4 py-12 pt-20"
+    style="background: linear-gradient(135deg, #F2F9FF 0%, #E0F0FF 100%);">
+    <div class="max-w-md w-full">
+        <div class="glass rounded-3xl p-8 sm:p-10 shadow-2xl">
+            <div class="text-center mb-6">
+                <a href="{% url 'home' %}" class="inline-block">
+                    <img src="{% static 'Icon.png' %}" alt="EasyCert Logo"
+                        class="mx-auto w-16 h-16 rounded-full mb-4 object-cover shadow-inner" />
+                </a>
+                <h3 class="text-2xl sm:text-3xl font-bold">Welcome to <span class="easycert-easy">Easy</span><span
+                        class="text-[#28DF97]">Cert</span></h3>
+                <p class="text-[#333333]/60 mt-1 text-sm">Sign in to your account</p>
+            </div>
+
+            <!-- Tab switcher -->
+            <div class="flex bg-white/60 rounded-2xl p-1 mb-7 gap-1">
+                <a href="{% url 'login' %}"
+                    class="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all bg-[#2C7BE5] text-white shadow-sm text-center">
+                    <i class="fa-solid fa-right-to-bracket mr-1.5"></i>Login
+                </a>
+                <a href="{% url 'register' %}"
+                    class="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all text-[#333333]/50 hover:text-[#2C7BE5] text-center">
+                    <i class="fa-solid fa-user-plus mr-1.5"></i>Register
+                </a>
+            </div>
+
+            <form method="POST" class="space-y-5">
+                {% csrf_token %}
+
+                <div>
+                    <label class="text-sm font-medium block mb-2 font-medium text-[#333333]/60 text-[10px]">Email
+                        Address</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                    <p class="text-red-400 text-xs mt-1">{{ form.email.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-sm font-medium block font-medium text-[#333333]/60 text-[10px]">Password
+                            / PIN</label>
+                    </div>
+                    {{ form.password }}
+                    {% if form.password.errors %}
+                    <p class="text-red-400 text-xs mt-1">{{ form.password.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                {% if form.non_field_errors %}
+                <div class="text-red-400 text-xs mt-1">
+                    {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <button type="submit"
+                    class="w-full py-5 bg-gradient-to-r from-[#2C7BE5] to-[#00B894] hover:opacity-90 text-white font-bold text-base rounded-3xl transition-all flex items-center justify-center gap-x-2 shadow-lg shadow-[#2C7BE5]/20">
+                    <i class="fa-solid fa-right-to-bracket"></i> Sign In
+                </button>
+            </form>
+
+            <div class="text-center text-sm mt-6 text-[#333333]/50">
+                Don't have an account? <a href="{% url 'register' %}"
+                    class="text-[#2C7BE5] font-semibold hover:underline">Register here</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .glass {
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(40px);
+        -webkit-backdrop-filter: blur(40px);
+    }
+</style>
+
+{% endblock %}

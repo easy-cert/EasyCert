@@ -1,0 +1,1111 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap');
+
+:root {
+    --primary: #2C7BE5;
+    --secondary: #00B894;
+    --bg: #F2F9FF;
+    --text: #333333;
+    --glass-bg: rgba(255, 255, 255, 0.75);
+    --glass-border: rgba(255, 255, 255, 0.6);
+    --shadow-primary: rgba(44, 123, 229, 0.15);
+}
+
+/* ===================== BRAND TEXT ===================== */
+.easycert-easy {
+    color: #2C7BE5;
+}
+
+:root.dark .easycert-easy {
+    color: #F9FBFB !important;
+}
+
+:root.dark .text-\[\#28DF97\] {
+    color: #28DF97 !important;
+}
+
+
+/* ===================== GLASS ===================== */
+.glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+}
+
+/* ===================== HERO ===================== */
+.hero-bg {
+    background: linear-gradient(135deg, #F2F9FF 0%, #E0F0FF 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-bg::before {
+    content: '';
+    position: absolute;
+    top: -80px;
+    right: -80px;
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(44, 123, 229, 0.08) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.hero-bg::after {
+    content: '';
+    position: absolute;
+    bottom: -60px;
+    left: -60px;
+    width: 280px;
+    height: 280px;
+    background: radial-gradient(circle, rgba(0, 184, 148, 0.07) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* ===================== CARD HOVER ===================== */
+.card-hover {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px -10px var(--shadow-primary);
+}
+
+/* ===================== NAV LINKS ===================== */
+.nav-link {
+    position: relative;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 3px;
+    bottom: -2px;
+    left: 0;
+    background-color: var(--primary);
+    transition: width 0.3s ease;
+    border-radius: 2px;
+}
+
+.nav-link:hover::after {
+    width: 100%;
+}
+
+/* ===================== ACTIVE TAB ===================== */
+.active-tab {
+    background-color: var(--primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(44, 123, 229, 0.3);
+}
+
+/* ===================== STATUS PING ===================== */
+.status-dot {
+    animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes ping {
+
+    75%,
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+/* ===================== CERTIFICATE ===================== */
+.certificate {
+    width: 800px;
+    max-width: 100%;
+    margin: 0 auto;
+    background: white;
+    border: 12px double var(--primary);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* ===================== MODALS ===================== */
+.modal {
+    animation: modalPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modalPop {
+    0% {
+        transform: scale(0.85);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* ===================== LARGE BUTTON ===================== */
+.large-button {
+    padding: 16px 32px;
+    font-size: 1rem;
+}
+
+@media (min-width: 640px) {
+    .large-button {
+        font-size: 1.1rem;
+    }
+}
+
+/* ===================== SECTION LABEL ===================== */
+.section-label {
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 1rem;
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* ===================== FORM INPUTS ===================== */
+.form-input {
+    padding: 1rem 1.25rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(44, 123, 229, 0.2);
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background: white;
+    font-size: 0.95rem;
+}
+
+.form-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(44, 123, 229, 0.1);
+}
+
+.form-input:hover {
+    border-color: rgba(44, 123, 229, 0.4);
+}
+
+/* ===================== RESIDENCY OPTIONS ===================== */
+.residency-option.selected-registered {
+    border-color: var(--secondary) !important;
+    background: rgba(0, 184, 148, 0.06);
+    box-shadow: 0 0 0 3px rgba(0, 184, 148, 0.1);
+}
+
+.residency-option.selected-temporary {
+    border-color: #f59e0b !important;
+    background: rgba(245, 158, 11, 0.06);
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+}
+
+/* ===================== PURPOSE OPTIONS ===================== */
+.purpose-option.selected {
+    border-color: var(--primary) !important;
+    background: rgba(44, 123, 229, 0.08);
+    box-shadow: 0 0 0 3px rgba(44, 123, 229, 0.1);
+}
+
+/* ===================== TOAST ===================== */
+#toast {
+    transform: translateY(16px);
+    opacity: 0;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+}
+
+#toast.toast-show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+#toast.toast-success .toast-inner {
+    border-left: 3px solid #00B894;
+}
+
+#toast.toast-error .toast-inner {
+    border-left: 3px solid #ef4444;
+}
+
+#toast.toast-info .toast-inner {
+    border-left: 3px solid #2C7BE5;
+}
+
+#toast.toast-success #toast-icon-wrap {
+    background: rgba(0, 184, 148, 0.15);
+}
+
+#toast.toast-error #toast-icon-wrap {
+    background: rgba(239, 68, 68, 0.15);
+}
+
+#toast.toast-info #toast-icon-wrap {
+    background: rgba(44, 123, 229, 0.15);
+}
+
+#toast.toast-success #toast-icon {
+    color: #00B894;
+}
+
+#toast.toast-error #toast-icon {
+    color: #ef4444;
+}
+
+#toast.toast-info #toast-icon {
+    color: #2C7BE5;
+}
+
+#toast-progress {
+    transition: width linear;
+}
+
+#toast.toast-success #toast-progress {
+    background: #00B894;
+}
+
+#toast.toast-error #toast-progress {
+    background: #ef4444;
+}
+
+#toast.toast-info #toast-progress {
+    background: #2C7BE5;
+}
+
+/* ===================== HOW IT WORKS STEPS ===================== */
+@keyframes stepFloat {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-6px);
+    }
+}
+
+.how-step-card .step-illustration {
+    animation: stepFloat 3.5s ease-in-out infinite;
+}
+
+.how-step-card:nth-child(1) .step-illustration {
+    animation-delay: 0s;
+}
+
+.how-step-card:nth-child(3) .step-illustration {
+    animation-delay: 0.7s;
+}
+
+.how-step-card:nth-child(5) .step-illustration {
+    animation-delay: 1.4s;
+}
+
+.how-step-card:hover .step-illustration {
+    animation-play-state: paused;
+    transform: translateY(-4px) scale(1.07);
+    transition: transform 0.3s ease;
+}
+
+/* ===================== TABLE ===================== */
+#requests-tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+#requests-tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.6);
+}
+
+/* ===================== CERTIFICATE CARD ===================== */
+.cert-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.cert-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+}
+
+.cert-card:hover .cert-icon {
+    transform: scale(1.12) rotate(-5deg);
+}
+
+.cert-icon {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-block;
+}
+
+/* ===================== RADIO CARDS ===================== */
+.radio-card.selected {
+    border-color: var(--primary) !important;
+    background: rgba(44, 123, 229, 0.08);
+    box-shadow: 0 0 0 3px rgba(44, 123, 229, 0.1);
+}
+
+
+.badge-pending {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+    padding: 3px 14px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.badge-approved {
+    background-color: rgba(0, 184, 148, 0.1);
+    color: var(--secondary);
+    padding: 3px 14px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.badge-rejected {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    padding: 3px 14px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* ===================== MODAL OVERLAY ===================== */
+.modal-overlay {
+    animation: fadeIn 0.2s ease;
+}
+
+.review-modal-overlay {
+    background: rgba(220, 235, 255, 0.50);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.review-modal-panel {
+    background: rgba(255, 255, 255, 0.78);
+    text-align: left;
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    box-shadow: 0 8px 40px rgba(44, 123, 229, 0.14);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* ===================== CHART CONTAINER ===================== */
+.chart-container {
+    position: relative;
+}
+
+/* ===================== REVIEW FIELD ===================== */
+.review-field {
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+/* ===================== PRINT STYLES ===================== */
+@media print {
+    body>*:not(#print-area) {
+        display: none !important;
+    }
+
+    #print-area {
+        display: block !important;
+    }
+
+    .certificate {
+        box-shadow: none;
+        border: 12px double var(--primary);
+    }
+}
+
+/* ===================== SCROLL ===================== */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(44, 123, 229, 0.05);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(44, 123, 229, 0.2);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(44, 123, 229, 0.35);
+}
+
+/* ===================== RESPONSIVE HELPERS ===================== */
+@media (max-width: 640px) {
+    .certificate {
+        border-width: 6px;
+    }
+
+    .large-button {
+        padding: 14px 24px;
+    }
+}
+
+/* ===================== ANIMATIONS ===================== */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.slide-in {
+    animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Stagger for cert cards */
+#certificate-grid>*:nth-child(1) {
+    animation-delay: 0.05s;
+    opacity: 0;
+    animation: slideInUp 0.4s ease forwards;
+}
+
+#certificate-grid>*:nth-child(2) {
+    animation-delay: 0.1s;
+    opacity: 0;
+    animation: slideInUp 0.4s ease forwards;
+}
+
+#certificate-grid>*:nth-child(3) {
+    animation-delay: 0.15s;
+    opacity: 0;
+    animation: slideInUp 0.4s ease forwards;
+}
+
+#certificate-grid>*:nth-child(4) {
+    animation-delay: 0.2s;
+    opacity: 0;
+    animation: slideInUp 0.4s ease forwards;
+}
+
+#certificate-grid>*:nth-child(5) {
+    animation-delay: 0.25s;
+    opacity: 0;
+    animation: slideInUp 0.4s ease forwards;
+}
+
+#certificate-grid>*:nth-child(6) {
+    animation-delay: 0.3s;
+    opacity: 0;
+    animation: slideInUp 0.4s ease forwards;
+}
+
+#certificate-grid>*:nth-child(7) {
+    animation-delay: 0.35s;
+    opacity: 0;
+    animation: slideInUp 0.4s ease forwards;
+}
+
+/* ===================== DARK MODE ===================== */
+/*
+  Palette used:
+  --dm-bg:        #212529  (Carbon Black)   — page background
+  --dm-surface:   #2B3035  (between Carbon and Gunmetal) — main card surfaces
+  --dm-card:      #343A40  (Gunmetal)       — elevated cards / panels
+  --dm-elevated:  #3D4349  (slightly above Gunmetal) — modals / dropdowns
+  --dm-border:    rgba(173,181,189,0.12)   (Pale Slate tint) — subtle borders
+  --dm-muted:     #6C757D  (Slate Grey)    — secondary / muted text
+  --dm-text:      #DEE2E6  (Alabaster Grey) — primary body text
+  --dm-heading:   #F8F9FA  (Bright Snow)   — headings
+*/
+
+:root.dark {
+    --bg: #212529;
+    --text: #DEE2E6;
+    --glass-bg: rgba(52, 58, 64, 0.85);
+    --glass-border: rgba(173, 181, 189, 0.1);
+    --shadow-primary: rgba(44, 123, 229, 0.25);
+}
+
+/* Base */
+:root.dark body {
+    background-color: #212529;
+    color: #DEE2E6;
+}
+
+/* Glass surfaces in dark mode */
+:root.dark .glass {
+    background: rgba(52, 58, 64, 0.85);
+    border-color: rgba(173, 181, 189, 0.1);
+}
+
+/* Hero */
+:root.dark .hero-bg {
+    background: linear-gradient(135deg, #212529 0%, #2b3035 100%);
+}
+
+:root.dark .hero-bg::before {
+    background: radial-gradient(circle, rgba(44, 123, 229, 0.12) 0%, transparent 70%);
+}
+
+:root.dark .hero-bg::after {
+    background: radial-gradient(circle, rgba(0, 184, 148, 0.1) 0%, transparent 70%);
+}
+
+/* Header */
+:root.dark header {
+    background: rgba(33, 37, 41, 0.92) !important;
+    border-bottom-color: rgba(173, 181, 189, 0.1) !important;
+}
+
+/* Tab switcher pill */
+:root.dark .flex.items-center.gap-x-1.bg-white\/80 {
+    background: rgba(52, 58, 64, 0.9) !important;
+}
+
+/* Inactive tab text */
+:root.dark #resident-tab:not(.active-tab),
+:root.dark #admin-tab:not(.active-tab) {
+    color: #ADB5BD;
+}
+
+/* Dark toggle button */
+:root.dark .dark-toggle-btn {
+    background: #343A40;
+    border-color: rgba(173, 181, 189, 0.2);
+    color: #f59e0b;
+}
+
+:root.dark .track-btn {
+    background: #343A40 !important;
+    border-color: rgba(44, 123, 229, 0.3) !important;
+}
+
+:root.dark .track-btn:hover {
+    background: #3d4349 !important;
+}
+
+/* Text colours */
+:root.dark h1,
+:root.dark h2,
+:root.dark h3,
+:root.dark h4,
+:root.dark h5 {
+    color: #F8F9FA;
+}
+
+:root.dark p,
+:root.dark span,
+:root.dark label {
+    color: #DEE2E6;
+}
+
+/* Muted text helpers */
+:root.dark .text-\[\#333333\]\/60,
+:root.dark .text-\[\#333333\]\/70,
+:root.dark .text-\[\#333333\]\/50,
+:root.dark .text-\[\#333333\]\/40 {
+    color: #6C757D !important;
+}
+
+:root.dark .text-\[\#333333\] {
+    color: #DEE2E6 !important;
+}
+
+/* White backgrounds → dark card */
+:root.dark .bg-white,
+:root.dark .bg-white\/80,
+:root.dark .bg-white\/70,
+:root.dark .bg-white\/60 {
+    background-color: #343A40 !important;
+}
+
+:root.dark .hover\:bg-\[\#F2F9FF\]:hover {
+    background-color: #3d4349 !important;
+}
+
+:root.dark .bg-\[\#F2F9FF\] {
+    background-color: #2b3035 !important;
+}
+
+/* How-it-works step cards */
+:root.dark .how-step-card {
+    background: rgba(52, 58, 64, 0.85);
+}
+
+/* Certificate cards */
+:root.dark .cert-card {
+    background: rgba(52, 58, 64, 0.85);
+}
+
+:root.dark .cert-card:hover {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* SELECT button inside cert card */
+:root.dark .cert-card button {
+    background: #3d4349 !important;
+    border-color: rgba(44, 123, 229, 0.3) !important;
+    color: #7EB8FF !important;
+}
+
+:root.dark .cert-card button:hover {
+    background: #495057 !important;
+}
+
+
+/* Modals */
+:root.dark [id$="-modal"]>div:not(.modal-overlay) {
+    background: #2b3035;
+    border-color: rgba(173, 181, 189, 0.1);
+}
+
+:root.dark .bg-\[\#F2F9FF\]\/80 {
+    background: rgba(43, 48, 53, 0.95) !important;
+}
+
+/* ── Request modal panel ── */
+:root.dark #request-modal>.modal {
+    background: rgba(43, 48, 53, 0.97) !important;
+    border: 1px solid rgba(173, 181, 189, 0.12) !important;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55) !important;
+    backdrop-filter: blur(32px) !important;
+}
+
+/* ── Request modal overlay ── */
+:root.dark #request-modal {
+    background: rgba(15, 17, 20, 0.65) !important;
+}
+
+:root.dark #success-modal,
+:root.dark #track-modal,
+:root.dark #cert-preview-modal {
+    background: rgba(15, 17, 20, 0.65) !important;
+}
+
+/* ── Modal header bar ── */
+:root.dark #request-modal .border-b {
+    background: rgba(43, 48, 53, 0.95) !important;
+    border-bottom-color: rgba(173, 181, 189, 0.1) !important;
+}
+
+:root.dark #request-modal .border-b h3 {
+    color: #F8F9FA !important;
+}
+
+:root.dark #request-modal .border-b p {
+    color: #00B894 !important;
+}
+
+:root.dark #request-modal .border-b button {
+    color: #ADB5BD !important;
+}
+
+:root.dark #request-modal .border-b button:hover {
+    background: rgba(173, 181, 189, 0.12) !important;
+}
+
+/* Modal inner panels */
+:root.dark .review-field {
+    background: rgba(52, 58, 64, 0.8);
+    border-color: rgba(173, 181, 189, 0.1);
+}
+
+/* Admin login screen */
+:root.dark #admin-login-screen {
+    background: transparent;
+}
+
+:root.dark #admin-login-screen .glass {
+    background: rgba(52, 58, 64, 0.9);
+}
+
+/* Admin dashboard stat cards */
+:root.dark .card-hover {
+    background: rgba(52, 58, 64, 0.85);
+}
+
+/* Table */
+:root.dark table thead {
+    background: rgba(43, 48, 53, 0.9) !important;
+}
+
+:root.dark table thead th {
+    color: #ADB5BD !important;
+}
+
+:root.dark #requests-tbody tr {
+    border-bottom-color: rgba(173, 181, 189, 0.08);
+}
+
+:root.dark #requests-tbody tr:hover {
+    background-color: rgba(73, 80, 87, 0.4) !important;
+}
+
+:root.dark #requests-tbody td {
+    color: #DEE2E6;
+}
+
+/* Section label */
+:root.dark .section-label {
+    color: #7EB8FF;
+}
+
+:root.dark .section-label span[class*="bg-"] {
+    background-color: rgba(44, 123, 229, 0.4) !important;
+}
+
+/* Borders */
+:root.dark .border-white\/60,
+:root.dark .border-white\/50,
+:root.dark .border-white\/80 {
+    border-color: rgba(173, 181, 189, 0.12) !important;
+}
+
+:root.dark .border-\[\#2C7BE5\]\/20 {
+    border-color: rgba(44, 123, 229, 0.25) !important;
+}
+
+/* Refresh indicator */
+:root.dark #auto-refresh-indicator {
+    background: #343A40 !important;
+    border-color: rgba(44, 123, 229, 0.25) !important;
+}
+
+/* Success/reject/approve buttons */
+:root.dark .bg-red-50 {
+    background-color: rgba(239, 68, 68, 0.12) !important;
+}
+
+:root.dark .hover\:bg-red-100:hover {
+    background-color: rgba(239, 68, 68, 0.2) !important;
+}
+
+/* Footer / section bg */
+:root.dark .bg-\[\#2C7BE5\]\/5 {
+    background-color: rgba(44, 123, 229, 0.08) !important;
+}
+
+/* Toast */
+:root.dark #toast .toast-inner {
+    background: #343A40 !important;
+}
+
+:root.dark #toast-title,
+:root.dark #toast-text {
+    color: #DEE2E6 !important;
+}
+
+/* Certificate preview */
+:root.dark .certificate {
+    background: #2b3035;
+    color: #DEE2E6;
+}
+
+/* Auth tabs */
+:root.dark #tab-login:not(.bg-\[\#2C7BE5\]),
+:root.dark #tab-register:not(.bg-\[\#2C7BE5\]) {
+    color: #6C757D !important;
+}
+
+/* Scrollbar */
+:root.dark ::-webkit-scrollbar-track {
+    background: rgba(173, 181, 189, 0.05);
+}
+
+:root.dark ::-webkit-scrollbar-thumb {
+    background: rgba(173, 181, 189, 0.15);
+}
+
+:root.dark ::-webkit-scrollbar-thumb:hover {
+    background: rgba(173, 181, 189, 0.3);
+}
+
+/* ===================== DARK MODE: FORM INPUTS (ENHANCED) ===================== */
+:root.dark .form-input {
+    background: rgba(33, 37, 41, 0.8);
+    border-color: rgba(173, 181, 189, 0.18);
+    color: #F8F9FA !important;
+    caret-color: #2C7BE5;
+}
+
+:root.dark .form-input::placeholder {
+    color: rgba(173, 181, 189, 0.4) !important;
+}
+
+:root.dark .form-input:focus {
+    border-color: #2C7BE5;
+    box-shadow: 0 0 0 3px rgba(44, 123, 229, 0.2);
+    background: rgba(33, 37, 41, 0.95);
+}
+
+:root.dark .form-input:hover:not(:focus) {
+    border-color: rgba(173, 181, 189, 0.3);
+}
+
+:root.dark select.form-input option {
+    background-color: #2b3035;
+    color: #DEE2E6;
+}
+
+:root.dark input[type="date"].form-input {
+    color-scheme: dark;
+}
+
+/* ── Time-picker schedule cards ── */
+:root.dark #request-modal .glass {
+    background: rgba(52, 58, 64, 0.65) !important;
+    border-color: rgba(173, 181, 189, 0.1) !important;
+}
+
+:root.dark .time-option {
+    color: #DEE2E6;
+}
+
+:root.dark .time-option:hover {
+    background: rgba(44, 123, 229, 0.1) !important;
+}
+
+:root.dark .time-option input[type="radio"] {
+    accent-color: #00B894;
+}
+
+/* ── Purpose option tiles ── */
+:root.dark .purpose-option {
+    background: rgba(52, 58, 64, 0.7) !important;
+    border-color: rgba(173, 181, 189, 0.1) !important;
+}
+
+:root.dark .purpose-option:hover {
+    border-color: rgba(44, 123, 229, 0.5) !important;
+    background: rgba(44, 123, 229, 0.1) !important;
+}
+
+:root.dark .purpose-option.selected {
+    border-color: #2C7BE5 !important;
+    background: rgba(44, 123, 229, 0.15) !important;
+    box-shadow: 0 0 0 3px rgba(44, 123, 229, 0.12);
+}
+
+:root.dark .purpose-option span {
+    color: #DEE2E6 !important;
+}
+
+:root.dark .purpose-option i {
+    color: #7EB8FF !important;
+}
+
+/* ── Radio cards (business permit etc.) ── */
+:root.dark .radio-card {
+    background: rgba(52, 58, 64, 0.7) !important;
+    border-color: rgba(173, 181, 189, 0.1) !important;
+}
+
+:root.dark .radio-card:hover {
+    border-color: rgba(44, 123, 229, 0.5) !important;
+    background: rgba(44, 123, 229, 0.1) !important;
+}
+
+:root.dark .radio-card.selected {
+    border-color: #2C7BE5 !important;
+    background: rgba(44, 123, 229, 0.15) !important;
+    box-shadow: 0 0 0 3px rgba(44, 123, 229, 0.12);
+}
+
+:root.dark .radio-card div .text-xs {
+    color: #6C757D !important;
+}
+
+/* ── Scholarship detail block ── */
+:root.dark #scholarship-group {
+    background: rgba(44, 123, 229, 0.08) !important;
+    border-color: rgba(44, 123, 229, 0.2) !important;
+}
+
+/* ── Other purpose input group ── */
+:root.dark #other-purpose-group label {
+    color: #DEE2E6 !important;
+}
+
+/* ── Residency option cards ── */
+:root.dark .residency-option {
+    background: rgba(52, 58, 64, 0.7) !important;
+    border-color: rgba(173, 181, 189, 0.1) !important;
+}
+
+:root.dark .residency-option:hover {
+    border-color: rgba(0, 184, 148, 0.4) !important;
+}
+
+:root.dark .residency-option.selected-registered {
+    background: rgba(0, 184, 148, 0.1) !important;
+    border-color: #00B894 !important;
+}
+
+:root.dark .residency-option.selected-temporary {
+    background: rgba(245, 158, 11, 0.1) !important;
+    border-color: #f59e0b !important;
+}
+
+/* ── Form labels in dark mode ── */
+:root.dark #request-modal label {
+    color: #ADB5BD !important;
+}
+
+:root.dark #request-modal label .text-red-400 {
+    color: #f87171 !important;
+}
+
+:root.dark #request-modal label .text-\[\#333333\]\/40 {
+    color: #6C757D !important;
+}
+
+/* ── Submit button glow ── */
+:root.dark #request-modal button[type="submit"] {
+    box-shadow: 0 8px 32px rgba(44, 123, 229, 0.25) !important;
+}
+
+:root.dark #request-modal button[type="submit"]:hover {
+    box-shadow: 0 8px 40px rgba(44, 123, 229, 0.4) !important;
+}
+
+/* ── Login/Register auth pages dark mode ── */
+:root.dark .min-h-screen[style*="F2F9FF"] {
+    background: #212529 !important;
+}
+
+:root.dark .bg-white\/60 {
+    background-color: rgba(52, 58, 64, 0.6) !important;
+}
+
+/* ===================== HERO ANIMATED ORBS ===================== */
+.hero-orb {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    will-change: transform;
+}
+
+.hero-orb-1 {
+    width: 560px;
+    height: 560px;
+    top: -160px;
+    right: -120px;
+    background: radial-gradient(circle, rgba(44, 123, 229, .14) 0%, transparent 68%);
+    animation: orbDrift1 15s ease-in-out infinite;
+}
+
+.hero-orb-2 {
+    width: 420px;
+    height: 420px;
+    bottom: -100px;
+    left: -80px;
+    background: radial-gradient(circle, rgba(0, 184, 148, .12) 0%, transparent 68%);
+    animation: orbDrift2 20s ease-in-out infinite;
+}
+
+.hero-orb-3 {
+    width: 300px;
+    height: 300px;
+    top: 35%;
+    left: 48%;
+    background: radial-gradient(circle, rgba(44, 123, 229, .08) 0%, transparent 68%);
+    animation: orbDrift3 25s ease-in-out infinite;
+}
+
+@keyframes orbDrift1 {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1)
+    }
+
+    33% {
+        transform: translate(-28px, 38px) scale(1.07)
+    }
+
+    66% {
+        transform: translate(18px, -22px) scale(.94)
+    }
+}
+
+@keyframes orbDrift2 {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1)
+    }
+
+    40% {
+        transform: translate(36px, -28px) scale(1.09)
+    }
+
+    70% {
+        transform: translate(-18px, 18px) scale(.96)
+    }
+}
+
+@keyframes orbDrift3 {
+
+    0%,
+    100% {
+        transform: translate(-50%, 0) scale(1);
+        opacity: .55
+    }
+
+    50% {
+        transform: translate(-50%, 0) scale(1.18);
+        opacity: .9
+    }
+}
+
+:root.dark .hero-orb-1 {
+    background: radial-gradient(circle, rgba(44, 123, 229, .20) 0%, transparent 68%);
+}
+
+:root.dark .hero-orb-2 {
+    background: radial-gradient(circle, rgba(0, 184, 148, .17) 0%, transparent 68%);
+}
+
+:root.dark .hero-orb-3 {
+    background: radial-gradient(circle, rgba(44, 123, 229, .12) 0%, transparent 68%);
+}
+
+/* ===================== SMOOTH DARK MODE TRANSITION ===================== */
+.no-transition,
+.no-transition * {
+    transition: none !important;
+}
+
+*,
+*::before,
+*::after {
+    transition:
+        background-color 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+        background 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+        border-color 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+        color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+        fill 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}

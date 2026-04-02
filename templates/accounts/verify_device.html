@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Verify Device • Security Alert{% endblock %}
+
+{% block body %}
+<div class="min-h-screen flex items-center justify-center p-4 pt-20" style="background: linear-gradient(135deg, #F2F9FF 0%, #E0F0FF 100%);">
+    <div class="glass rounded-3xl p-8 max-w-lg w-full text-center shadow-2xl">
+        <div class="mx-auto w-16 h-16 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center mb-5">
+            <i class="fa-solid fa-shield-halved text-2xl"></i>
+        </div>
+        
+        <h2 class="text-2xl font-bold mb-2">Unrecognized Login Detected</h2>
+        <p class="text-[#333333]/70 mb-6 text-sm leading-relaxed">
+            We detected a login from a new device for the account <strong>{{ device.user.email }}</strong>. <br><br>
+            
+            <span class="inline-block bg-white/50 px-4 py-3 rounded-xl border border-white/60 text-left w-full shadow-inner mt-2">
+                <strong class="text-[#2C7BE5] block mb-1 uppercase tracking-wider text-xs">Login Details</strong>
+                <strong class="text-[#333333]/60">IP Address:</strong> {{ device.ip_address }}<br>
+                <strong class="text-[#333333]/60">Browser:</strong> {{ device.user_agent|slice:":50" }}{% if device.user_agent|length > 50 %}...{% endif %}<br>
+                <strong class="text-[#333333]/60">Time:</strong> {{ device.created_at|date:"M d, Y h:i A" }}
+            </span>
+        </p>
+
+        <form method="POST" class="flex flex-col sm:flex-row gap-3 justify-center mb-2">
+            {% csrf_token %}
+            <button type="submit" name="action" value="NO" class="px-6 py-3.5 bg-red-100 hover:bg-red-200 text-red-700 font-bold rounded-2xl transition cursor-pointer border border-red-200 shadow-sm flex-1 flex items-center justify-center gap-x-2">
+                <i class="fa-solid fa-xmark"></i> No, Log Them Out
+            </button>
+            <button type="submit" name="action" value="YES" class="px-6 py-3.5 bg-[#00B894] hover:bg-[#00a382] text-white font-bold rounded-2xl transition cursor-pointer shadow-sm flex-1 flex items-center justify-center gap-x-2">
+                <i class="fa-solid fa-check"></i> Yes, It Was Me
+            </button>
+        </form>
+        
+        <p class="text-xs text-[#333333]/40 mt-6">
+            If you click "No", we will immediately terminate the session and log the unauthorized user out of your account.
+        </p>
+    </div>
+</div>
+{% endblock %}

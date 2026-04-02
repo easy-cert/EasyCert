@@ -1,0 +1,647 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}EasyCert • Barangay Certificate System{% endblock %}
+
+{% block body %}
+
+<!-- HEADER -->
+<header class="sticky top-0 z-50 glass border-b border-white/50 shadow-sm">
+    <div
+        class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-x-2 flex-wrap gap-y-2">
+        <div class="flex items-center gap-x-3">
+            <img src="{% static 'Icon.png' %}" alt="EasyCert Logo"
+                class="w-10 h-10 sm:w-12 sm:h-12 rounded-full shadow-inner object-cover" />
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold tracking-tight"><span class="easycert-easy">Easy</span><span
+                        class="text-[#28DF97]">Cert</span></h1>
+                <p class="text-xs text-[#00B894] font-medium -mt-1">
+                    {% if user.is_authenticated and user.barangay %}
+                        Barangay {{ user.barangay.barangay_name }}
+                    {% elif membership %}
+                        Barangay {{ membership.barangay.barangay_name }}
+                    {% else %}
+                        EasyCert Central
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        {% if user.is_authenticated and membership %}
+        <div class="flex items-center gap-x-1 bg-white/80 rounded-3xl p-1 shadow-inner order-3 sm:order-2">
+            <a href="{% url 'home' %}"
+                class="px-4 sm:px-6 py-2 sm:py-2.5 rounded-3xl font-semibold transition-all flex items-center gap-x-2 text-sm bg-[#2C7BE5] text-white shadow-md">
+                <i class="fa-solid fa-file-signature"></i>
+                <span>Certificates</span>
+            </a>
+            <a href="{% url 'user_dashboard' %}"
+                class="px-4 sm:px-6 py-2 sm:py-2.5 rounded-3xl font-semibold transition-all flex items-center gap-x-2 text-sm text-[#333333]/60 hover:bg-white/60">
+                <i class="fa-solid fa-gauge-high"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{% url 'profile_settings' %}"
+                class="px-4 sm:px-6 py-2 sm:py-2.5 rounded-3xl font-semibold transition-all flex items-center gap-x-2 text-sm text-[#333333]/60 hover:bg-white/60">
+                <i class="fa-solid fa-gear"></i>
+                <span class="hidden sm:inline">Settings</span>
+            </a>
+        </div>
+        {% endif %}
+
+        <div class="flex items-center gap-x-3 sm:gap-x-6 order-2 sm:order-3">
+            <div class="flex items-center gap-x-2 text-xs sm:text-sm">
+                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-[#00B894] rounded-full animate-pulse"></div>
+                <span class="font-medium text-[#00B894]">Online</span>
+            </div>
+            <!-- Dark Mode Toggle -->
+            <button onclick="toggleDarkMode()" id="dark-mode-btn" title="Toggle Dark Mode"
+                class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-2xl border border-[#2C7BE5]/20 bg-white hover:bg-[#F2F9FF] dark-toggle-btn transition-all text-[#2C7BE5]">
+                <i id="dark-mode-icon" class="fa-solid fa-moon text-sm"></i>
+            </button>
+            <button onclick="showTrackModal()"
+                class="flex items-center gap-x-2 px-4 sm:px-6 py-2 sm:py-3 bg-white hover:bg-[#F2F9FF] border border-[#2C7BE5]/30 rounded-3xl text-[#2C7BE5] font-semibold transition-all text-sm track-btn">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <span class="hidden sm:inline">Track Request</span>
+            </button>
+
+            {% if user.is_authenticated %}
+            <a href="{% url 'logout' %}"
+                class="flex items-center gap-x-2 px-4 py-2 bg-red-50 hover:bg-red-100 border border-red-200 rounded-3xl text-red-600 font-semibold text-sm transition-all">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span class="hidden sm:inline">Logout</span>
+            </a>
+            {% else %}
+            <a href="{% url 'login' %}"
+                class="flex items-center gap-x-2 px-4 py-2 bg-[#2C7BE5] hover:bg-[#1e5ab3] rounded-3xl text-white font-semibold text-sm transition-all">
+                <i class="fa-solid fa-right-to-bracket"></i>
+                <span class="hidden sm:inline">Login</span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+<!-- RESIDENT VIEW -->
+<div id="resident-view">
+    <!-- HERO -->
+    <div class="hero-bg py-12 sm:py-16" style="position:relative;overflow:hidden;">
+        <canvas id="hero-canvas"
+            style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
+        <div class="hero-orb hero-orb-1"></div>
+        <div class="hero-orb hero-orb-2"></div>
+        <div class="hero-orb hero-orb-3"></div>
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 text-center" style="position:relative;z-index:1;">
+            {% if membership %}
+            <div
+                class="inline-flex items-center gap-x-2 bg-white/70 backdrop-blur-sm px-5 sm:px-6 py-2 sm:py-3 rounded-full mb-5 sm:mb-6 shadow-sm border border-white/60">
+                <i class="fa-solid fa-building-columns text-[#2C7BE5]"></i>
+                <span class="font-semibold text-[#2C7BE5] text-sm sm:text-base tracking-wide">
+                    {% if user.barangay %}{{ user.barangay.barangay_name }}{% else %}{{ membership.barangay.barangay_name }}{% endif %}
+                </span>
+            </div>
+            {% endif %}
+
+            <h2 class="text-4xl sm:text-6xl font-bold leading-none tracking-tighter mb-4">
+                Get Your Barangay<br>Certificate in <span class="text-[#00B894]">Minutes</span>
+            </h2>
+            <p class="text-base sm:text-xl text-[#333333]/70 max-w-md mx-auto mb-8 sm:mb-10">
+                Fast. Secure. Paperless.
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="scrollToCertificates()"
+                    class="large-button bg-[#2C7BE5] hover:bg-[#1e5ab3] text-white rounded-3xl flex items-center justify-center gap-x-3 shadow-xl shadow-[#2C7BE5]/30 transition-all">
+                    <i class="fa-solid fa-file-signature text-xl sm:text-2xl"></i>
+                    <span class="font-semibold">Request Certificate Now</span>
+                </button>
+
+                <button onclick="showTrackModal()"
+                    class="large-button border-2 border-[#2C7BE5] text-[#2C7BE5] hover:bg-white rounded-3xl flex items-center justify-center gap-x-3 transition-all">
+                    <i class="fa-solid fa-receipt"></i>
+                    <span class="font-semibold">Track My Request</span>
+                </button>
+            </div>
+
+            <!-- How it works -->
+            <div
+                class="mt-12 sm:mt-16 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 max-w-3xl mx-auto">
+
+                <!-- Step 1 -->
+                <div
+                    class="how-step-card glass rounded-3xl px-5 py-6 flex flex-col items-center text-center w-full sm:flex-1 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-[#2C7BE5]/10">
+                    <div class="mb-3 step-illustration">
+                        <svg width="80" height="72" viewBox="0 0 80 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="14" y="6" width="40" height="52" rx="6" fill="#2C7BE5" fill-opacity="0.12"
+                                stroke="#2C7BE5" stroke-width="1.5" />
+                            <rect x="22" y="18" width="24" height="3" rx="1.5" fill="#2C7BE5" fill-opacity="0.5" />
+                            <rect x="22" y="25" width="18" height="3" rx="1.5" fill="#2C7BE5" fill-opacity="0.3" />
+                            <rect x="22" y="32" width="21" height="3" rx="1.5" fill="#2C7BE5" fill-opacity="0.3" />
+                            <circle cx="34" cy="48" r="8" fill="#2C7BE5" fill-opacity="0.12" stroke="#2C7BE5"
+                                stroke-width="1.2" />
+                            <circle cx="34" cy="48" r="4" fill="#2C7BE5" fill-opacity="0.5" />
+                            <circle cx="55" cy="26" r="10" fill="white" fill-opacity="0.8" stroke="#2C7BE5"
+                                stroke-width="2" />
+                            <circle cx="55" cy="26" r="5.5" fill="#2C7BE5" fill-opacity="0.15" />
+                            <line x1="62" y1="33" x2="68" y2="40" stroke="#2C7BE5" stroke-width="2.5"
+                                stroke-linecap="round" />
+                            <circle cx="10" cy="12" r="2" fill="#2C7BE5" fill-opacity="0.4" />
+                            <circle cx="68" cy="10" r="1.5" fill="#2C7BE5" fill-opacity="0.3" />
+                            <circle cx="11" cy="52" r="1.5" fill="#00B894" fill-opacity="0.5" />
+                        </svg>
+                    </div>
+                    <div
+                        class="w-7 h-7 rounded-xl bg-[#2C7BE5] text-white text-xs font-bold flex items-center justify-center mb-2">
+                        1</div>
+                    <p class="text-xs sm:text-sm font-semibold text-[#333333]">Choose Certificate</p>
+                    <p class="text-[10px] text-[#333333]/40 mt-1 hidden sm:block">Pick the document you need</p>
+                </div>
+
+                <!-- Arrow -->
+                <div class="hidden sm:block text-[#2C7BE5]/30 flex-shrink-0">
+                    <svg width="28" height="16" viewBox="0 0 28 16" fill="none">
+                        <path d="M0 8H24M24 8L18 2M24 8L18 14" stroke="#2C7BE5" stroke-width="1.8"
+                            stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.4" />
+                    </svg>
+                </div>
+
+                <!-- Step 2 -->
+                <div
+                    class="how-step-card glass rounded-3xl px-5 py-6 flex flex-col items-center text-center w-full sm:flex-1 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-[#2C7BE5]/10">
+                    <div class="mb-3 step-illustration">
+                        <svg width="80" height="72" viewBox="0 0 80 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="14" y="12" width="40" height="52" rx="6" fill="#2C7BE5" fill-opacity="0.10"
+                                stroke="#2C7BE5" stroke-width="1.5" />
+                            <rect x="27" y="7" width="14" height="9" rx="4.5" fill="#2C7BE5" fill-opacity="0.2"
+                                stroke="#2C7BE5" stroke-width="1.2" />
+                            <rect x="22" y="26" width="28" height="7" rx="3" fill="none" stroke="#2C7BE5"
+                                stroke-width="1" stroke-opacity="0.5" />
+                            <rect x="22" y="38" width="28" height="7" rx="3" fill="none" stroke="#2C7BE5"
+                                stroke-width="1" stroke-opacity="0.5" />
+                            <rect x="22" y="50" width="16" height="7" rx="3" fill="none" stroke="#2C7BE5"
+                                stroke-width="1" stroke-opacity="0.5" />
+                            <rect x="25" y="28.5" width="14" height="2.5" rx="1.25" fill="#2C7BE5" fill-opacity="0.4" />
+                            <rect x="25" y="40.5" width="10" height="2.5" rx="1.25" fill="#2C7BE5" fill-opacity="0.3" />
+                            <g transform="translate(52, 36) rotate(-40)">
+                                <rect x="-4" y="-14" width="8" height="22" rx="2" fill="#2C7BE5" fill-opacity="0.7" />
+                                <polygon points="-4,8 4,8 0,15" fill="#2C7BE5" fill-opacity="0.5" />
+                                <rect x="-4" y="-14" width="8" height="5" rx="2" fill="#2C7BE5" fill-opacity="0.35" />
+                            </g>
+                            <circle cx="10" cy="60" r="1.5" fill="#00B894" fill-opacity="0.5" />
+                            <circle cx="68" cy="18" r="2" fill="#2C7BE5" fill-opacity="0.3" />
+                        </svg>
+                    </div>
+                    <div
+                        class="w-7 h-7 rounded-xl bg-[#2C7BE5] text-white text-xs font-bold flex items-center justify-center mb-2">
+                        2</div>
+                    <p class="text-xs sm:text-sm font-semibold text-[#333333]">Fill Out Form</p>
+                    <p class="text-[10px] text-[#333333]/40 mt-1 hidden sm:block">Enter your details online</p>
+                </div>
+
+                <!-- Arrow -->
+                <div class="hidden sm:block text-[#00B894]/30 flex-shrink-0">
+                    <svg width="28" height="16" viewBox="0 0 28 16" fill="none">
+                        <path d="M0 8H24M24 8L18 2M24 8L18 14" stroke="#00B894" stroke-width="1.8"
+                            stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.5" />
+                    </svg>
+                </div>
+
+                <!-- Step 3 -->
+                <div
+                    class="how-step-card glass rounded-3xl px-5 py-6 flex flex-col items-center text-center w-full sm:flex-1 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-[#00B894]/10">
+                    <div class="mb-3 step-illustration">
+                        <svg width="80" height="72" viewBox="0 0 80 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="38" cy="28" r="20" fill="#00B894" fill-opacity="0.12" stroke="#00B894"
+                                stroke-width="1.8" />
+                            <circle cx="38" cy="28" r="13" fill="#00B894" fill-opacity="0.15" />
+                            <polygon
+                                points="38,16 40.4,23.3 48,23.3 42,27.7 44.4,35 38,30.7 31.6,35 34,27.7 28,23.3 35.6,23.3"
+                                fill="#00B894" fill-opacity="0.7" />
+                            <path d="M30 46 L26 62 L32 58 L35 64 L38 48" fill="#00B894" fill-opacity="0.25"
+                                stroke="#00B894" stroke-width="1" stroke-linejoin="round" />
+                            <path d="M46 46 L50 62 L44 58 L41 64 L38 48" fill="#00B894" fill-opacity="0.25"
+                                stroke="#00B894" stroke-width="1" stroke-linejoin="round" />
+                            <circle cx="56" cy="18" r="9" fill="white" fill-opacity="0.9" stroke="#00B894"
+                                stroke-width="1.5" />
+                            <path d="M51.5 18L54.5 21L60.5 15" stroke="#00B894" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <circle cx="10" cy="20" r="2" fill="#00B894" fill-opacity="0.4" />
+                            <circle cx="14" cy="56" r="1.5" fill="#2C7BE5" fill-opacity="0.35" />
+                            <circle cx="66" cy="54" r="2" fill="#00B894" fill-opacity="0.3" />
+                        </svg>
+                    </div>
+                    <div
+                        class="w-7 h-7 rounded-xl bg-[#00B894] text-white text-xs font-bold flex items-center justify-center mb-2">
+                        3</div>
+                    <p class="text-xs sm:text-sm font-semibold text-[#333333]">Pick Up Certificate</p>
+                    <p class="text-[10px] text-[#333333]/40 mt-1 hidden sm:block">Claim your document in person</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AVAILABLE CERTIFICATES -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-12" id="certificates-section">
+        <h3 class="text-xl sm:text-2xl font-semibold mb-6 sm:mb-8 flex items-center gap-x-3">
+            <span>Available Certificates</span>
+            <div class="h-px flex-1 bg-gradient-to-r from-transparent via-[#2C7BE5]/30 to-transparent"></div>
+        </h3>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6" id="certificate-grid">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+</div>
+
+<!-- ============ MODALS ============ -->
+
+<!-- REQUEST FORM MODAL -->
+<div id="request-modal" class="fixed inset-0 hidden items-center justify-center z-[9999] p-3 sm:p-4"
+    style="background: rgba(220,235,255,0.50); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
+    <div class="modal max-w-3xl w-full rounded-3xl overflow-hidden max-h-[95vh] overflow-y-auto"
+        style="background: rgba(255,255,255,0.78); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); border: 1px solid rgba(255,255,255,0.75); box-shadow: 0 8px 40px rgba(44,123,229,0.14);">
+        <!-- FORM HEADER -->
+        <div
+            class="px-6 sm:px-8 py-5 sm:py-6 border-b border-white/60 flex items-center justify-between bg-white/80 sticky top-0 z-10">
+            <div class="flex items-center gap-x-3 sm:gap-x-4">
+                <div id="modal-icon" class="text-3xl sm:text-4xl"></div>
+                <div>
+                    <h3 id="modal-title" class="text-xl sm:text-2xl font-bold"></h3>
+                    <p class="text-xs text-[#00B894]">Barangay Certificate Request</p>
+                </div>
+            </div>
+            <button onclick="closeRequestModal()"
+                class="w-10 h-10 flex items-center justify-center text-2xl hover:bg-black/5 rounded-2xl transition-colors">✕</button>
+        </div>
+
+        <form id="certificate-form" onsubmit="submitRequest(event)" class="p-6 sm:p-8 space-y-8 sm:space-y-10">
+
+            <!-- CSRF token (Django) -->
+            {% csrf_token %}
+
+            <!-- DYNAMIC FIELDS — rendered by JS per certificate type -->
+            <div id="dynamic-fields"></div>
+
+            <!-- PICKUP SCHEDULE — always shown -->
+            <div>
+                <h4 class="section-label">
+                    <span class="w-5 h-px bg-[#2C7BE5] inline-block"></span>
+                    PREFERRED PICKUP SCHEDULE
+                </h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="glass p-5 sm:p-6 rounded-3xl">
+                        <p class="font-medium mb-3 text-sm flex items-center gap-x-2">
+                            <i class="fa-regular fa-sun text-amber-400"></i> Morning
+                        </p>
+                        <div class="space-y-2">
+                            <label
+                                class="time-option flex items-center gap-x-3 cursor-pointer p-2 rounded-xl hover:bg-white/60 transition-colors">
+                                <input type="radio" name="time" value="7:30 AM" class="accent-[#00B894]"> 7:30 AM
+                            </label>
+                            <label
+                                class="time-option flex items-center gap-x-3 cursor-pointer p-2 rounded-xl hover:bg-white/60 transition-colors">
+                                <input type="radio" name="time" value="9:00 AM" class="accent-[#00B894]"> 9:00 AM
+                            </label>
+                            <label
+                                class="time-option flex items-center gap-x-3 cursor-pointer p-2 rounded-xl hover:bg-white/60 transition-colors">
+                                <input type="radio" name="time" value="10:30 AM" class="accent-[#00B894]"> 10:30 AM
+                            </label>
+                        </div>
+                    </div>
+                    <div class="glass p-5 sm:p-6 rounded-3xl">
+                        <p class="font-medium mb-3 text-sm flex items-center gap-x-2">
+                            <i class="fa-regular fa-moon text-[#2C7BE5]"></i> Afternoon
+                        </p>
+                        <div class="space-y-2">
+                            <label
+                                class="time-option flex items-center gap-x-3 cursor-pointer p-2 rounded-xl hover:bg-white/60 transition-colors">
+                                <input type="radio" name="time" value="1:30 PM" class="accent-[#00B894]"> 1:30 PM
+                            </label>
+                            <label
+                                class="time-option flex items-center gap-x-3 cursor-pointer p-2 rounded-xl hover:bg-white/60 transition-colors">
+                                <input type="radio" name="time" value="3:00 PM" class="accent-[#00B894]"> 3:00 PM
+                            </label>
+                            <label
+                                class="time-option flex items-center gap-x-3 cursor-pointer p-2 rounded-xl hover:bg-white/60 transition-colors">
+                                <input type="radio" name="time" value="4:30 PM" class="accent-[#00B894]"> 4:30 PM
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit"
+                class="w-full py-6 sm:py-7 bg-gradient-to-r from-[#2C7BE5] to-[#00B894] text-white font-bold text-lg sm:text-xl rounded-3xl shadow-xl hover:opacity-90 transition-opacity">
+                <i class="fa-solid fa-paper-plane mr-2"></i>SUBMIT REQUEST • FREE
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div id="success-modal" class="fixed inset-0 hidden items-center justify-center z-[99999] p-4"
+    style="background: rgba(220,235,255,0.50); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
+    <div class="modal max-w-lg w-full rounded-3xl p-8 sm:p-10 text-center"
+        style="background: rgba(255,255,255,0.78); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); border: 1px solid rgba(255,255,255,0.75); box-shadow: 0 8px 40px rgba(44,123,229,0.14);">
+        <div
+            class="w-20 h-20 sm:w-24 sm:h-24 mx-auto bg-[#2C7BE5] text-white rounded-full flex items-center justify-center text-5xl sm:text-6xl mb-5 sm:mb-6">
+            🎉
+        </div>
+        <h3 class="text-2xl sm:text-3xl font-bold mb-2">Request Submitted!</h3>
+        <p class="text-[#333333]/70 mb-6 sm:mb-8">Your request has been received and is now under review.</p>
+
+        <div class="glass inline-block px-8 sm:px-10 py-5 sm:py-6 rounded-2xl mb-6 sm:mb-10 w-full">
+            <p class="text-xs uppercase tracking-widest text-[#333333]/50 mb-1">Tracking Number</p>
+            <p id="success-tracking" class="font-mono text-3xl sm:text-4xl font-bold text-[#2C7BE5]"></p>
+            <p class="text-xs text-[#333333]/50 mt-2">Save this number to track your request</p>
+        </div>
+
+        <div id="success-appointment-info" class="glass p-4 rounded-2xl mb-6 text-sm text-left hidden">
+            <p class="font-medium text-[#333333]/70 mb-1">Pickup Appointment</p>
+            <p id="success-appointment-text" class="font-semibold text-[#2C7BE5]"></p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3">
+            <button onclick="copyTracking()"
+                class="flex-1 px-6 py-3 bg-white border border-[#2C7BE5]/30 text-[#2C7BE5] rounded-3xl font-semibold text-sm flex items-center justify-center gap-x-2 hover:bg-[#F2F9FF] transition-colors">
+                <i class="fa-solid fa-copy"></i> Copy Number
+            </button>
+            <button onclick="closeSuccessModal()"
+                class="flex-1 px-6 py-4 bg-[#2C7BE5] text-white rounded-3xl font-semibold hover:bg-black/5 transition-colors">
+                Done • Back to Home
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- TRACK MODAL -->
+<div id="track-modal" class="fixed inset-0 hidden items-center justify-center z-[9999] p-4"
+    style="background: rgba(220,235,255,0.50); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
+    <div class="modal w-full max-w-md rounded-3xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto"
+        style="background: rgba(255,255,255,0.78); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); border: 1px solid rgba(255,255,255,0.75); box-shadow: 0 8px 40px rgba(44,123,229,0.14);">
+        <div class="flex items-center justify-between mb-6 sm:mb-8">
+            <h3 class="text-xl sm:text-2xl font-bold">Track Your Request</h3>
+            <button onclick="closeTrackModal()"
+                class="w-9 h-9 flex items-center justify-center hover:bg-black/5 rounded-xl text-[#333333]/50 transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="flex gap-x-3">
+            <input id="track-input" type="text" placeholder="EC-2026-XXXXX"
+                class="flex-1 px-5 sm:px-6 py-4 sm:py-5 rounded-3xl border border-[#2C7BE5]/30 text-base sm:text-lg font-mono focus:border-[#2C7BE5] outline-none"
+                onkeydown="if(event.key==='Enter') trackRequest()">
+            <button onclick="trackRequest()"
+                class="px-6 sm:px-10 bg-[#2C7BE5] text-white rounded-3xl font-semibold hover:bg-[#1e5ab3] transition-colors">
+                <i class="fa-solid fa-search sm:hidden"></i>
+                <span class="hidden sm:inline">Search</span>
+            </button>
+        </div>
+
+        <div id="track-result" class="mt-6 sm:mt-8 hidden">
+            <!-- Filled by JS -->
+        </div>
+    </div>
+</div>
+
+<!-- CERTIFICATE PREVIEW MODAL -->
+<div id="cert-preview-modal" class="fixed inset-0 hidden items-center justify-center z-[99999] p-3 sm:p-4"
+    style="background: rgba(220,235,255,0.50); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
+    <div class="max-w-[850px] w-full max-h-[95vh] overflow-y-auto">
+        <div class="flex justify-end mb-3 sm:mb-4">
+            <button onclick="closeCertModal()"
+                class="px-5 sm:px-6 py-2.5 sm:py-3 bg-white/90 hover:bg-black/5 text-[#333333] rounded-3xl flex items-center gap-x-2 text-sm">
+                <i class="fa-solid fa-xmark"></i> Close
+            </button>
+        </div>
+
+        <div id="certificate-content" class="certificate mx-auto p-8 sm:p-12 relative bg-white">
+            <!-- Official Header -->
+            <div class="flex flex-col sm:flex-row justify-between items-start mb-8 sm:mb-10 gap-4">
+                <div>
+                    <div class="flex items-center gap-x-3 sm:gap-x-4">
+                        <img src="{% static 'Icon.png' %}" alt="EasyCert Logo"
+                            class="w-12 h-12 sm:w-14 sm:h-14 object-cover rounded-full" />
+                        <div>
+                            <p id="cert-barangay-name"
+                                class="text-[#2C7BE5] text-xl sm:text-2xl font-bold tracking-widest uppercase">BARANGAY
+                                POBLACION</p>
+                            <p id="cert-barangay-location" class="text-xs text-[#333333] uppercase">CEBU CITY •
+                                PHILIPPINES</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-left sm:text-right">
+                    <div class="text-xs font-medium uppercase tracking-widest text-[#333333]/60">OFFICIAL
+                        CERTIFICATE</div>
+                    <div id="cert-type" class="text-2xl sm:text-3xl font-bold text-[#2C7BE5]"></div>
+                </div>
+            </div>
+
+            <div class="border border-dashed border-[#2C7BE5]/50 p-6 sm:p-8 mb-8 sm:mb-10">
+                <div
+                    class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 sm:gap-x-12 gap-y-4 sm:gap-y-6 text-sm sm:text-base">
+                    <div><span class="font-medium text-[#333333]/60">Name:</span> <span id="cert-name"
+                            class="font-semibold ml-1"></span></div>
+                    <div><span class="font-medium text-[#333333]/60">Date Issued:</span> <span id="cert-date"
+                            class="font-semibold ml-1"></span></div>
+                    <div><span class="font-medium text-[#333333]/60">Address:</span> <span id="cert-address"
+                            class="font-semibold ml-1"></span></div>
+                    <div><span class="font-medium text-[#333333]/60">Purpose:</span> <span id="cert-purpose"
+                            class="font-semibold ml-1"></span></div>
+                    <div><span class="font-medium text-[#333333]/60">Precinct:</span> <span id="cert-precinct"
+                            class="font-semibold ml-1"></span></div>
+                    <div><span class="font-medium text-[#333333]/60">Residency:</span> <span id="cert-residency"
+                            class="font-semibold ml-1"></span></div>
+                </div>
+            </div>
+
+            <!-- Certifying text -->
+            <div class="text-center text-sm text-[#333333]/70 mb-8 px-4">
+                <p>This is to certify that the above-named person is a <strong>bona fide</strong> resident of this
+                    barangay and is known to be of good moral character and standing in the community.</p>
+            </div>
+
+            <!-- QR -->
+            <div class="flex justify-center mb-8">
+                <div class="p-3 sm:p-4 bg-white border-4 border-[#2C7BE5] rounded-2xl">
+                    <img id="cert-qr" src="" alt="QR Code" class="w-28 h-28 sm:w-40 sm:h-40">
+                </div>
+            </div>
+
+            <div class="text-center text-xs text-[#333333]/50 mb-4">
+                Verified by EasyCert System • <span id="cert-tracking-display"></span>
+            </div>
+
+            <!-- Signature -->
+            <div class="flex justify-end">
+                <div class="text-center">
+                    <div class="border-t border-[#2C7BE5] w-40 sm:w-48 pt-2">
+                        <p id="cert-captain-name" class="font-bold text-sm">Hon. Roberto L. Garcia</p>
+                        <p class="text-xs text-[#333333]/60">Barangay Captain</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mt-5 sm:mt-8">
+            <button onclick="printCertificate()"
+                class="flex-1 max-w-xs py-4 sm:py-5 bg-[#00B894] text-white rounded-3xl font-semibold flex items-center justify-center gap-x-3 mx-auto sm:mx-0 hover:bg-[#00a382] transition-colors">
+                <i class="fa-solid fa-print"></i> PRINT
+            </button>
+            <button onclick="downloadPDF()"
+                class="flex-1 max-w-xs py-4 sm:py-5 bg-[#2C7BE5] text-white rounded-3xl font-semibold flex items-center justify-center gap-x-3 mx-auto sm:mx-0 hover:bg-[#1e5ab3] transition-colors">
+                <i class="fa-solid fa-download"></i> DOWNLOAD PDF
+            </button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // ── Override submitRequest to POST to Django backend ──
+    // This replaces the localStorage-based submit with an AJAX call.
+    (function () {
+        const originalSubmit = window.submitRequest;
+
+        window.submitRequest = function (e) {
+            e.preventDefault();
+
+            // Purpose validation
+            const purposeEl = document.getElementById("purpose");
+            if (purposeEl && !purposeEl.value) {
+                showToast("Please select a purpose for your request.", "Missing Field", "error");
+                return;
+            }
+
+            // Appointment validation
+            const timeEl = document.querySelector('input[name="time"]:checked');
+            if (!timeEl) {
+                showToast("Please select a pickup schedule.", "Missing Field", "error");
+                return;
+            }
+
+            const { displayName, fields, purpose, sitio, address, scholarshipData } = collectFormData();
+
+            // Build payload for Django
+            const payload = {
+                certificate_type: currentCertificateType,
+                first_name: fields["first-name"] || "",
+                last_name: fields["last-name"] || "",
+                middle_name: fields["middle-name"] || "",
+                sitio: sitio || address || "",
+                purpose: purpose || "",
+                appointment_time: timeEl.value,
+                form_data: {
+                    ...fields,
+                    scholarshipData: scholarshipData,
+                },
+            };
+
+            // Get CSRF token from Django template
+            const csrfTokenEl = document.querySelector('[name=csrfmiddlewaretoken]');
+            const csrfVal = csrfTokenEl ? csrfTokenEl.value : "";
+
+            fetch("{% url 'submit_request' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrfVal,
+                },
+                body: JSON.stringify(payload),
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.ok) {
+                        closeRequestModal();
+                        showSuccessModal(data.tracking_number, data.appointment_time);
+                        showToast("Certificate request submitted to database.", "Saved!", "success");
+                    } else {
+                        showToast(data.error || "Something went wrong.", "Error", "error");
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    showToast("Network error. Please try again.", "Error", "error");
+                });
+        };
+    })();
+
+    // ── Override trackRequest to query Django backend ──
+    window._lastTrackedData = null;
+    window.viewTrackedCertificate = function () {
+        if (!window._lastTrackedData) return;
+        const d = window._lastTrackedData;
+        showCertificatePreview({
+            name: d.name,
+            type: d.type,
+            tracking: d.tracking,
+            purpose: d.purpose,
+            sitio: '',
+            barangay_name: d.barangay_name || '',
+            barangay_location: d.barangay_location || '',
+            captain_name: d.captain_name || '',
+        });
+        closeTrackModal();
+    };
+    (function () {
+        window.trackRequest = function () {
+            const input = document.getElementById("track-input").value.trim().toUpperCase();
+            const resultDiv = document.getElementById("track-result");
+            resultDiv.innerHTML = "";
+
+            if (!input) return;
+
+            fetch("{% url 'track_request' %}?q=" + encodeURIComponent(input))
+                .then(res => res.json())
+                .then(data => {
+                    if (data.found) {
+                        window._lastTrackedData = data;
+                        const statusMap = {
+                            Approved: { html: '<span class="badge-approved">READY FOR PICKUP</span>', icon: '<i class="fa-solid fa-circle-check text-[#00B894] text-2xl"></i>' },
+                            Pending: { html: '<span class="badge-pending">UNDER REVIEW</span>', icon: '<i class="fa-solid fa-hourglass text-amber-500 text-2xl"></i>' },
+                            Rejected: { html: '<span class="badge-rejected">REJECTED</span>', icon: '<i class="fa-solid fa-circle-xmark text-red-500 text-2xl"></i>' },
+                        };
+                        const s = statusMap[data.status] || statusMap.Pending;
+                        resultDiv.innerHTML = `
+                        <div class="glass p-6 rounded-3xl slide-in">
+                            <div class="flex items-start justify-between mb-5">
+                                <div>
+                                    <div class="text-xs font-medium text-[#333333]/50 uppercase tracking-widest">TRACKING NO.</div>
+                                    <div class="font-mono text-2xl sm:text-3xl text-[#2C7BE5] font-bold">${data.tracking}</div>
+                                </div>
+                                <div class="flex flex-col items-end gap-y-2">${s.icon}${s.html}</div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm mb-4">
+                                <div class="font-medium text-[#333333]/50">Name</div>       <div class="font-semibold">${data.name}</div>
+                                <div class="font-medium text-[#333333]/50">Certificate</div><div>${data.type}</div>
+                                <div class="font-medium text-[#333333]/50">Purpose</div>    <div>${data.purpose}</div>
+                                <div class="font-medium text-[#333333]/50">Appointment</div><div class="font-semibold">${data.appointment}</div>
+                                <div class="font-medium text-[#333333]/50">Date Filed</div> <div>${data.date}</div>
+                            </div>
+                            ${data.status === 'Approved' ? `
+                            <div class="mt-4 pt-4 border-t border-white/50">
+                                <button onclick="viewTrackedCertificate()"
+                                    class="w-full py-3 bg-gradient-to-r from-[#2C7BE5] to-[#00B894] text-white font-semibold text-sm rounded-2xl flex items-center justify-center gap-x-2 hover:opacity-90 transition-opacity">
+                                    <i class="fa-solid fa-file-certificate"></i> View Certificate
+                                </button>
+                            </div>` : ''}
+                        </div>`;
+                    } else {
+                        resultDiv.innerHTML = `
+                        <div class="text-center py-10 text-[#333333]/40 slide-in">
+                            <i class="fa-solid fa-magnifying-glass text-4xl mb-4 block"></i>
+                            <p class="font-medium">No request found with that tracking number.</p>
+                            <p class="text-xs mt-1">Format: EC-YYYY-XXXXX</p>
+                        </div>`;
+                    }
+                    resultDiv.classList.remove("hidden");
+                })
+                .catch(err => {
+                    console.error(err);
+                    showToast("Network error while tracking.", "Error", "error");
+                });
+        };
+    })();
+</script>
+{% endblock %}

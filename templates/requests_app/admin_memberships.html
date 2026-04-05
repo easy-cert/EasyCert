@@ -23,21 +23,23 @@
 
         <div class="flex items-center gap-x-1 bg-white/80 rounded-3xl p-1 shadow-inner order-3 sm:order-2">
             <a href="{% url 'admin_dashboard' %}"
-                class="px-4 sm:px-6 py-2 sm:py-3 rounded-3xl font-semibold transition-all flex items-center gap-x-2 text-sm sm:text-base text-[#333333]/60 hover:text-[#2C7BE5] hover:bg-[#2C7BE5]/5">
+                class="relative px-4 sm:px-6 py-2 sm:py-3 rounded-3xl font-semibold transition-all flex items-center gap-x-2 text-sm sm:text-base text-[#333333]/60 hover:text-[#2C7BE5] hover:bg-[#2C7BE5]/5">
                 <i class="fa-solid fa-file-signature text-[#2C7BE5]"></i>
                 <span class="hidden sm:inline">Certificates</span>
+                <span id="badge-certs" class="absolute -top-1.5 -right-1.5 sm:-top-1 sm:-right-1 px-1.5 min-w-[1.25rem] h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow border-2 border-white transform scale-0 transition-transform duration-300 origin-center hidden">0</span>
             </a>
             <button id="residents-tab-btn" onclick="switchManagementTab('residents')"
-                class="px-4 sm:px-6 py-2 sm:py-3 rounded-3xl font-semibold transition-all flex items-center gap-x-2 text-sm sm:text-base active-tab">
+                class="relative px-4 sm:px-6 py-2 sm:py-3 rounded-3xl font-semibold transition-all flex items-center gap-x-2 text-sm sm:text-base active-tab">
                 <i class="fa-solid fa-users"></i>
                 <span class="hidden sm:inline">Residents</span>
             </button>
             <button id="memberships-tab-btn" onclick="switchManagementTab('memberships')"
-                class="px-4 sm:px-6 py-2 sm:py-3 rounded-3xl font-semibold transition-all flex items-center gap-x-2 text-sm sm:text-base text-[#333333]/60 hover:text-[#2C7BE5] hover:bg-[#2C7BE5]/5">
+                class="relative px-4 sm:px-6 py-2 sm:py-3 rounded-3xl font-semibold transition-all flex items-center gap-x-2 text-sm sm:text-base text-[#333333]/60 hover:text-[#2C7BE5] hover:bg-[#2C7BE5]/5">
                 <i class="fa-solid fa-user-clock"></i>
                 <span class="hidden sm:inline">Applications</span>
                 <span id="pending-badge"
-                    class="hidden w-5 h-5 bg-amber-500 text-white rounded-full flex items-center justify-center text-[10px]">0</span>
+                    class="hidden w-5 h-5 bg-amber-500 text-white rounded-full items-center justify-center text-[10px] ml-1">0</span>
+                <span id="badge-members" class="absolute -top-1.5 -right-1.5 sm:-top-1 sm:-right-1 px-1.5 min-w-[1.25rem] h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow border-2 border-white transform scale-0 transition-transform duration-300 origin-center hidden">0</span>
             </button>
         </div>
 
@@ -49,6 +51,7 @@
                 <i class="fa-solid fa-shield-halved"></i>
             </a>
             {% endif %}
+            {% include "accounts/partials/notification_bell.html" %}
             <a href="{% url 'logout' %}"
                 class="px-5 py-3 bg-red-50 hover:bg-red-100 text-red-600 rounded-2xl flex items-center gap-x-2 text-sm font-medium border border-red-200 transition-all">
                 <i class="fa-solid fa-right-from-bracket"></i>
@@ -204,7 +207,7 @@
                     <label
                         class="block text-[10px] font-semibold text-[#333333]/40 uppercase tracking-widest ml-2 mb-2">Contact
                         Number</label>
-                    <input type="text" id="res-contact" class="form-input-box w-full" placeholder="09XX XXX XXXX">
+                    <input type="text" id="res-contact" class="form-input-box w-full" placeholder="e.g. 0912-345-6789">
                 </div>
 
                 <div class="md:col-span-2">

@@ -40,10 +40,10 @@
                         {% elif user.memberships.exists %}
                             {{ user.memberships.first.barangay.barangay_name }}, {{ user.memberships.first.barangay.location }}
                         {% else %}
-                            EasyCert Central, Online Portal
+                            EasyCert, Online Portal
                         {% endif %}
                     {% else %}
-                        EasyCert Central, Online Portal
+                        EasyCert, Online Portal
                     {% endif %}
                 </p>
             </div>
@@ -58,13 +58,68 @@
     <!-- Global Dynamic Context -->
     <script>
         {% with membership=user.memberships.first %}
-        window.BARANGAY_NAME = "{% if user.is_authenticated %}{% if user.barangay %}{{ user.barangay.barangay_name|escapejs }}{% elif membership %}{{ membership.barangay.barangay_name|escapejs }}{% else %}EasyCert Central{% endif %}{% else %}EasyCert Central{% endif %}";
+        window.BARANGAY_NAME = "{% if user.is_authenticated %}{% if user.barangay %}{{ user.barangay.barangay_name|escapejs }}{% elif membership %}{{ membership.barangay.barangay_name|escapejs }}{% else %}EasyCert{% endif %}{% else %}EasyCert{% endif %}";
         window.BARANGAY_LOCATION = "{% if user.is_authenticated %}{% if user.barangay %}{{ user.barangay.location|escapejs }}{% elif membership %}{{ membership.barangay.location|escapejs }}{% else %}Online Portal{% endif %}{% else %}Online Portal{% endif %}";
         {% endwith %}
     </script>
 
     <!-- Project scripts -->
     <script src="{% static 'script.js' %}?v={% now 'U' %}"></script>
+
+    {% if user.is_authenticated and user.is_barangay_admin %}
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        function checkNotifications() {
+            fetch("{% url 'get_notification_count' %}")
+                .then(r => r.json())
+                .then(data => {
+                    updateBadge("badge-certs", data.certs_count);
+                    updateBadge("badge-members", data.members_count);
+                }).catch(e => console.error("Poll err:", e));
+        }
+
+        function updateBadge(id, count) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (count > 0) {
+                el.textContent = count > 99 ? '99+' : count;
+                el.classList.remove("hidden", "scale-0");
+                el.classList.add("scale-100");
+            } else {
+                el.classList.remove("scale-100");
+                el.classList.add("scale-0");
+                setTimeout(() => el.classList.add("hidden"), 300);
+            }
+        }
+
+        function markRead(type) {
+            const csrfMatch = document.cookie.match(/csrftoken=([^;]+)/);
+            fetch("{% url 'mark_notifications_read' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrfMatch ? csrfMatch[1] : "",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({type: type})
+            }).then(() => checkNotifications());
+        }
+
+        // Poll every 10 seconds
+        setInterval(checkNotifications, 10000);
+        checkNotifications(); // Initial fetch
+        
+        // Auto-mark as read based on current view/clicks
+        if (window.location.pathname.includes("admin/dashboard")) {
+            markRead("request");
+        } else if (window.location.pathname.includes("admin/memberships")) {
+            // It could be 'applications' tab open if we intercepted it
+            // Let's bind to the button clicks directly for dynamic SPA-like tabs
+            const btnApp = document.getElementById("memberships-tab-btn");
+            if (btnApp) btnApp.addEventListener("click", () => markRead("membership"));
+        }
+    });
+    </script>
+    {% endif %}
 
     {% block extra_scripts %}{% endblock %}
 

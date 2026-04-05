@@ -145,3 +145,20 @@ class AuditLog(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.action} at {self.timestamp}"
+
+
+class LoginLog(models.Model):
+    """
+    Tracks admin login activity (Success or Failed) to satisfy security requirements.
+    """
+    email = models.EmailField(null=True, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    status = models.CharField(max_length=20, default="Success")
+
+    class Meta:
+        ordering = ["-timestamp"]
+        db_table = "login_logs"
+
+    def __str__(self):
+        return f"{self.email} - {self.status} at {self.timestamp}"

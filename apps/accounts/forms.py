@@ -55,7 +55,7 @@ class RegisterForm(forms.ModelForm):
     )
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={
-            "placeholder": "Min. 6 characters",
+            "placeholder": "Min. 8 characters",
             "class": "form-input w-full",
         }),
         min_length=6,
@@ -72,11 +72,11 @@ class RegisterForm(forms.ModelForm):
         fields = ["email", "contact_number"]
         widgets = {
             "email": forms.EmailInput(attrs={
-                "placeholder": "juan@example.com",
+                "placeholder": "juandelacruz@gmail.com",
                 "class": "form-input w-full",
             }),
             "contact_number": forms.TextInput(attrs={
-                "placeholder": "09XX XXX XXXX",
+                "placeholder": "e.g. 0912-345-6789",
                 "class": "form-input w-full",
             }),
         }
@@ -109,14 +109,14 @@ class LoginForm(forms.Form):
     """Simple email + password login form."""
     email = forms.EmailField(
         widget=forms.EmailInput(attrs={
-            "placeholder": "you@example.com",
+            "placeholder": "juandelacruz@gmail.com",
             "class": "form-input w-full",
             "autofocus": True,
         }),
     )
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={
-            "placeholder": "Password / 6-digit PIN",
+            "placeholder": "Password",
             "class": "form-input w-full",
         }),
     )
@@ -173,11 +173,11 @@ class ProfileUpdateForm(forms.ModelForm):
             }),
             "email": forms.EmailInput(attrs={
                 "class": "form-input w-full",
-                "placeholder": "juan@example.com",
+                "placeholder": "juandelacruz@gmail.com",
             }),
             "contact_number": forms.TextInput(attrs={
                 "class": "form-input w-full",
-                "placeholder": "09XX XXX XXXX",
+                "placeholder": "e.g. 0912-345-6789",
             }),
             "address": forms.TextInput(attrs={
                 "class": "form-input w-full",
@@ -203,10 +203,10 @@ class PasswordChangeForm(forms.Form):
         }),
     )
     new_password = forms.CharField(
-        min_length=6,
+        min_length=8,
         widget=forms.PasswordInput(attrs={
             "class": "form-input w-full",
-            "placeholder": "Min. 6 characters",
+            "placeholder": "Min. 8 characters",
         }),
     )
     confirm_new_password = forms.CharField(

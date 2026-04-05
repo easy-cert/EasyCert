@@ -169,6 +169,20 @@ def login_view(request):
                     user_candidate.failed_login_attempts += 1
                     user_candidate.last_failed_login = timezone.now()
                     user_candidate.save(update_fields=['failed_login_attempts', 'last_failed_login'])
+                    
+                    if user_candidate.role == user_candidate.ADMIN:
+                        from .models import LoginLog, Notification
+                        import logging
+                        LoginLog.objects.create(
+                            email=email,
+                            ip_address=request.META.get('REMOTE_ADDR'),
+                            status="Failed"
+                        )
+                        Notification.objects.create(
+                            user=user_candidate,
+                            message=f"Login attempt detected from {request.META.get('REMOTE_ADDR')} (Failed)",
+                            notification_type="security"
+                        )
                 
                 messages.error(request, "Invalid email or password.")
     else:
@@ -214,6 +228,19 @@ def verify_otp_view(request):
                     action="login_verification_success",
                     ip_address=request.META.get('REMOTE_ADDR')
                 )
+                
+                if user.role == user.ADMIN:
+                    from .models import LoginLog
+                    LoginLog.objects.create(
+                        email=user.email,
+                        ip_address=request.META.get('REMOTE_ADDR'),
+                        status="Success"
+                    )
+                    Notification.objects.create(
+                        user=user,
+                        message=f"Login attempt detected from {request.META.get('REMOTE_ADDR')} (Success)",
+                        notification_type="security"
+                    )
                         
                 # 4. Create success notification
                 Notification.objects.create(
@@ -284,18 +311,59 @@ def clear_notifications_api(request):
 @require_POST
 def mark_notifications_read_api(request):
     """
-    AJAX endpoint to mark all unread notifications as read.
+    AJAX endpoint to mark unread notifications as read.
     """
-    request.user.notifications.filter(is_read=False).update(is_read=True)
-    return JsonResponse({"status": "success", "message": "All notifications marked as read."})
+    import json
+    try:
+        body = json.loads(request.body)
+        notif_type = body.get("type")
+    except:
+        notif_type = request.POST.get("type")
+        
+    qs = request.user.notifications.filter(is_read=False)
+    if notif_type:
+        qs = qs.filter(notification_type=notif_type)
+        
+    qs.update(is_read=True)
+    return JsonResponse({"status": "success", "message": "Notifications marked as read."})
 
 @login_required
 def get_notification_count_api(request):
     """
     Simple AJAX endpoint to check for current unread count.
+    Provides detailed breakdown for Barangay Admins.
     """
-    count = request.user.notifications.filter(is_read=False).count()
-    return JsonResponse({"unread_count": count})
+    qs = request.user.notifications.filter(is_read=False)
+    data = {"unread_count": qs.count()}
+    
+    if request.user.is_barangay_admin:
+        data["certs_count"] = qs.filter(notification_type="request").count()
+        data["members_count"] = qs.filter(notification_type="membership").count()
+        
+    return JsonResponse(data)
+
+
+@login_required
+def login_logs_api(request):
+    """
+    AJAX endpoint — returns login history for the admin dashboard.
+    Barangay admins see logs for their barangay admins only.
+    Superadmins see all logs.
+    """
+    from .models import LoginLog
+    if not (request.user.is_barangay_admin or request.user.is_super_admin or request.user.is_staff):
+        return JsonResponse({"error": "Forbidden"}, status=403)
+
+    qs = LoginLog.objects.all()[:50]
+    logs = []
+    for log in qs:
+        logs.append({
+            "email": log.email or "—",
+            "timestamp": log.timestamp.strftime("%Y-%m-%d %H:%M:%S") if log.timestamp else "—",
+            "ip_address": log.ip_address or "—",
+            "status": log.status,
+        })
+    return JsonResponse({"logs": logs})
 
 
 def _redirect_after_login(user):
@@ -360,6 +428,16 @@ def select_barangay_view(request):
                 defaults={"status": BarangayMembership.PENDING},
             )
             if created:
+                # Notify Admins of this barangay
+                from .models import User, Notification
+                admins = User.objects.filter(role=User.ADMIN, barangay=barangay)
+                for admin in admins:
+                    Notification.objects.create(
+                        user=admin,
+                        message=f"New membership application from {request.user.full_name}",
+                        notification_type="membership"
+                    )
+                
                 messages.success(
                     request,
                     f"Your request to join {barangay.barangay_name} has been submitted!"

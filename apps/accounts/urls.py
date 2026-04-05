@@ -18,6 +18,7 @@ urlpatterns = [
     path("api/notifications/clear/", views.clear_notifications_api, name="clear_notifications"),
     path("api/notifications/mark-read/", views.mark_notifications_read_api, name="mark_notifications_read"),
     path("api/notifications/count/", views.get_notification_count_api, name="get_notification_count"),
+    path("api/login-logs/", views.login_logs_api, name="login_logs_api"),
 
     # Super Admin: Barangay Admin Management
     path("super-admin/", views.superadmin_dashboard_view, name="superadmin_dashboard"),

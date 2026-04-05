@@ -17,6 +17,19 @@ class Barangay(models.Model):
         verbose_name_plural = "Barangays"
         ordering = ["barangay_name"]
 
+    def clean(self):
+        super().clean()
+        if self.barangay_name:
+            name = self.barangay_name.strip()
+            # Normalize to avoid "Barangay " vs non-prefix duplication
+            if name.lower().startswith("barangay "):
+                name = name[9:].strip()
+            self.barangay_name = name
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.barangay_name
 

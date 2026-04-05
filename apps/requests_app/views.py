@@ -78,6 +78,17 @@ def submit_request_view(request):
     try:
         cert.full_clean()
         cert.save()
+        
+        # Notify Admins of this barangay
+        if cert.barangay:
+            from apps.accounts.models import User, Notification
+            admins = User.objects.filter(role=User.ADMIN, barangay=cert.barangay)
+            for admin in admins:
+                Notification.objects.create(
+                    user=admin,
+                    message=f"New certificate request: {cert.certificate_type} from {cert.display_name}",
+                    notification_type="request"
+                )
     except Exception as e:
         return JsonResponse({"ok": False, "error": str(e)}, status=400)
 
@@ -140,11 +151,16 @@ def admin_dashboard_view(request):
         "total": all_requests.count(),
     }
 
-    return render(request, "requests_app/admin_dashboard.html", {
+    context = {
         "stats": stats,
         "requests": all_requests[:100],  # latest 100
         "certificate_types": CertificateRequest.CERTIFICATE_TYPES,
-    })
+    }
+    if request.user.is_authenticated:
+        context["my_notifications"] = request.user.notifications.all()[:20]
+        context["unread_notifications_count"] = request.user.notifications.filter(is_read=False).count()
+
+    return render(request, "requests_app/admin_dashboard.html", context)
 
 
 @admin_only_api
@@ -264,7 +280,14 @@ def admin_update_status(request, pk):
 def admin_memberships_view(request):
     """Admin page to manage barangay resident memberships."""
 
-    return render(request, "requests_app/admin_memberships.html")
+    context = {
+        "active_tab": "applications",
+    }
+    if request.user.is_authenticated:
+        context["my_notifications"] = request.user.notifications.all()[:20]
+        context["unread_notifications_count"] = request.user.notifications.filter(is_read=False).count()
+
+    return render(request, "requests_app/admin_memberships.html", context)
 
 
 @admin_only_api

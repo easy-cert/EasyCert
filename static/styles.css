@@ -999,6 +999,79 @@
     background-color: rgba(52, 58, 64, 0.6) !important;
 }
 
+/* ── Admin Dashboard: Filters & Search (dark mode) ── */
+:root.dark #status-filter,
+:root.dark #type-filter,
+:root.dark #search-input {
+    background: #343A40 !important;
+    border-color: rgba(44, 123, 229, 0.25) !important;
+    color: #DEE2E6 !important;
+}
+
+:root.dark #status-filter option,
+:root.dark #type-filter option {
+    background-color: #2b3035;
+    color: #DEE2E6;
+}
+
+:root.dark #search-input::placeholder {
+    color: #6C757D !important;
+}
+
+/* ── Admin Dashboard: Table rows in dark mode ── */
+:root.dark #requests-tbody tr,
+:root.dark #login-logs-tbody tr {
+    border-bottom-color: rgba(173, 181, 189, 0.08);
+}
+
+:root.dark #requests-tbody tr:hover,
+:root.dark #login-logs-tbody tr:hover {
+    background-color: rgba(73, 80, 87, 0.4) !important;
+}
+
+:root.dark #login-logs-tbody td {
+    color: #DEE2E6;
+}
+
+/* ── Admin Nav Tab Pill (dark mode) ── */
+:root.dark .active-tab {
+    background: #2C7BE5 !important;
+    color: #fff !important;
+}
+
+/* ── Review modal dark mode ── */
+:root.dark #review-modal > div {
+    background: rgba(43, 48, 53, 0.97) !important;
+    border-color: rgba(173, 181, 189, 0.12) !important;
+}
+
+:root.dark #review-modal {
+    background: rgba(15, 17, 20, 0.65) !important;
+}
+
+/* ── Notification dropdown dark mode ── */
+:root.dark #notif-dropdown {
+    background: #2b3035 !important;
+    border-color: rgba(173, 181, 189, 0.12) !important;
+}
+
+:root.dark .notif-item:hover {
+    background: rgba(73, 80, 87, 0.4) !important;
+}
+
+/* ── Logout button dark mode ── */
+:root.dark .bg-red-50 {
+    background-color: rgba(239, 68, 68, 0.12) !important;
+}
+
+:root.dark .hover\:bg-red-100:hover {
+    background-color: rgba(239, 68, 68, 0.2) !important;
+}
+
+:root.dark .border-red-200 {
+    border-color: rgba(239, 68, 68, 0.25) !important;
+}
+
 /* ===================== HERO ANIMATED ORBS ===================== */
 .hero-orb {
     position: absolute;

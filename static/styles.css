@@ -3,12 +3,44 @@
 :root {
     --primary: #2C7BE5;
     --secondary: #00B894;
-    --bg: #F2F9FF;
-    --text: #333333;
-    --glass-bg: rgba(255, 255, 255, 0.75);
-    --glass-border: rgba(255, 255, 255, 0.6);
-    --shadow-primary: rgba(44, 123, 229, 0.15);
+    --bg-body: #F2F9FF;
+    --bg-card: #FFFFFF;
+    --bg-glass: rgba(255, 255, 255, 0.75);
+    --bg-input: #FFFFFF;
+    --bg-table-header: rgba(255, 255, 255, 0.6);
+    --bg-table-hover: rgba(255, 255, 255, 0.5);
+    --bg-nav: rgba(255, 255, 255, 0.82);
+    --text-main: #333333;
+    --text-muted: rgba(51, 51, 51, 0.6);
+    --text-heading: #333333;
+    --border-subtle: rgba(255, 255, 255, 0.6);
+    --border-primary: rgba(44, 123, 229, 0.15);
+    --shadow-main: rgba(44, 123, 229, 0.12);
+    --modal-overlay: rgba(220, 235, 255, 0.5);
+    --card-elevated: #FFFFFF;
 }
+
+:root.dark {
+    --primary: #5294e2;
+    --secondary: #00cca3;
+    --bg-body: #0f1114;
+    --bg-card: #1e2227;
+    --bg-glass: rgba(30, 34, 39, 0.88);
+    --bg-input: #121417;
+    --bg-table-header: rgba(33, 37, 41, 0.95);
+    --bg-table-hover: rgba(73, 80, 87, 0.25);
+    --bg-nav: rgba(21, 24, 28, 0.94);
+    --text-main: #dee2e6;
+    --text-muted: #9ba1a8;
+    --text-heading: #f8f9fa;
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-primary: rgba(255, 255, 255, 0.12);
+    --shadow-main: rgba(0, 0, 0, 0.6);
+    --modal-overlay: rgba(0, 0, 0, 0.75);
+    --card-elevated: #2b3035;
+}
+
+
 
 /* ===================== BRAND TEXT ===================== */
 .easycert-easy {
@@ -26,10 +58,10 @@
 
 /* ===================== GLASS ===================== */
 .glass {
-    background: var(--glass-bg);
+    background: var(--bg-glass);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
+    border: 1px solid var(--border-subtle);
 }
 
 /* ===================== HERO ===================== */
@@ -70,7 +102,7 @@
 
 .card-hover:hover {
     transform: translateY(-6px);
-    box-shadow: 0 20px 40px -10px var(--shadow-primary);
+    box-shadow: 0 20px 40px -10px var(--shadow-main);
 }
 
 /* ===================== NAV LINKS ===================== */
@@ -528,272 +560,257 @@
 }
 
 /* ===================== DARK MODE ===================== */
-/*
-  Palette used:
-  --dm-bg:        #212529  (Carbon Black)   — page background
-  --dm-surface:   #2B3035  (between Carbon and Gunmetal) — main card surfaces
-  --dm-card:      #343A40  (Gunmetal)       — elevated cards / panels
-  --dm-elevated:  #3D4349  (slightly above Gunmetal) — modals / dropdowns
-  --dm-border:    rgba(173,181,189,0.12)   (Pale Slate tint) — subtle borders
-  --dm-muted:     #6C757D  (Slate Grey)    — secondary / muted text
-  --dm-text:      #DEE2E6  (Alabaster Grey) — primary body text
-  --dm-heading:   #F8F9FA  (Bright Snow)   — headings
-*/
 
-:root.dark {
-    --bg: #212529;
-    --text: #DEE2E6;
-    --glass-bg: rgba(52, 58, 64, 0.85);
-    --glass-border: rgba(173, 181, 189, 0.1);
-    --shadow-primary: rgba(44, 123, 229, 0.25);
-}
+/* Palette reference defined in :root.dark */
 
-/* Base */
 :root.dark body {
-    background-color: #212529;
-    color: #DEE2E6;
+    background-color: var(--bg-body);
+    color: var(--text-main);
 }
 
 /* Glass surfaces in dark mode */
 :root.dark .glass {
-    background: rgba(52, 58, 64, 0.85);
-    border-color: rgba(173, 181, 189, 0.1);
+    background: var(--bg-glass);
+    border-color: var(--border-subtle);
 }
 
 /* Hero */
 :root.dark .hero-bg {
-    background: linear-gradient(135deg, #212529 0%, #2b3035 100%);
+    background: linear-gradient(135deg, var(--bg-body) 0%, var(--bg-card) 100%);
 }
 
 :root.dark .hero-bg::before {
-    background: radial-gradient(circle, rgba(44, 123, 229, 0.12) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(82, 148, 226, 0.12) 0%, transparent 70%);
 }
 
 :root.dark .hero-bg::after {
-    background: radial-gradient(circle, rgba(0, 184, 148, 0.1) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(0, 204, 163, 0.1) 0%, transparent 70%);
 }
 
 /* Header */
 :root.dark header {
-    background: rgba(33, 37, 41, 0.92) !important;
-    border-bottom-color: rgba(173, 181, 189, 0.1) !important;
+    background: var(--bg-nav) !important;
+    border-bottom-color: var(--border-subtle) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 /* Tab switcher pill */
 :root.dark .flex.items-center.gap-x-1.bg-white\/80 {
-    background: rgba(52, 58, 64, 0.9) !important;
+    background: var(--bg-input) !important;
+    border: 1px solid var(--border-subtle);
 }
 
 /* Inactive tab text */
 :root.dark #resident-tab:not(.active-tab),
 :root.dark #admin-tab:not(.active-tab) {
-    color: #ADB5BD;
+    color: var(--text-muted);
 }
 
 /* Dark toggle button */
 :root.dark .dark-toggle-btn {
-    background: #343A40;
-    border-color: rgba(173, 181, 189, 0.2);
+    background: var(--bg-card);
+    border-color: var(--border-subtle);
     color: #f59e0b;
 }
 
 :root.dark .track-btn {
-    background: #343A40 !important;
-    border-color: rgba(44, 123, 229, 0.3) !important;
+    background: var(--bg-card) !important;
+    border-color: var(--border-primary) !important;
 }
 
 :root.dark .track-btn:hover {
-    background: #3d4349 !important;
+    background: var(--card-elevated) !important;
 }
 
-/* Text colours */
+/* Text colours - Centralized headings and body */
 :root.dark h1,
 :root.dark h2,
 :root.dark h3,
 :root.dark h4,
 :root.dark h5 {
-    color: #F8F9FA;
+    color: var(--text-heading) !important;
 }
 
 :root.dark p,
 :root.dark span,
-:root.dark label {
-    color: #DEE2E6;
+:root.dark label,
+:root.dark div {
+    color: var(--text-main);
 }
 
-/* Muted text helpers */
+/* Muted text helpers - Systematically covering common Tailwind muted utilities */
 :root.dark .text-\[\#333333\]\/60,
 :root.dark .text-\[\#333333\]\/70,
 :root.dark .text-\[\#333333\]\/50,
-:root.dark .text-\[\#333333\]\/40 {
-    color: #6C757D !important;
+:root.dark .text-\[\#333333\]\/40,
+:root.dark .text-gray-500,
+:root.dark .text-slate-500 {
+    color: var(--text-muted) !important;
 }
 
 :root.dark .text-\[\#333333\] {
-    color: #DEE2E6 !important;
+    color: var(--text-main) !important;
 }
 
 /* White backgrounds → dark card */
 :root.dark .bg-white,
+:root.dark .bg-white\/95,
+:root.dark .bg-white\/90,
 :root.dark .bg-white\/80,
 :root.dark .bg-white\/70,
-:root.dark .bg-white\/60 {
-    background-color: #343A40 !important;
+:root.dark .bg-white\/60,
+:root.dark .bg-white\/50,
+:root.dark .bg-white\/40,
+:root.dark .bg-white\/30,
+:root.dark .bg-white\/20,
+:root.dark .bg-white\/10 {
+    background-color: var(--bg-card) !important;
 }
 
-:root.dark .hover\:bg-\[\#F2F9FF\]:hover {
-    background-color: #3d4349 !important;
+:root.dark .hover\:bg-\[\#F2F9FF\]:hover,
+:root.dark .hover\:bg-gray-50:hover,
+:root.dark .hover\:bg-gray-100:hover,
+:root.dark .hover\:bg-white\/60:hover,
+:root.dark .hover\:bg-white\/10:hover {
+    background-color: var(--bg-table-hover) !important;
 }
 
-:root.dark .bg-\[\#F2F9FF\] {
-    background-color: #2b3035 !important;
+:root.dark .bg-\[\#F2F9FF\],
+:root.dark .bg-gray-50,
+:root.dark .bg-slate-50,
+:root.dark .bg-blue-50\/20,
+:root.dark .bg-gray-100 {
+    background-color: var(--bg-body) !important;
 }
 
-/* How-it-works step cards */
-:root.dark .how-step-card {
-    background: rgba(52, 58, 64, 0.85);
+:root.dark .bg-\[\#F2F9FF\]\/80,
+:root.dark .bg-\[\#F2F9FF\]\/60 {
+    background-color: var(--bg-glass) !important;
 }
 
-/* Certificate cards */
-:root.dark .cert-card {
-    background: rgba(52, 58, 64, 0.85);
+/* Glass-specific overrides */
+:root.dark .bg-white\/78,
+:root.dark .bg-white\/75 {
+    background-color: var(--bg-glass) !important;
+}
+:root.dark .cert-card,
+:root.dark .review-field,
+:root.dark .card-hover {
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
 }
 
 :root.dark .cert-card:hover {
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 25px 50px -12px var(--shadow-main);
 }
 
-/* SELECT button inside cert card */
+/* Component Buttons */
 :root.dark .cert-card button {
-    background: #3d4349 !important;
-    border-color: rgba(44, 123, 229, 0.3) !important;
-    color: #7EB8FF !important;
+    background: var(--card-elevated) !important;
+    border-color: var(--border-primary) !important;
+    color: var(--primary) !important;
 }
 
 :root.dark .cert-card button:hover {
-    background: #495057 !important;
+    background: var(--bg-table-hover) !important;
 }
 
-
 /* Modals */
-:root.dark [id$="-modal"]>div:not(.modal-overlay) {
-    background: #2b3035;
-    border-color: rgba(173, 181, 189, 0.1);
+:root.dark [id$="-modal"],
+:root.dark [id$="-modal"] > .modal,
+:root.dark [id$="-modal"] > div:not(.modal-overlay) {
+    background: var(--bg-card) !important;
+    border-color: var(--border-subtle) !important;
+    box-shadow: 0 24px 64px var(--shadow-main) !important;
 }
 
 :root.dark .bg-\[\#F2F9FF\]\/80 {
-    background: rgba(43, 48, 53, 0.95) !important;
+    background: var(--bg-glass) !important;
 }
 
-/* ── Request modal panel ── */
-:root.dark #request-modal>.modal {
-    background: rgba(43, 48, 53, 0.97) !important;
-    border: 1px solid rgba(173, 181, 189, 0.12) !important;
-    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55) !important;
-    backdrop-filter: blur(32px) !important;
-}
-
-/* ── Request modal overlay ── */
-:root.dark #request-modal {
-    background: rgba(15, 17, 20, 0.65) !important;
-}
-
+:root.dark #request-modal,
+:root.dark #review-modal,
 :root.dark #success-modal,
 :root.dark #track-modal,
 :root.dark #cert-preview-modal {
-    background: rgba(15, 17, 20, 0.65) !important;
+    background: var(--modal-overlay) !important;
+    backdrop-filter: blur(8px) !important;
 }
 
-/* ── Modal header bar ── */
-:root.dark #request-modal .border-b {
-    background: rgba(43, 48, 53, 0.95) !important;
-    border-bottom-color: rgba(173, 181, 189, 0.1) !important;
-}
-
-:root.dark #request-modal .border-b h3 {
-    color: #F8F9FA !important;
-}
-
-:root.dark #request-modal .border-b p {
-    color: #00B894 !important;
-}
-
-:root.dark #request-modal .border-b button {
-    color: #ADB5BD !important;
-}
-
-:root.dark #request-modal .border-b button:hover {
-    background: rgba(173, 181, 189, 0.12) !important;
-}
-
-/* Modal inner panels */
-:root.dark .review-field {
-    background: rgba(52, 58, 64, 0.8);
-    border-color: rgba(173, 181, 189, 0.1);
-}
-
-/* Admin login screen */
-:root.dark #admin-login-screen {
-    background: transparent;
-}
-
-:root.dark #admin-login-screen .glass {
-    background: rgba(52, 58, 64, 0.9);
+:root.dark #request-modal .border-b,
+:root.dark #review-modal .border-b,
+:root.dark .modal-header {
+    background: var(--bg-nav) !important;
+    border-bottom-color: var(--border-subtle) !important;
 }
 
 /* Admin dashboard stat cards */
-:root.dark .card-hover {
-    background: rgba(52, 58, 64, 0.85);
+:root.dark .stat-card {
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
 }
 
-/* Table */
+/* ── Admin Nav Tab Pill (dark mode) ── */
+:root.dark .active-tab {
+    background: var(--primary) !important;
+    color: #fff !important;
+}
+
+/* Table Enhancements */
 :root.dark table thead {
-    background: rgba(43, 48, 53, 0.9) !important;
+    background: var(--bg-table-header) !important;
 }
 
 :root.dark table thead th {
-    color: #ADB5BD !important;
+    color: var(--text-muted) !important;
+    border-bottom: 1px solid var(--border-subtle);
 }
 
-:root.dark #requests-tbody tr {
-    border-bottom-color: rgba(173, 181, 189, 0.08);
+:root.dark tbody tr {
+    border-bottom-color: var(--border-subtle) !important;
 }
 
-:root.dark #requests-tbody tr:hover {
-    background-color: rgba(73, 80, 87, 0.4) !important;
+:root.dark tbody tr:hover,
+:root.dark #requests-tbody tr:hover,
+:root.dark #login-logs-tbody tr:hover {
+    background-color: var(--bg-table-hover) !important;
 }
 
-:root.dark #requests-tbody td {
-    color: #DEE2E6;
+:root.dark td {
+    color: var(--text-main);
 }
 
-/* Section label */
+/* Section labels */
 :root.dark .section-label {
-    color: #7EB8FF;
+    color: var(--primary);
 }
 
 :root.dark .section-label span[class*="bg-"] {
-    background-color: rgba(44, 123, 229, 0.4) !important;
+    background-color: var(--primary) !important;
+    opacity: 0.4;
 }
 
 /* Borders */
+:root.dark .border-white,
 :root.dark .border-white\/60,
 :root.dark .border-white\/50,
+:root.dark .border-white\/40,
 :root.dark .border-white\/80 {
-    border-color: rgba(173, 181, 189, 0.12) !important;
+    border-color: var(--border-subtle) !important;
 }
 
-:root.dark .border-\[\#2C7BE5\]\/20 {
-    border-color: rgba(44, 123, 229, 0.25) !important;
+:root.dark .border-\[\#2C7BE5\]\/20,
+:root.dark .border-blue-200 {
+    border-color: var(--border-primary) !important;
 }
 
-/* Refresh indicator */
+/* Component specifics */
 :root.dark #auto-refresh-indicator {
-    background: #343A40 !important;
-    border-color: rgba(44, 123, 229, 0.25) !important;
+    background: var(--bg-card) !important;
+    border-color: var(--border-primary) !important;
 }
 
-/* Success/reject/approve buttons */
 :root.dark .bg-red-50 {
     background-color: rgba(239, 68, 68, 0.12) !important;
 }
@@ -802,31 +819,28 @@
     background-color: rgba(239, 68, 68, 0.2) !important;
 }
 
-/* Footer / section bg */
-:root.dark .bg-\[\#2C7BE5\]\/5 {
-    background-color: rgba(44, 123, 229, 0.08) !important;
-}
-
 /* Toast */
 :root.dark #toast .toast-inner {
-    background: #343A40 !important;
+    background: var(--bg-card) !important;
+    border-color: var(--border-primary) !important;
+    box-shadow: 0 10px 30px var(--shadow-main);
 }
 
 :root.dark #toast-title,
 :root.dark #toast-text {
-    color: #DEE2E6 !important;
+    color: var(--text-main) !important;
 }
 
 /* Certificate preview */
 :root.dark .certificate {
-    background: #2b3035;
-    color: #DEE2E6;
+    background: var(--bg-card);
+    color: var(--text-main);
 }
 
 /* Auth tabs */
 :root.dark #tab-login:not(.bg-\[\#2C7BE5\]),
 :root.dark #tab-register:not(.bg-\[\#2C7BE5\]) {
-    color: #6C757D !important;
+    color: var(--text-muted) !important;
 }
 
 /* Scrollbar */
@@ -835,237 +849,94 @@
 }
 
 :root.dark ::-webkit-scrollbar-thumb {
-    background: rgba(173, 181, 189, 0.15);
+    background: rgba(173, 181, 189, 0.2);
 }
 
 :root.dark ::-webkit-scrollbar-thumb:hover {
-    background: rgba(173, 181, 189, 0.3);
+    background: rgba(173, 181, 189, 0.35);
 }
 
 /* ===================== DARK MODE: FORM INPUTS (ENHANCED) ===================== */
-:root.dark .form-input {
-    background: rgba(33, 37, 41, 0.8);
-    border-color: rgba(173, 181, 189, 0.18);
-    color: #F8F9FA !important;
-    caret-color: #2C7BE5;
+:root.dark .form-input,
+:root.dark select,
+:root.dark input,
+:root.dark textarea {
+    background: var(--bg-input);
+    border-color: var(--border-subtle);
+    color: var(--text-main) !important;
+    caret-color: var(--primary);
 }
 
-:root.dark .form-input::placeholder {
-    color: rgba(173, 181, 189, 0.4) !important;
+:root.dark .form-input::placeholder,
+:root.dark input::placeholder {
+    color: var(--text-muted) !important;
+    opacity: 0.6;
 }
 
-:root.dark .form-input:focus {
-    border-color: #2C7BE5;
-    box-shadow: 0 0 0 3px rgba(44, 123, 229, 0.2);
-    background: rgba(33, 37, 41, 0.95);
+:root.dark .form-input:focus,
+:root.dark input:focus,
+:root.dark select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(82, 148, 226, 0.25);
+    background: var(--bg-input);
 }
 
 :root.dark .form-input:hover:not(:focus) {
-    border-color: rgba(173, 181, 189, 0.3);
+    border-color: var(--border-primary);
 }
 
-:root.dark select.form-input option {
-    background-color: #2b3035;
-    color: #DEE2E6;
+:root.dark select option {
+    background-color: var(--bg-card);
+    color: var(--text-main);
 }
 
-:root.dark input[type="date"].form-input {
+:root.dark input[type="date"] {
     color-scheme: dark;
 }
 
-/* ── Time-picker schedule cards ── */
-:root.dark #request-modal .glass {
-    background: rgba(52, 58, 64, 0.65) !important;
-    border-color: rgba(173, 181, 189, 0.1) !important;
-}
-
-:root.dark .time-option {
-    color: #DEE2E6;
-}
-
-:root.dark .time-option:hover {
-    background: rgba(44, 123, 229, 0.1) !important;
-}
-
-:root.dark .time-option input[type="radio"] {
-    accent-color: #00B894;
-}
-
-/* ── Purpose option tiles ── */
-:root.dark .purpose-option {
-    background: rgba(52, 58, 64, 0.7) !important;
-    border-color: rgba(173, 181, 189, 0.1) !important;
-}
-
-:root.dark .purpose-option:hover {
-    border-color: rgba(44, 123, 229, 0.5) !important;
-    background: rgba(44, 123, 229, 0.1) !important;
-}
-
-:root.dark .purpose-option.selected {
-    border-color: #2C7BE5 !important;
-    background: rgba(44, 123, 229, 0.15) !important;
-    box-shadow: 0 0 0 3px rgba(44, 123, 229, 0.12);
-}
-
-:root.dark .purpose-option span {
-    color: #DEE2E6 !important;
-}
-
-:root.dark .purpose-option i {
-    color: #7EB8FF !important;
-}
-
-/* ── Radio cards (business permit etc.) ── */
-:root.dark .radio-card {
-    background: rgba(52, 58, 64, 0.7) !important;
-    border-color: rgba(173, 181, 189, 0.1) !important;
-}
-
-:root.dark .radio-card:hover {
-    border-color: rgba(44, 123, 229, 0.5) !important;
-    background: rgba(44, 123, 229, 0.1) !important;
-}
-
-:root.dark .radio-card.selected {
-    border-color: #2C7BE5 !important;
-    background: rgba(44, 123, 229, 0.15) !important;
-    box-shadow: 0 0 0 3px rgba(44, 123, 229, 0.12);
-}
-
-:root.dark .radio-card div .text-xs {
-    color: #6C757D !important;
-}
-
-/* ── Scholarship detail block ── */
-:root.dark #scholarship-group {
-    background: rgba(44, 123, 229, 0.08) !important;
-    border-color: rgba(44, 123, 229, 0.2) !important;
-}
-
-/* ── Other purpose input group ── */
-:root.dark #other-purpose-group label {
-    color: #DEE2E6 !important;
-}
-
-/* ── Residency option cards ── */
+/* Selection components */
+:root.dark .time-option,
+:root.dark .purpose-option,
+:root.dark .radio-card,
 :root.dark .residency-option {
-    background: rgba(52, 58, 64, 0.7) !important;
-    border-color: rgba(173, 181, 189, 0.1) !important;
+    background: var(--bg-card) !important;
+    border-color: var(--border-subtle) !important;
+    color: var(--text-main);
 }
 
+:root.dark .time-option:hover,
+:root.dark .purpose-option:hover,
+:root.dark .radio-card:hover,
 :root.dark .residency-option:hover {
-    border-color: rgba(0, 184, 148, 0.4) !important;
+    background: var(--bg-table-hover) !important;
+    border-color: var(--border-primary) !important;
 }
 
-:root.dark .residency-option.selected-registered {
-    background: rgba(0, 184, 148, 0.1) !important;
-    border-color: #00B894 !important;
+:root.dark .purpose-option.selected,
+:root.dark .radio-card.selected {
+    border-color: var(--primary) !important;
+    background: rgba(82, 148, 226, 0.1) !important;
+    box-shadow: 0 0 0 3px rgba(82, 148, 226, 0.15);
 }
 
-:root.dark .residency-option.selected-temporary {
-    background: rgba(245, 158, 11, 0.1) !important;
-    border-color: #f59e0b !important;
+:root.dark .purpose-option i,
+:root.dark .radio-card i {
+    color: var(--primary) !important;
 }
 
-/* ── Form labels in dark mode ── */
-:root.dark #request-modal label {
-    color: #ADB5BD !important;
-}
-
-:root.dark #request-modal label .text-red-400 {
-    color: #f87171 !important;
-}
-
-:root.dark #request-modal label .text-\[\#333333\]\/40 {
-    color: #6C757D !important;
-}
-
-/* ── Submit button glow ── */
-:root.dark #request-modal button[type="submit"] {
-    box-shadow: 0 8px 32px rgba(44, 123, 229, 0.25) !important;
-}
-
-:root.dark #request-modal button[type="submit"]:hover {
-    box-shadow: 0 8px 40px rgba(44, 123, 229, 0.4) !important;
-}
-
-/* ── Login/Register auth pages dark mode ── */
-:root.dark .min-h-screen[style*="F2F9FF"] {
-    background: #212529 !important;
-}
-
-:root.dark .bg-white\/60 {
-    background-color: rgba(52, 58, 64, 0.6) !important;
-}
-
-/* ── Admin Dashboard: Filters & Search (dark mode) ── */
-:root.dark #status-filter,
-:root.dark #type-filter,
-:root.dark #search-input {
-    background: #343A40 !important;
-    border-color: rgba(44, 123, 229, 0.25) !important;
-    color: #DEE2E6 !important;
-}
-
-:root.dark #status-filter option,
-:root.dark #type-filter option {
-    background-color: #2b3035;
-    color: #DEE2E6;
-}
-
-:root.dark #search-input::placeholder {
-    color: #6C757D !important;
-}
-
-/* ── Admin Dashboard: Table rows in dark mode ── */
-:root.dark #requests-tbody tr,
-:root.dark #login-logs-tbody tr {
-    border-bottom-color: rgba(173, 181, 189, 0.08);
-}
-
-:root.dark #requests-tbody tr:hover,
-:root.dark #login-logs-tbody tr:hover {
-    background-color: rgba(73, 80, 87, 0.4) !important;
-}
-
-:root.dark #login-logs-tbody td {
-    color: #DEE2E6;
-}
-
-/* ── Admin Nav Tab Pill (dark mode) ── */
-:root.dark .active-tab {
-    background: #2C7BE5 !important;
-    color: #fff !important;
-}
-
-/* ── Review modal dark mode ── */
-:root.dark #review-modal > div {
-    background: rgba(43, 48, 53, 0.97) !important;
-    border-color: rgba(173, 181, 189, 0.12) !important;
-}
-
-:root.dark #review-modal {
-    background: rgba(15, 17, 20, 0.65) !important;
-}
-
-/* ── Notification dropdown dark mode ── */
+/* Notification dropdown */
 :root.dark #notif-dropdown {
-    background: #2b3035 !important;
-    border-color: rgba(173, 181, 189, 0.12) !important;
+    background: var(--bg-card) !important;
+    border-color: var(--border-subtle) !important;
+    box-shadow: 0 15px 45px var(--shadow-main) !important;
 }
 
 :root.dark .notif-item:hover {
-    background: rgba(73, 80, 87, 0.4) !important;
+    background: var(--bg-table-hover) !important;
 }
 
-/* ── Logout button dark mode ── */
-:root.dark .bg-red-50 {
-    background-color: rgba(239, 68, 68, 0.12) !important;
-}
-
-:root.dark .hover\:bg-red-100:hover {
-    background-color: rgba(239, 68, 68, 0.2) !important;
+:root.dark .notif-badge {
+    border-color: var(--bg-nav) !important;
 }
 
 :root.dark .border-red-200 {

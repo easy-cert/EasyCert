@@ -17,11 +17,11 @@
                         class="text-[#28DF97]">Cert</span></h1>
                 <p class="text-xs text-[#00B894] font-medium -mt-1">
                     {% if user.is_authenticated and user.barangay %}
-                        Barangay {{ user.barangay.barangay_name }}
+                    Barangay {{ user.barangay.barangay_name }}
                     {% elif membership %}
-                        Barangay {{ membership.barangay.barangay_name }}
+                    Barangay {{ membership.barangay.barangay_name }}
                     {% else %}
-                        EasyCert Central
+                    EasyCert Central
                     {% endif %}
                 </p>
             </div>
@@ -95,7 +95,8 @@
                 class="inline-flex items-center gap-x-2 bg-white/70 backdrop-blur-sm px-5 sm:px-6 py-2 sm:py-3 rounded-full mb-5 sm:mb-6 shadow-sm border border-white/60">
                 <i class="fa-solid fa-building-columns text-[#2C7BE5]"></i>
                 <span class="font-semibold text-[#2C7BE5] text-sm sm:text-base tracking-wide">
-                    {% if user.barangay %}{{ user.barangay.barangay_name }}{% else %}{{ membership.barangay.barangay_name }}{% endif %}
+                    {% if user.barangay %}{{ user.barangay.barangay_name }}{% else %}{{
+                    membership.barangay.barangay_name }}{% endif %}
                 </span>
             </div>
             {% endif %}

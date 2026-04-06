@@ -352,9 +352,29 @@
                         if (type) url += "type=" + encodeURIComponent(type) + "&";
                         if (search) url += "q=" + encodeURIComponent(search) + "&";
 
-                        fetch(url)
-                            .then(r => r.json())
+                        console.log("[Dashboard] Fetching requests from:", url);
+
+                        fetch(url, { credentials: 'same-origin' })
+                            .then(r => {
+                                console.log("[Dashboard] Response status:", r.status, r.statusText);
+                                console.log("[Dashboard] Response URL:", r.url);
+                                console.log("[Dashboard] Redirected:", r.redirected);
+                                if (!r.ok) {
+                                    throw new Error("HTTP " + r.status + ": " + r.statusText);
+                                }
+                                const ct = r.headers.get("content-type") || "";
+                                if (!ct.includes("application/json")) {
+                                    console.error("[Dashboard] Expected JSON but got:", ct);
+                                    return r.text().then(txt => {
+                                        console.error("[Dashboard] Non-JSON body (first 200 chars):", txt.substring(0, 200));
+                                        throw new Error("Non-JSON response: " + ct);
+                                    });
+                                }
+                                return r.json();
+                            })
                             .then(data => {
+                                if (!data) return;
+                                console.log("[Dashboard] Received", (data.requests || []).length, "requests");
                                 dashboardRequests = data.requests || [];
                                 // Map Django fields to what script.js expects
                                 dashboardRequests.forEach(r => {
@@ -365,9 +385,12 @@
                                 allRequests = dashboardRequests; // Link to global variable for script.js
                                 isAdminLoggedIn = true;          // So charts render dark mode correctly
                                 renderDashboardTable(dashboardRequests);
-                                renderCharts();                  // Draw charts with database data
+                                try { renderCharts(); } catch(e) { console.warn("[Dashboard] Charts skipped:", e.message); }
                             })
-                            .catch(err => console.error("Failed to load requests:", err));
+                            .catch(err => {
+                                console.error("[Dashboard] Failed to load requests:", err);
+                                console.error("[Dashboard] Error details:", err.message, err.stack);
+                            });
                     }
 
                     function renderDashboardTable(reqs) {

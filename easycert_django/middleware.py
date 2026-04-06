@@ -89,9 +89,19 @@ class OTPMiddleware:
                 '/admin/', # Optional: allow admin access if needed, or block it
             ]
             
+            # Also allow API endpoints — they have their own auth decorators
+            # and must return JSON, not HTML redirects
+            allowed_prefixes = [
+                '/api/',
+                '/static/',
+            ]
+            
             # Check if current path is allowed
             path = request.path
-            is_allowed = any(path.startswith(url) for url in allowed_urls)
+            is_allowed = (
+                any(path.startswith(url) for url in allowed_urls) or
+                any(path.startswith(prefix) for prefix in allowed_prefixes)
+            )
             
             if not is_allowed:
                 # Redirect them back to verification

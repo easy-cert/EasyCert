@@ -6,10 +6,14 @@ from django.contrib import messages
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.db.models import Count, Q
+from django.db.models.functions import TruncMonth, TruncDate
+from datetime import timedelta
+import calendar
 
 from .models import CertificateRequest
 from .forms import CertificateRequestForm
 from apps.barangays.models import BarangayMembership
+from apps.accounts.models import User, Notification
 from apps.accounts.decorators import (
     admin_only, admin_only_api, approved_member_required_api,
 )
@@ -44,14 +48,50 @@ def submit_request_view(request):
     """
     AJAX endpoint — handles certificate form submissions.
     Accepts JSON body from the frontend JS.
+
+    CRITICAL FIX: barangay is ALWAYS derived from the logged-in user.
+    The form does NOT allow barangay selection.
     """
+    import logging
+    logger = logging.getLogger(__name__)
+
     try:
         data = json.loads(request.body)
     except json.JSONDecodeError:
         return JsonResponse({"ok": False, "error": "Invalid JSON."}, status=400)
 
-    # Build a CertificateRequest
+    # ── Step 1: Resolve the user's barangay ──
+    user = request.user
+    barangay = None
+
+    if user.barangay_id:
+        barangay = user.barangay
+    else:
+        # Fallback: check approved membership
+        membership = BarangayMembership.objects.filter(
+            user=user, status=BarangayMembership.APPROVED
+        ).select_related("barangay").first()
+        if membership:
+            barangay = membership.barangay
+            # Sync user.barangay for future requests
+            user.barangay = barangay
+            user.save(update_fields=["barangay"])
+
+    # ── Step 2: REJECT if no barangay ──
+    if not barangay:
+        logger.error(
+            f"submit_request BLOCKED: user={user.email} has no barangay assignment."
+        )
+        return JsonResponse({
+            "ok": False,
+            "error": "You do not have an approved barangay membership. "
+                     "Please apply for membership first."
+        }, status=403)
+
+    # ── Step 3: Build the CertificateRequest ──
     cert = CertificateRequest(
+        user=user,
+        barangay=barangay,  # ALWAYS from user, NEVER from form
         certificate_type=data.get("certificate_type", ""),
         first_name=data.get("first_name", ""),
         last_name=data.get("last_name", ""),
@@ -62,34 +102,26 @@ def submit_request_view(request):
         form_data=data.get("form_data", {}),
     )
 
-    # Attach user if logged in
-    if request.user.is_authenticated:
-        cert.user = request.user
-        # Use the user's approved membership barangay (user.barangay may be None)
-        if request.user.barangay:
-            cert.barangay = request.user.barangay
-        else:
-            membership = BarangayMembership.objects.filter(
-                user=request.user, status=BarangayMembership.APPROVED
-            ).select_related("barangay").first()
-            if membership:
-                cert.barangay = membership.barangay
-
+    # ── Step 4: Validate and save ──
     try:
         cert.full_clean()
         cert.save()
-        
+
+        logger.info(
+            f"Request created: tracking={cert.tracking_number}, "
+            f"user={user.email}, barangay={barangay.barangay_name}"
+        )
+
         # Notify Admins of this barangay
-        if cert.barangay:
-            from apps.accounts.models import User, Notification
-            admins = User.objects.filter(role=User.ADMIN, barangay=cert.barangay)
-            for admin in admins:
-                Notification.objects.create(
-                    user=admin,
-                    message=f"New certificate request: {cert.certificate_type} from {cert.display_name}",
-                    notification_type="request"
-                )
+        admins = User.objects.filter(role=User.ADMIN, barangay=barangay)
+        for admin_user in admins:
+            Notification.objects.create(
+                user=admin_user,
+                message=f"New certificate request: {cert.certificate_type} from {cert.display_name}",
+                notification_type="request"
+            )
     except Exception as e:
+        logger.error(f"submit_request error: {e} | user={user.email}")
         return JsonResponse({"ok": False, "error": str(e)}, status=400)
 
     return JsonResponse({
@@ -109,7 +141,7 @@ def track_request_view(request):
         return JsonResponse({"found": False})
 
     try:
-        cert = CertificateRequest.objects.get(tracking_number=tracking)
+        cert = CertificateRequest.objects.select_related("barangay").get(tracking_number=tracking)
     except CertificateRequest.DoesNotExist:
         return JsonResponse({"found": False})
 
@@ -122,9 +154,9 @@ def track_request_view(request):
         "appointment": cert.appointment_time or "Not set",
         "date": cert.date_requested.strftime("%Y-%m-%d"),
         "status": cert.status,
-        "barangay_name": cert.barangay.barangay_name if cert.barangay else "POBLACION",
-        "barangay_location": cert.barangay.location if cert.barangay else "CEBU CITY • PHILIPPINES",
-        "captain_name": cert.barangay.captain_name if cert.barangay else "Hon. Roberto L. Garcia",
+        "barangay_name": cert.barangay.barangay_name if cert.barangay else "—",
+        "barangay_location": cert.barangay.location if cert.barangay else "—",
+        "captain_name": cert.barangay.captain_name if cert.barangay else "—",
     })
 
 
@@ -138,11 +170,15 @@ def admin_dashboard_view(request):
     """Admin dashboard page — shows stats, charts, request table."""
 
     today = timezone.localdate()
-    # Data Isolation Check
+    # Data Isolation: Barangay admins ONLY see their own barangay
     if request.user.is_barangay_admin and request.user.barangay:
-        all_requests = CertificateRequest.objects.filter(barangay=request.user.barangay)
+        all_requests = CertificateRequest.objects.filter(
+            barangay=request.user.barangay
+        ).select_related("barangay", "user").order_by("-date_requested")
     else:
-        all_requests = CertificateRequest.objects.all()
+        all_requests = CertificateRequest.objects.all().select_related(
+            "barangay", "user"
+        ).order_by("-date_requested")
 
     stats = {
         "today": all_requests.filter(date_requested__date=today).count(),
@@ -154,6 +190,7 @@ def admin_dashboard_view(request):
     context = {
         "stats": stats,
         "requests": all_requests[:100],  # latest 100
+        "barangay_name": request.user.barangay.barangay_name if request.user.barangay else "All Barangays",
         "certificate_types": CertificateRequest.CERTIFICATE_TYPES,
     }
     if request.user.is_authenticated:
@@ -170,10 +207,15 @@ def admin_requests_api(request):
     Supports filtering by status and type.
     """
 
+    # Data Isolation: Barangay admins ONLY see their own barangay
     if request.user.is_barangay_admin and request.user.barangay:
-        qs = CertificateRequest.objects.filter(barangay=request.user.barangay)
+        qs = CertificateRequest.objects.filter(
+            barangay=request.user.barangay
+        ).select_related("barangay", "user").order_by("-date_requested")
     else:
-        qs = CertificateRequest.objects.all()
+        qs = CertificateRequest.objects.all().select_related(
+            "barangay", "user"
+        ).order_by("-date_requested")
 
     status = request.GET.get("status")
     cert_type = request.GET.get("type")
@@ -203,9 +245,9 @@ def admin_requests_api(request):
             "purpose": cert.purpose or "—",
             "appointment": cert.appointment_time,
             "form_data": cert.form_data,
-            "barangay_name": cert.barangay.barangay_name if cert.barangay else "POBLACION",
-            "barangay_location": cert.barangay.location if cert.barangay else "CEBU CITY • PHILIPPINES",
-            "captain_name": cert.barangay.captain_name if cert.barangay else "Hon. Roberto L. Garcia",
+            "barangay_name": cert.barangay.barangay_name if cert.barangay else "—",
+            "barangay_location": cert.barangay.location if cert.barangay else "—",
+            "captain_name": cert.barangay.captain_name if cert.barangay else "—",
         })
 
     return JsonResponse({"requests": data})
@@ -228,6 +270,56 @@ def admin_stats_api(request):
         .annotate(count=Count("id"))
         .order_by("-count")
     )
+    
+    # Calendar bounds
+    start_of_year = today.replace(month=1, day=1)
+    start_of_month = today.replace(day=1)
+    start_of_week = today - timedelta(days=today.weekday())
+
+    # Yearly distribution (current year)
+    yearly_db = list(
+        all_requests.filter(date_requested__date__gte=start_of_year)
+        .annotate(month=TruncMonth('date_requested'))
+        .values('month')
+        .annotate(count=Count('id'))
+    )
+    yearly_dict = {today.replace(month=i, day=1).strftime("%b %Y"): 0 for i in range(1, 13)}
+    for entry in yearly_db:
+        if entry['month']:
+            yearly_dict[entry['month'].strftime("%b %Y")] = entry['count']
+    yearly_counts = [{"month": k, "count": v} for k, v in yearly_dict.items()]
+
+    # Monthly distribution (current month by day)
+    monthly_db = list(
+        all_requests.filter(date_requested__date__gte=start_of_month)
+        .annotate(date=TruncDate('date_requested'))
+        .values('date')
+        .annotate(count=Count('id'))
+    )
+    _, last_day = calendar.monthrange(today.year, today.month)
+    monthly_dict = {today.replace(day=i).strftime("%Y-%m-%d"): 0 for i in range(1, last_day + 1)}
+    for entry in monthly_db:
+        if entry['date']:
+            monthly_dict[entry['date'].strftime("%Y-%m-%d")] = entry['count']
+    monthly_counts = [{"date": k, "count": v} for k, v in monthly_dict.items()]
+
+    # Weekly distribution (current week by day, labeled Mon to Sun)
+    weekly_db = list(
+        all_requests.filter(date_requested__date__gte=start_of_week)
+        .annotate(date=TruncDate('date_requested'))
+        .values('date')
+        .annotate(count=Count('id'))
+    )
+    weekly_dict = {}
+    for i in range(7):
+        d = start_of_week + timedelta(days=i)
+        # Use abbreviated weekday name (Mon, Tue, etc.) instead of YYYY-MM-DD
+        weekly_dict[d.strftime("%a")] = 0
+    for entry in weekly_db:
+        if entry['date']:
+            # Map the DB date back to wekday name
+            weekly_dict[entry['date'].strftime("%a")] = entry['count']
+    weekly_counts = [{"date": k, "count": v} for k, v in weekly_dict.items()]
 
     return JsonResponse({
         "today": all_requests.filter(date_requested__date=today).count(),
@@ -235,6 +327,9 @@ def admin_stats_api(request):
         "approved": all_requests.filter(status="Approved").count(),
         "total": all_requests.count(),
         "type_distribution": list(type_counts),
+        "monthly_distribution": monthly_counts,
+        "weekly_distribution": weekly_counts,
+        "yearly_distribution": yearly_counts,
     })
 
 
@@ -537,9 +632,11 @@ from django.http import HttpResponse
 def export_requests_csv(request):
     """Export the list of requests to CSV."""
     if request.user.is_barangay_admin and request.user.barangay:
-        qs = CertificateRequest.objects.filter(barangay=request.user.barangay)
+        qs = CertificateRequest.objects.filter(
+            barangay=request.user.barangay
+        ).select_related("barangay")
     else:
-        qs = CertificateRequest.objects.all()
+        qs = CertificateRequest.objects.all().select_related("barangay")
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename="requests_{timezone.now().strftime("%Y%m%d")}.csv"'

@@ -53,7 +53,7 @@ def seed_data():
         ("markamancio1@hotmail.com", "Guadalupe", "111111", "Barangay Captain"),
         ("limuelforcrypto@gmail.com", "Quiot Pardo", "222222", "Barangay Secretary"),
         ("gonzagaagnus@gmail.com", "Pahina Central", "333333", "Barangay Admin Staff"),
-        ("gomezclark051@gmail.com", "Cogon Pardo", "101503", "Barangay Treasurer"),
+        ("gomezclark051@gmail.com", "Cogon Pardo", "444444", "Barangay Treasurer"),
     ]
     
     for email, b_name, pin, position in admins:

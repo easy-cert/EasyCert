@@ -354,7 +354,11 @@ def login_logs_api(request):
     if not (request.user.is_barangay_admin or request.user.is_super_admin or request.user.is_staff):
         return JsonResponse({"error": "Forbidden"}, status=403)
 
-    qs = LoginLog.objects.all()[:50]
+    if request.user.is_super_admin:
+        qs = LoginLog.objects.all()[:50]
+    else:
+        qs = LoginLog.objects.filter(email=request.user.email)[:50]
+        
     logs = []
     for log in qs:
         logs.append({

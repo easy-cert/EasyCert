@@ -8,6 +8,7 @@ let currentRequestForReview = null
 let monthlyChartInstance = null
 let typeChartInstance = null
 let weeklyChartInstance = null
+let yearlyChartInstance = null
 let isAdminLoggedIn = false
 let currentAdminRole = ""
 let csrfToken = ""

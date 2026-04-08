@@ -41,7 +41,7 @@
                 <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-[#00B894] rounded-full animate-pulse"></div>
                 <span class="font-medium text-[#00B894]">Online</span>
             </div>
-            <button onclick="toggleDarkMode()" id="dark-mode-btn" title="Toggle Dark Mode"
+            <button onclick="toggleDarkMode(); if(typeof loadDashboardCharts === 'function') loadDashboardCharts();" id="dark-mode-btn" title="Toggle Dark Mode"
                 class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-2xl border border-[#2C7BE5]/20 bg-white hover:bg-[#F2F9FF] dark-toggle-btn transition-all text-[#2C7BE5]">
                 <i id="dark-mode-icon" class="fa-solid fa-moon text-sm"></i>
             </button>
@@ -112,6 +112,34 @@
                     <p id="stat-month" class="text-4xl sm:text-5xl font-bold text-[#2C7BE5]">{{ stats.total }}</p>
                 </div>
                 <i class="fa-solid fa-chart-line text-3xl sm:text-4xl text-[#2C7BE5]/20"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- ANALYTICAL CHARTS -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-10">
+        <div class="glass rounded-3xl p-5 sm:p-6 card-hover">
+            <h4 class="font-semibold text-sm mb-4 text-[#333333]/80 uppercase tracking-wider text-center">Requests By Type</h4>
+            <div class="relative h-64 w-full flex items-center justify-center">
+                <canvas id="typeChart"></canvas>
+            </div>
+        </div>
+        <div class="glass rounded-3xl p-5 sm:p-6 card-hover">
+            <h4 class="font-semibold text-sm mb-4 text-[#333333]/80 uppercase tracking-wider text-center">Weekly Requests</h4>
+            <div class="relative h-64 w-full flex items-center justify-center">
+                <canvas id="weeklyChart"></canvas>
+            </div>
+        </div>
+        <div class="glass rounded-3xl p-5 sm:p-6 card-hover">
+            <h4 class="font-semibold text-sm mb-4 text-[#333333]/80 uppercase tracking-wider text-center">Monthly Requests</h4>
+            <div class="relative h-64 w-full flex items-center justify-center">
+                <canvas id="monthlyChart"></canvas>
+            </div>
+        </div>
+        <div class="glass rounded-3xl p-5 sm:p-6 card-hover">
+            <h4 class="font-semibold text-sm mb-4 text-[#333333]/80 uppercase tracking-wider text-center">Yearly Requests</h4>
+            <div class="relative h-64 w-full flex items-center justify-center">
+                <canvas id="yearlyChart"></canvas>
             </div>
         </div>
     </div>
@@ -436,18 +464,12 @@
                     }
 
                     function filterDashboard() { loadDashboardRequests(); }
-                    function refreshDashboard() { loadDashboardRequests(); showToast("Dashboard refreshed.", "Done", "success"); }
+                    function refreshDashboard() { loadDashboardRequests(); loadDashboardCharts(); showToast("Dashboard refreshed.", "Done", "success"); }
 
                     // ── Review modal ──
-                    const fieldLabels = {
-                        "last-name": "Last Name", "first-name": "First Name", "middle-name": "Middle Name",
-                        "sitio": "Sitio / Zone", "address": "Address", "gender": "Gender",
-                        "age": "Age", "birthday": "Birthday", "birthplace": "Birthplace",
-                        "income": "Annual Income (₱)", "years-of-living": "Years of Living",
-                        "monthly-income": "Monthly Income (₱)", "work": "Occupation",
-                        "permit-type": "Application Type", "business-type": "Business Type",
-                        "business-name": "Business Name", "capital": "Capital (₱)", "gross-income": "Gross Income (₱)"
-                    };
+                    // NOTE: fieldLabels is already declared in script.js (global scope).
+                    // Do NOT re-declare it here with const/let — it causes a SyntaxError
+                    // that silently kills this entire script block.
 
                     function openAdminReview(id) {
                         const req = dashboardRequests.find(r => r.id === id);
@@ -604,8 +626,116 @@
                         // Do NOT call switchView or loadFromLocalStorage
                     };
 
+                    // ── Analytical Charts ──
+                    function loadDashboardCharts() {
+                        const isDark = document.documentElement.classList.contains('dark');
+                        Chart.defaults.color = isDark ? '#9ba1a8' : '#6b7280';
+                        Chart.defaults.borderColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
+                        Chart.defaults.animation = false;
+
+                        fetch("/api/stats/")
+                            .then(r => r.json())
+                            .then(data => {
+                                // 1. Type Distribution (Pie)
+                                const typeCanvas = document.getElementById("typeChart");
+                                if (typeCanvas && data.type_distribution) {
+                                    const labels = data.type_distribution.map(d => d.certificate_type);
+                                    const values = data.type_distribution.map(d => d.count);
+                                    
+                                    if (typeChartInstance) typeChartInstance.destroy();
+                                    typeChartInstance = new Chart(typeCanvas, {
+                                        type: 'pie',
+                                        data: {
+                                            labels: labels,
+                                            datasets: [{
+                                                data: values,
+                                                backgroundColor: ['#2C7BE5', '#00B894', '#FFB020', '#FF5D5D', '#9155FD', '#17A2B8', '#6C757D', '#20C997'],
+                                                borderWidth: 1,
+                                                borderColor: '#ffffff'
+                                            }]
+                                        },
+                                        options: { maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: {size: 10} } } } }
+                                    });
+                                }
+
+                                // 2. Weekly Distribution (Line)
+                                const weekCanvas = document.getElementById("weeklyChart");
+                                if (weekCanvas && data.weekly_distribution) {
+                                    const labels = data.weekly_distribution.map(d => d.date);
+                                    const values = data.weekly_distribution.map(d => d.count);
+                                    
+                                    if (weeklyChartInstance) weeklyChartInstance.destroy();
+                                    weeklyChartInstance = new Chart(weekCanvas, {
+                                        type: 'line',
+                                        data: {
+                                            labels: labels,
+                                            datasets: [{
+                                                label: 'Requests',
+                                                data: values,
+                                                borderColor: '#2C7BE5',
+                                                backgroundColor: '#2C7BE5',
+                                                borderWidth: 3,
+                                                fill: false,
+                                                tension: 0.1
+                                            }]
+                                        },
+                                        options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+                                    });
+                                }
+
+                                // 3. Monthly Distribution (Bar)
+                                const monthCanvas = document.getElementById("monthlyChart");
+                                if (monthCanvas && data.monthly_distribution) {
+                                    const labels = data.monthly_distribution.map(d => d.date);
+                                    const values = data.monthly_distribution.map(d => d.count);
+                                    
+                                    if (monthlyChartInstance) monthlyChartInstance.destroy();
+                                    monthlyChartInstance = new Chart(monthCanvas, {
+                                        type: 'bar',
+                                        data: {
+                                            labels: labels,
+                                            datasets: [{
+                                                label: 'Requests',
+                                                data: values,
+                                                backgroundColor: '#00B894',
+                                                borderRadius: 4
+                                            }]
+                                        },
+                                        options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } } } }
+                                    });
+                                }
+
+                                // 4. Yearly Distribution (Line)
+                                const yearCanvas = document.getElementById("yearlyChart");
+                                if (yearCanvas && data.yearly_distribution) {
+                                    const labels = data.yearly_distribution.map(d => d.month);
+                                    const values = data.yearly_distribution.map(d => d.count);
+                                    
+                                    if (yearlyChartInstance) yearlyChartInstance.destroy();
+                                    yearlyChartInstance = new Chart(yearCanvas, {
+                                        type: 'line',
+                                        data: {
+                                            labels: labels,
+                                            datasets: [{
+                                                label: 'Requests',
+                                                data: values,
+                                                borderColor: '#9155FD',
+                                                backgroundColor: 'rgba(145, 85, 253, 0.35)',
+                                                borderWidth: 2,
+                                                fill: 'origin',
+                                                tension: 0.4
+                                            }]
+                                        },
+                                        options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+                                    });
+                                }
+                            })
+                            .catch(err => console.error("Error loading charts:", err));
+                    }
+
                     // ── Initial load ──
                     loadDashboardRequests();
+                    loadDashboardCharts();
                     loadLoginLogs();
                 </script>
                 {% endblock %}

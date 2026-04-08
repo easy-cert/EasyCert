@@ -2,6 +2,9 @@ from django.db import models
 from django.conf import settings
 from apps.barangays.models import Barangay
 import random
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class CertificateRequest(models.Model):
@@ -47,9 +50,10 @@ class CertificateRequest(models.Model):
     )
     barangay = models.ForeignKey(
         Barangay,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        on_delete=models.CASCADE,
+        null=True,      # TODO: Remove after running migration 0002_fix_barangay_nonnull
+        blank=True,     # The save() override prevents new NULL records
+        related_name="certificate_requests",
     )
     certificate_type = models.CharField(max_length=50, choices=CERTIFICATE_TYPES)
     tracking_number = models.CharField(max_length=30, unique=True, editable=False)
@@ -97,6 +101,31 @@ class CertificateRequest(models.Model):
     def save(self, *args, **kwargs):
         if not self.tracking_number:
             self.tracking_number = self._generate_tracking()
+
+        # ── CRITICAL: Auto-derive barangay from user ──
+        if self.user and not self.barangay_id:
+            if self.user.barangay_id:
+                self.barangay = self.user.barangay
+            else:
+                # Fallback: look up approved membership
+                from apps.barangays.models import BarangayMembership
+                membership = BarangayMembership.objects.filter(
+                    user=self.user, status=BarangayMembership.APPROVED
+                ).select_related("barangay").first()
+                if membership:
+                    self.barangay = membership.barangay
+
+        # Validate: barangay MUST be set
+        if not self.barangay_id:
+            logger.error(
+                f"CertificateRequest save blocked: no barangay. "
+                f"user={self.user}, user.barangay={getattr(self.user, 'barangay', None)}"
+            )
+            raise ValueError(
+                "Cannot save a certificate request without a barangay. "
+                "Please ensure your barangay membership is approved."
+            )
+
         super().save(*args, **kwargs)
 
     @staticmethod

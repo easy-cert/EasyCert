@@ -241,7 +241,7 @@ function renderPurposeSection(withScholarship) {
         </label>`).join('')
 
     const scholarshipBlock = withScholarship ? `
-        <div id="scholarship-group" class="hidden mt-4 p-5 bg-blue-50/60 rounded-3xl border border-[#2C7BE5]/20">
+        <div id="scholarship-group" class="hidden mt-4 p-5 bg-blue-50/20 rounded-3xl border border-[#2C7BE5]/20">
             <div class="flex items-center gap-x-2 text-[#2C7BE5] text-xs font-semibold mb-4">
                 <i class="fa-solid fa-graduation-cap"></i>
                 <span>SCHOLARSHIP DETAILS</span>
@@ -442,7 +442,10 @@ function renderCertificateCards() {
 // ============================================================
 // SELECT CERTIFICATE
 // ============================================================
+let isRequestFormDirty = false;
+
 function selectCertificate(name) {
+    isRequestFormDirty = false;
     currentCertificateType = name
     const cert = certificateTypes.find(c => c.name === name)
     document.getElementById("modal-title").textContent = name
@@ -1205,7 +1208,21 @@ function openModal(id) {
     document.body.style.overflow = "hidden"
 }
 
+document.addEventListener("input", e => {
+    if (e.target.closest("#request-modal")) {
+        isRequestFormDirty = true;
+    }
+});
+
 function closeModal(id) {
+    if (id === "request-modal" && typeof isRequestFormDirty !== 'undefined' && isRequestFormDirty) {
+        const confirmModal = document.getElementById("unsaved-confirm-modal");
+        if (confirmModal) {
+            confirmModal.classList.remove("hidden");
+            confirmModal.classList.add("flex");
+            return;
+        }
+    }
     const el = document.getElementById(id); if (!el) return
     el.classList.add("hidden"); el.classList.remove("flex")
     document.body.style.overflow = ""

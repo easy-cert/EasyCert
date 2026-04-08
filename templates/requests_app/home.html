@@ -644,5 +644,43 @@
                 });
         };
     })();
+
+    // ── Discard Modal Helpers ──
+    window.cancelCloseModal = function () {
+        const m = document.getElementById("unsaved-confirm-modal");
+        if (m) { m.classList.add("hidden"); m.classList.remove("flex"); }
+    };
+    window.confirmCloseModal = function () {
+        const m = document.getElementById("unsaved-confirm-modal");
+        if (m) { m.classList.add("hidden"); m.classList.remove("flex"); }
+        isRequestFormDirty = false;
+        closeModal("request-modal");
+    };
 </script>
+
+<!-- UNSAVED CONFIRM MODAL -->
+<div id="unsaved-confirm-modal" class="fixed inset-0 hidden items-center justify-center z-[99999] p-4"
+    style="background: rgba(10, 15, 30, 0.1); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
+    <div class="modal max-w-sm w-full rounded-3xl p-6 sm:p-8 text-center"
+        style="background: rgba(255,255,255,1.25); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); border: 1px solid rgba(255,255,255,0.75); box-shadow: 0 8px 40px rgba(44,123,229,0.14);">
+        <div class="mb-5 flex justify-center">
+            <div class="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center text-amber-500 text-3xl">
+                <i class="fa-solid fa-triangle-exclamation dark:text-[#F59E08]/80"></i>
+            </div>
+        </div>
+        <h3 class="text-xl font-bold mb-2">Unsaved Changes</h3>
+        <p class="text-sm text-[#333333]/70 mb-8">Are you sure you want to close this form? Your unsaved data will be
+            lost.</p>
+        <div class="flex flex-col sm:flex-row gap-3">
+            <button onclick="cancelCloseModal()"
+                class="flex-1 px-4 py-3 bg-white border border-[#2C7BE5]/30 text-[#2C7BE5] rounded-xl font-semibold hover:bg-[#F2F9FF] transition-colors">
+                No, Keep
+            </button>
+            <button onclick="confirmCloseModal()"
+                class="flex-1 px-4 py-3 bg-amber-500 text-white rounded-xl font-semibold hover:bg-amber-600 transition-colors">
+                Yes, Discard
+            </button>
+        </div>
+    </div>
+</div>
 {% endblock %}

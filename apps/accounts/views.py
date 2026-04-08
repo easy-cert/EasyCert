@@ -43,6 +43,13 @@ def login_view(request):
     if request.user.is_authenticated:
         return _redirect_after_login(request.user)
 
+    # When requesting the login page, clear any pending OTP state
+    # so the user is not trapped by the OTPMiddleware.
+    if request.method == "GET":
+        request.session.pop("pending_otp_user_id", None)
+        request.session.pop("pending_login_backend", None)
+        request.session.pop("pending_next_url", None)
+
     if request.method == "POST":
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -286,6 +293,38 @@ def verify_otp_view(request):
                 logger.warning(f"Invalid OTP code entered for {user.email}")
                 messages.error(request, "The code you entered is incorrect. Please check your email.")
                 
+        elif action == "RESEND":
+            import random
+            import string
+            from django.core.mail import send_mail
+            from django.conf import settings
+            
+            # Delete old unexpired OTPs to prevent confusion
+            LoginOTP.objects.filter(user=user).delete()
+
+            otp_code = ''.join(random.choices(string.digits, k=6))
+            hashed_code = LoginOTP.hash_code(otp_code)
+            expires = timezone.now() + timedelta(minutes=5)
+            
+            LoginOTP.objects.create(user=user, code=hashed_code, expires_at=expires)
+            
+            try:
+                send_mail(
+                    "Your New Verification Code - EasyCert",
+                    f"Hello {user.full_name},\n\n"
+                    f"Here is your new verification code: {otp_code}\n\n"
+                    f"This code will expire in 5 minutes.",
+                    settings.DEFAULT_FROM_EMAIL,
+                    [user.email],
+                    fail_silently=False,
+                )
+                messages.success(request, "A new verification code has been sent to your email.")
+            except Exception as e:
+                logger.error(f"OTP resend email fail: {str(e)}")
+                messages.error(request, "Failed to send email. Please try again.")
+                
+            return redirect('verify_otp')
+
         elif action == "CANCEL":
             request.session.pop('pending_otp_user_id', None)
             request.session.pop('pending_login_backend', None)

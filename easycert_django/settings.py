@@ -144,6 +144,7 @@ LOGOUT_REDIRECT_URL = "/accounts/login/"
 CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1",
     "http://localhost",
+     "https://web-production-ef998.up.railway.app",
 ]
 ALLOWED_HOSTS = ['*']
 

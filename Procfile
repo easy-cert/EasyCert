@@ -1,0 +1,1 @@
+web: gunicorn easycert_django.wsgi --log-file -

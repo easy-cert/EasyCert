@@ -16,7 +16,8 @@
                 <h1 class="text-2xl sm:text-3xl font-bold tracking-tight"><span class="easycert-easy">Easy</span><span
                         class="text-[#28DF97]">Cert</span></h1>
                 <p class="text-xs text-[#00B894] font-medium -mt-1">
-                    {% if user.barangay %}Barangay {{ user.barangay.barangay_name }}{% else %}Barangay {{ membership.barangay.barangay_name }}{% endif %}
+                    {% if user.barangay %}Barangay {{ user.barangay.barangay_name }}{% else %}Barangay {{
+                    membership.barangay.barangay_name }}{% endif %}
                 </p>
             </div>
         </div>
@@ -83,9 +84,9 @@
             <p class="text-sm text-[#333333]/60">
                 <i class="fa-solid fa-building-columns mr-1 text-[#2C7BE5]"></i>
                 {% if user.barangay %}
-                    {{ user.barangay.barangay_name }} • {{ user.barangay.location }}
+                {{ user.barangay.barangay_name }} • {{ user.barangay.location }}
                 {% else %}
-                    {{ membership.barangay.barangay_name }} • {{ membership.barangay.location }}
+                {{ membership.barangay.barangay_name }} • {{ membership.barangay.location }}
                 {% endif %}
             </p>
         </div>
@@ -251,11 +252,11 @@
 
         {% if my_requests|length > 5 %}
         <div class="px-6 sm:px-8 py-4 border-t border-white/60 flex justify-center">
-            <button id="toggleHistoryBtn" onclick="toggleRequestHistory()"
-                class="inline-flex items-center gap-x-2 px-6 py-2.5 bg-[#2C7BE5]/10 hover:bg-[#2C7BE5]/20
+            <button id="toggleHistoryBtn" onclick="toggleRequestHistory()" class="inline-flex items-center gap-x-2 px-6 py-2.5 bg-[#2C7BE5]/10 hover:bg-[#2C7BE5]/20
                        text-[#2C7BE5] font-semibold text-sm rounded-2xl transition-all">
                 <span id="toggleHistoryText">See More</span>
-                <i id="toggleHistoryIcon" class="fa-solid fa-chevron-down text-xs transition-transform duration-300"></i>
+                <i id="toggleHistoryIcon"
+                    class="fa-solid fa-chevron-down text-xs transition-transform duration-300"></i>
             </button>
         </div>
         {% endif %}
@@ -264,14 +265,17 @@
             .request-row {
                 transition: opacity 0.3s ease, max-height 0.3s ease;
             }
+
             .hidden-row {
                 display: none;
                 opacity: 0;
             }
+
             .hidden-row.show-row {
                 display: table-row;
                 opacity: 1;
             }
+
             #toggleHistoryIcon.rotated {
                 transform: rotate(180deg);
             }

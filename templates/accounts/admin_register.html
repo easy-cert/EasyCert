@@ -13,9 +13,9 @@
                 <i class="fa-solid fa-arrow-left"></i>
             </a>
             <div>
-                <h1 class="text-2xl font-bold tracking-tight text-[#0D1B2A]">{% if edit_mode %}Update Administrator{%
-                    else %}New Barangay Admin{% endif %}</h1>
-                <p class="text-xs text-[#333333]/50 font-medium -mt-1 uppercase tracking-wider">Super Admin Console</p>
+                <h1 class="text-2xl font-bold tracking-tight text-[#0D1B2A]">
+                    {% if edit_mode %}Update Administrator{% else %}New Barangay Admin{% endif %}</h1>
+                <p class="text-xs text-[#333333]/50 font-medium -mt-1 tracking-wider">Super Admin Console</p>
             </div>
         </div>
     </div>
@@ -35,7 +35,7 @@
                 <!-- Personal Info -->
                 <div class="md:col-span-2">
                     <h3
-                        class="text-xs font-black text-[#2C7BE5] uppercase tracking-[0.3em] mb-6 flex items-center gap-x-3">
+                        class="text-xs font-black text-[#2C7BE5] uppercase tracking-[0.3em] mb-6 flex items-center gap-x-1">
                         <i class="fa-solid fa-id-card"></i> IDENTIFICATION
                     </h3>
                 </div>
@@ -47,7 +47,7 @@
                         <i class="fa-regular fa-user absolute left-5 top-1/2 -translate-y-1/2 text-[#333333]/30"></i>
                         {{ form.full_name }}
                     </div>
-                    {% if form.full_name.errors %}<p class="text-red-500 text-xs font-bold mt-1">{{
+                    {% if form.full_name.errors %}<p class="text-red-500 text-xs font-bold mt-1 ">{{
                         form.full_name.errors.0 }}</p>{% endif %}
                 </div>
 
@@ -137,18 +137,18 @@
                             <i class="fa-solid fa-key text-2xl"></i>
                         </div>
                         <div class="flex-1 text-center sm:text-left">
-                            <h4 class="font-bold text-[#0D1B2A] text-xl">{% if edit_mode %}Security Configuration{% else
-                                %}Primary Security PIN{% endif %}</h4>
-                            <p class="text-xs text-[#333333]/50 font-medium">{% if edit_mode %}Leave the PIN field blank
-                                to keep the current one. Use 6 digits for the new PIN.{% else %}Set a 6-digit PIN for
+                            <h4 class="font-bold text-[#0D1B2A] text-xl">
+                                {% if edit_mode %}Security Verification{% else %}Primary Security PIN{% endif %}</h4>
+                            <p class="text-xs text-[#333333]/50 font-medium">{% if edit_mode %}Authentication required:
+                                Please enter your PIN to continue updating your profile.{% else %}Set a 6-digit PIN for
                                 the admin. This will be their primary login credential.{% endif %}</p>
                         </div>
                         <div class="w-full sm:w-48">
                             {{ form.pin }}
                         </div>
                     </div>
-                    {% if form.pin.errors %}<p class="text-red-500 text-xs font-bold mt-2 text-center">{{
-                        form.pin.errors.0 }}</p>{% endif %}
+                    {% if form.pin.errors %}<p class="text-red-500 text-xs font-bold mt-2 text-center">
+                        {{form.pin.errors.0 }}</p>{% endif %}
                 </div>
             </div>
 
@@ -165,12 +165,14 @@
 </main>
 
 <style>
+    input.form-input,
+    select.form-input,
     input,
     select {
         background-color: rgba(255, 255, 255, 0.4);
         border: 1px solid rgba(0, 0, 0, 0.05);
         border-radius: 1rem;
-        padding-left: 3rem;
+        padding-left: 3.5rem !important;
         padding-right: 3rem;
         padding-top: 1.25rem;
         padding-bottom: 1.25rem;

@@ -605,8 +605,11 @@ def superadmin_dashboard_view(request):
     admins = User.objects.filter(role=User.ADMIN).select_related('barangay').order_by('full_name')
     audit_logs = AuditLog.objects.all()[:50]
     
+    active_admins_count = admins.filter(is_active=True).count()
+    
     return render(request, "accounts/superadmin_dashboard.html", {
         "admins": admins,
+        "active_admins_count": active_admins_count,
         "audit_logs": audit_logs,
         "active_page": "admin_mgmt"
     })
@@ -637,21 +640,21 @@ def edit_admin_view(request, pk):
     admin_user = get_object_or_404(User, pk=pk, role=User.ADMIN)
     if request.method == "POST":
         form = AdminRegistrationForm(request.POST, instance=admin_user)
-        # Handle PIN change separately if provided
-        new_pin = request.POST.get('pin')
+        confirm_pin = request.POST.get('pin')
+        
         if form.is_valid():
-            user = form.save(commit=False)
-            if new_pin and len(new_pin) == 6:
-                user.set_password(new_pin)
-            user.save()
-            AuditLog.objects.create(
-                user=request.user,
-                action="admin_updated",
-                ip_address=request.META.get('REMOTE_ADDR'),
-                details={"updated_user": admin_user.email}
-            )
-            messages.success(request, f"Account for {admin_user.full_name} updated.")
-            return redirect("superadmin_dashboard")
+            if admin_user.check_password(confirm_pin):
+                user = form.save()
+                AuditLog.objects.create(
+                    user=request.user,
+                    action="admin_updated",
+                    ip_address=request.META.get('REMOTE_ADDR'),
+                    details={"updated_user": admin_user.email}
+                )
+                messages.success(request, f"Account for {admin_user.full_name} updated.")
+                return redirect("superadmin_dashboard")
+            else:
+                form.add_error('pin', 'Invalid Security PIN. Authorization Failed.')
     else:
         form = AdminRegistrationForm(instance=admin_user)
     

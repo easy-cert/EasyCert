@@ -152,7 +152,8 @@ class AdminRegistrationForm(forms.ModelForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.set_password(self.cleaned_data["pin"])
+        if not self.instance.pk:
+            user.set_password(self.cleaned_data["pin"])
         user.role = User.ADMIN
         user.is_staff = True # Needed for admin access if using django admin, but we are building custom
         if commit:

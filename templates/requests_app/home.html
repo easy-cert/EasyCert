@@ -554,6 +554,7 @@
                 .then(res => res.json())
                 .then(data => {
                     if (data.ok) {
+                        isRequestFormDirty = false;
                         closeRequestModal();
                         showSuccessModal(data.tracking_number, data.appointment_time);
                         showToast("Certificate request submitted to database.", "Saved!", "success");

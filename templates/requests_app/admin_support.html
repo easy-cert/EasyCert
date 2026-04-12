@@ -234,7 +234,8 @@
                 let newHash = JSON.stringify(data.tickets || []);
                 if (isAutoRefresh) {
                     if (lastTicketsHash !== "" && lastTicketsHash !== newHash) {
-                        if (typeof showToast === "function") showToast("New support ticket update received!", "Real-Time Sync", "info");
+                        window.location.reload();
+                        return;
                     } else {
                         lastTicketsHash = newHash;
                         return;

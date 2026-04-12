@@ -10,29 +10,34 @@
     <div
         class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-x-2 flex-wrap gap-y-2">
         <div class="flex items-center gap-x-3">
-            <img src="{% static 'Icon.png' %}" alt="EasyCert Logo" 
+            <img src="{% static 'Icon.png' %}" alt="EasyCert Logo"
                 class="w-10 h-10 sm:w-12 sm:h-12 rounded-full shadow-inner object-cover" />
             <div>
-                <h1 class="text-2xl sm:text-3xl font-bold tracking-tight"><span class="easycert-easy">Easy</span><span class="text-[#28DF97]">Cert</span></h1>
+                <h1 class="text-2xl sm:text-3xl font-bold tracking-tight"><span class="easycert-easy">Easy</span><span
+                        class="text-[#28DF97]">Cert</span></h1>
                 <p class="text-xs text-[#00B894] font-medium -mt-1">
-                    {% if user.barangay %}{{ user.barangay.barangay_name }} • {{ user.barangay.location }}{% else %}Super Admin Mode{% endif %}
+                    {% if user.barangay %}{{ user.barangay.barangay_name }} • {{ user.barangay.location }}
+                    {% else %}Super Admin Mode{% endif %}
                 </p>
             </div>
         </div>
 
         <div class="flex items-center gap-x-1 bg-white/80 rounded-3xl p-1 shadow-inner order-3 sm:order-2">
-            <button id="admin-tab" class="relative px-3 sm:px-6 py-2 sm:py-3 rounded-3xl font-semibold transition-all flex items-center gap-x-2 text-sm sm:text-base active-tab">
+            <button id="admin-tab"
+                class="relative px-3 sm:px-6 py-2 sm:py-3 rounded-3xl font-semibold transition-all flex items-center gap-x-2 text-sm sm:text-base active-tab">
                 <i class="fa-solid fa-file-signature"></i>
                 <span class="hidden sm:inline">Certificates</span>
                 <span class="sm:hidden">Certs</span>
-                <span id="badge-certs" class="absolute -top-1.5 -right-1.5 sm:-top-1 sm:-right-1 px-1.5 min-w-[1.25rem] h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow border-2 border-white transform scale-0 transition-transform duration-300 origin-center hidden">0</span>
+                <span id="badge-certs"
+                    class="absolute -top-1.5 -right-1.5 sm:-top-1 sm:-right-1 px-1.5 min-w-[1.25rem] h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow border-2 border-white transform scale-0 transition-transform duration-300 origin-center hidden">0</span>
             </button>
             <a href="{% url 'admin_memberships' %}" id="memberships-tab"
                 class="relative px-3 sm:px-6 py-2 sm:py-3 rounded-3xl font-semibold transition-all flex items-center gap-x-2 text-sm sm:text-base text-[#333333]/60 hover:text-[#2C7BE5] hover:bg-[#2C7BE5]/5">
                 <i class="fa-solid fa-users"></i>
                 <span class="hidden sm:inline">Memberships</span>
                 <span class="sm:hidden">Members</span>
-                <span id="badge-members" class="absolute -top-1.5 -right-1.5 sm:-top-1 sm:-right-1 px-1.5 min-w-[1.25rem] h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow border-2 border-white transform scale-0 transition-transform duration-300 origin-center hidden">0</span>
+                <span id="badge-members"
+                    class="absolute -top-1.5 -right-1.5 sm:-top-1 sm:-right-1 px-1.5 min-w-[1.25rem] h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow border-2 border-white transform scale-0 transition-transform duration-300 origin-center hidden">0</span>
             </a>
 
         </div>
@@ -42,7 +47,8 @@
                 <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-[#00B894] rounded-full animate-pulse"></div>
                 <span class="font-medium text-[#00B894]">Online</span>
             </div>
-            <button onclick="toggleDarkMode(); if(typeof loadDashboardCharts === 'function') loadDashboardCharts();" id="dark-mode-btn" title="Toggle Dark Mode"
+            <button onclick="toggleDarkMode(); if(typeof loadDashboardCharts === 'function') loadDashboardCharts();"
+                id="dark-mode-btn" title="Toggle Dark Mode"
                 class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-2xl border border-[#2C7BE5]/20 bg-white hover:bg-[#F2F9FF] dark-toggle-btn transition-all text-[#2C7BE5]">
                 <i id="dark-mode-icon" class="fa-solid fa-moon text-sm"></i>
             </button>
@@ -120,25 +126,29 @@
     <!-- ANALYTICAL CHARTS -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-10">
         <div class="glass rounded-3xl p-5 sm:p-6 card-hover">
-            <h4 class="font-semibold text-sm mb-4 text-[#333333]/80 uppercase tracking-wider text-center">Requests By Type</h4>
+            <h4 class="font-semibold text-sm mb-4 text-[#333333]/80 uppercase tracking-wider text-center">Requests By
+                Type</h4>
             <div class="relative h-64 w-full flex items-center justify-center">
                 <canvas id="typeChart"></canvas>
             </div>
         </div>
         <div class="glass rounded-3xl p-5 sm:p-6 card-hover">
-            <h4 class="font-semibold text-sm mb-4 text-[#333333]/80 uppercase tracking-wider text-center">Weekly Requests</h4>
+            <h4 class="font-semibold text-sm mb-4 text-[#333333]/80 uppercase tracking-wider text-center">Weekly
+                Requests</h4>
             <div class="relative h-64 w-full flex items-center justify-center">
                 <canvas id="weeklyChart"></canvas>
             </div>
         </div>
         <div class="glass rounded-3xl p-5 sm:p-6 card-hover">
-            <h4 class="font-semibold text-sm mb-4 text-[#333333]/80 uppercase tracking-wider text-center">Monthly Requests</h4>
+            <h4 class="font-semibold text-sm mb-4 text-[#333333]/80 uppercase tracking-wider text-center">Monthly
+                Requests</h4>
             <div class="relative h-64 w-full flex items-center justify-center">
                 <canvas id="monthlyChart"></canvas>
             </div>
         </div>
         <div class="glass rounded-3xl p-5 sm:p-6 card-hover">
-            <h4 class="font-semibold text-sm mb-4 text-[#333333]/80 uppercase tracking-wider text-center">Yearly Requests</h4>
+            <h4 class="font-semibold text-sm mb-4 text-[#333333]/80 uppercase tracking-wider text-center">Yearly
+                Requests</h4>
             <div class="relative h-64 w-full flex items-center justify-center">
                 <canvas id="yearlyChart"></canvas>
             </div>
@@ -193,8 +203,11 @@
             <i class="fa-solid fa-inbox text-5xl mb-4"></i>
             <p class="font-medium">No requests found</p>
         </div>
-        <div id="requests-see-more-container" class="hidden text-center py-4 border-t border-white/60 bg-white/20 hover:bg-white/40 transition-colors cursor-pointer" onclick="toggleAllRequests()">
-            <button id="requests-see-more-btn" class="text-xs font-semibold text-[#2C7BE5] transition-colors uppercase tracking-widest w-full">
+        <div id="requests-see-more-container"
+            class="hidden text-center py-4 border-t border-white/60 bg-white/20 hover:bg-white/40 transition-colors cursor-pointer"
+            onclick="toggleAllRequests()">
+            <button id="requests-see-more-btn"
+                class="text-xs font-semibold text-[#2C7BE5] transition-colors uppercase tracking-widest w-full">
                 See More <i class="fa-solid fa-chevron-down ml-1"></i>
             </button>
         </div>
@@ -206,7 +219,8 @@
             <h4 class="font-semibold text-lg flex items-center gap-x-2">
                 <i class="fa-solid fa-clock-rotate-left text-[#2C7BE5]"></i> Login History
             </h4>
-            <button onclick="loadLoginLogs()" class="px-4 py-2 bg-white rounded-xl flex items-center gap-x-2 text-xs font-medium border border-[#2C7BE5]/20 hover:bg-[#F2F9FF] transition-all">
+            <button onclick="loadLoginLogs()"
+                class="px-4 py-2 bg-white rounded-xl flex items-center gap-x-2 text-xs font-medium border border-[#2C7BE5]/20 hover:bg-[#F2F9FF] transition-all">
                 <i class="fa-solid fa-rotate"></i> Refresh
             </button>
         </div>
@@ -229,8 +243,11 @@
             <i class="fa-solid fa-shield-halved text-4xl mb-3 block"></i>
             <p class="font-medium">No login activity recorded yet</p>
         </div>
-        <div id="login-logs-see-more-container" class="hidden text-center py-4 border-t border-white/60 bg-white/20 hover:bg-white/40 transition-colors cursor-pointer" onclick="toggleAllLoginLogs()">
-            <button id="login-logs-see-more-btn" class="text-xs font-semibold text-[#2C7BE5] transition-colors uppercase tracking-widest w-full">
+        <div id="login-logs-see-more-container"
+            class="hidden text-center py-4 border-t border-white/60 bg-white/20 hover:bg-white/40 transition-colors cursor-pointer"
+            onclick="toggleAllLoginLogs()">
+            <button id="login-logs-see-more-btn"
+                class="text-xs font-semibold text-[#2C7BE5] transition-colors uppercase tracking-widest w-full">
                 See More <i class="fa-solid fa-chevron-down ml-1"></i>
             </button>
         </div>
@@ -296,26 +313,36 @@
                         <img src="{% static 'Icon.png' %}" alt="EasyCert Logo"
                             class="w-12 h-12 sm:w-14 sm:h-14 object-cover rounded-full" />
                         <div>
-                            <p id="cert-barangay-name" class="text-[#2C7BE5] text-xl sm:text-2xl font-bold tracking-widest uppercase">
+                            <p id="cert-barangay-name"
+                                class="text-[#2C7BE5] text-xl sm:text-2xl font-bold tracking-widest uppercase">
                                 BARANGAY POBLACION</p>
-                            <p id="cert-barangay-location" class="text-xs text-[#333333] uppercase">CEBU CITY • PHILIPPINES</p>
+                            <p id="cert-barangay-location" class="text-xs text-[#333333] uppercase">CEBU CITY •
+                                PHILIPPINES</p>
                         </div>
                     </div>
                 </div>
                 <div class="text-left sm:text-right">
-                    <div class="text-xs font-medium uppercase tracking-widest text-[#333333]/60">OFFICIAL CERTIFICATE</div>
+                    <div class="text-xs font-medium uppercase tracking-widest text-[#333333]/60">OFFICIAL CERTIFICATE
+                    </div>
                     <div id="cert-type" class="text-2xl sm:text-3xl font-bold text-[#2C7BE5]"></div>
                 </div>
             </div>
 
             <div class="border border-dashed border-[#2C7BE5]/50 p-6 sm:p-8 mb-8 sm:mb-10">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 sm:gap-x-12 gap-y-4 sm:gap-y-6 text-sm sm:text-base">
-                    <div><span class="font-medium text-[#333333]/60">Name:</span> <span id="cert-name" class="font-semibold ml-1"></span></div>
-                    <div><span class="font-medium text-[#333333]/60">Date Issued:</span> <span id="cert-date" class="font-semibold ml-1"></span></div>
-                    <div><span class="font-medium text-[#333333]/60">Address:</span> <span id="cert-address" class="font-semibold ml-1"></span></div>
-                    <div><span class="font-medium text-[#333333]/60">Purpose:</span> <span id="cert-purpose" class="font-semibold ml-1"></span></div>
-                    <div><span class="font-medium text-[#333333]/60">Precinct:</span> <span id="cert-precinct" class="font-semibold ml-1"></span></div>
-                    <div><span class="font-medium text-[#333333]/60">Residency:</span> <span id="cert-residency" class="font-semibold ml-1"></span></div>
+                <div
+                    class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 sm:gap-x-12 gap-y-4 sm:gap-y-6 text-sm sm:text-base">
+                    <div><span class="font-medium text-[#333333]/60">Name:</span> <span id="cert-name"
+                            class="font-semibold ml-1"></span></div>
+                    <div><span class="font-medium text-[#333333]/60">Date Issued:</span> <span id="cert-date"
+                            class="font-semibold ml-1"></span></div>
+                    <div><span class="font-medium text-[#333333]/60">Address:</span> <span id="cert-address"
+                            class="font-semibold ml-1"></span></div>
+                    <div><span class="font-medium text-[#333333]/60">Purpose:</span> <span id="cert-purpose"
+                            class="font-semibold ml-1"></span></div>
+                    <div><span class="font-medium text-[#333333]/60">Precinct:</span> <span id="cert-precinct"
+                            class="font-semibold ml-1"></span></div>
+                    <div><span class="font-medium text-[#333333]/60">Residency:</span> <span id="cert-residency"
+                            class="font-semibold ml-1"></span></div>
                 </div>
             </div>
 
@@ -358,122 +385,123 @@
 
 {% endblock %}
 
-                {% block extra_scripts %}
-                <script>
-                    // ── Admin Dashboard JS (Django-powered) ──
-                    let dashboardRequests = [];
-                    let currentReviewRequest = null;
-                    let showingAllRequests = false;
-                    let lastRequestsHash = "";
+{% block extra_scripts %}
+<script>
+    // ── Admin Dashboard JS (Django-powered) ──
+    let dashboardRequests = [];
+    let currentReviewRequest = null;
+    let showingAllRequests = false;
+    let lastRequestsHash = "";
 
-                    // Set date display
-                    document.getElementById("dashboard-date").textContent = new Date().toLocaleDateString("en-PH", {
-                        weekday: "long", year: "numeric", month: "long", day: "numeric"
+    // Set date display
+    document.getElementById("dashboard-date").textContent = new Date().toLocaleDateString("en-PH", {
+        weekday: "long", year: "numeric", month: "long", day: "numeric"
+    });
+
+    // ── Load requests from Django API ──
+    function loadDashboardRequests(isAutoRefresh = false) {
+        if (isAutoRefresh && !document.getElementById("review-modal").classList.contains("hidden")) return;
+
+        const status = document.getElementById("status-filter").value;
+        const type = document.getElementById("type-filter").value;
+        const search = document.getElementById("search-input").value.trim();
+
+        let url = "{% url 'admin_requests_api' %}?";
+        if (status) url += "status=" + encodeURIComponent(status) + "&";
+        if (type) url += "type=" + encodeURIComponent(type) + "&";
+        if (search) url += "q=" + encodeURIComponent(search) + "&";
+
+        if (!isAutoRefresh) console.log("[Dashboard] Fetching requests from:", url);
+
+        fetch(url, { credentials: 'same-origin' })
+            .then(r => {
+                console.log("[Dashboard] Response status:", r.status, r.statusText);
+                console.log("[Dashboard] Response URL:", r.url);
+                console.log("[Dashboard] Redirected:", r.redirected);
+                if (!r.ok) {
+                    throw new Error("HTTP " + r.status + ": " + r.statusText);
+                }
+                const ct = r.headers.get("content-type") || "";
+                if (!ct.includes("application/json")) {
+                    console.error("[Dashboard] Expected JSON but got:", ct);
+                    return r.text().then(txt => {
+                        console.error("[Dashboard] Non-JSON body (first 200 chars):", txt.substring(0, 200));
+                        throw new Error("Non-JSON response: " + ct);
                     });
+                }
+                return r.json();
+            })
+            .then(data => {
+                if (!data) return;
 
-                    // ── Load requests from Django API ──
-                    function loadDashboardRequests(isAutoRefresh = false) {
-                        if (isAutoRefresh && !document.getElementById("review-modal").classList.contains("hidden")) return;
-
-                        const status = document.getElementById("status-filter").value;
-                        const type = document.getElementById("type-filter").value;
-                        const search = document.getElementById("search-input").value.trim();
-
-                        let url = "{% url 'admin_requests_api' %}?";
-                        if (status) url += "status=" + encodeURIComponent(status) + "&";
-                        if (type) url += "type=" + encodeURIComponent(type) + "&";
-                        if (search) url += "q=" + encodeURIComponent(search) + "&";
-
-                        if (!isAutoRefresh) console.log("[Dashboard] Fetching requests from:", url);
-
-                        fetch(url, { credentials: 'same-origin' })
-                            .then(r => {
-                                console.log("[Dashboard] Response status:", r.status, r.statusText);
-                                console.log("[Dashboard] Response URL:", r.url);
-                                console.log("[Dashboard] Redirected:", r.redirected);
-                                if (!r.ok) {
-                                    throw new Error("HTTP " + r.status + ": " + r.statusText);
-                                }
-                                const ct = r.headers.get("content-type") || "";
-                                if (!ct.includes("application/json")) {
-                                    console.error("[Dashboard] Expected JSON but got:", ct);
-                                    return r.text().then(txt => {
-                                        console.error("[Dashboard] Non-JSON body (first 200 chars):", txt.substring(0, 200));
-                                        throw new Error("Non-JSON response: " + ct);
-                                    });
-                                }
-                                return r.json();
-                            })
-                            .then(data => {
-                                if (!data) return;
-                                
-                                let newHash = JSON.stringify(data.requests || []);
-                                if (isAutoRefresh) {
-                                    if (lastRequestsHash !== "" && lastRequestsHash !== newHash) {
-                                        if (typeof showToast === "function") showToast("New requests update received!", "Real-Time Sync", "info");
-                                    } else {
-                                        lastRequestsHash = newHash;
-                                        return; // No layout update if no change
-                                    }
-                                }
-                                
-                                lastRequestsHash = newHash;
-                                if (!isAutoRefresh) console.log("[Dashboard] Received", (data.requests || []).length, "requests");
-                                
-                                dashboardRequests = data.requests || [];
-                                // Map Django fields to what script.js expects
-                                dashboardRequests.forEach(r => {
-                                    r.fields = r.form_data || {};
-                                    r.sitio = r.sitio || r.fields.sitio || r.fields.address || "";
-                                    r.address = r.sitio;
-                                });
-                                allRequests = dashboardRequests; // Link to global variable for script.js
-                                isAdminLoggedIn = true;          // So charts render dark mode correctly
-                                renderDashboardTable(dashboardRequests);
-                                try { renderCharts(); } catch(e) { if(!isAutoRefresh) console.warn("[Dashboard] Charts skipped:", e.message); }
-                            })
-                            .catch(err => {
-                                console.error("[Dashboard] Failed to load requests:", err);
-                                console.error("[Dashboard] Error details:", err.message, err.stack);
-                            });
+                let newHash = JSON.stringify(data.requests || []);
+                if (isAutoRefresh) {
+                    if (lastRequestsHash !== "" && lastRequestsHash !== newHash) {
+                        window.location.reload();
+                        return;
+                    } else {
+                        lastRequestsHash = newHash;
+                        return; // No layout update if no change
                     }
+                }
 
-                    function renderDashboardTable(reqs) {
-                        const tbody = document.getElementById("requests-tbody");
-                        const empty = document.getElementById("table-empty");
-                        const seeMore = document.getElementById("requests-see-more-container");
-                        tbody.innerHTML = "";
+                lastRequestsHash = newHash;
+                if (!isAutoRefresh) console.log("[Dashboard] Received", (data.requests || []).length, "requests");
 
-                        if (reqs.length === 0) {
-                            empty.classList.remove("hidden");
-                            if (seeMore) seeMore.classList.add("hidden");
-                            return;
-                        }
-                        empty.classList.add("hidden");
+                dashboardRequests = data.requests || [];
+                // Map Django fields to what script.js expects
+                dashboardRequests.forEach(r => {
+                    r.fields = r.form_data || {};
+                    r.sitio = r.sitio || r.fields.sitio || r.fields.address || "";
+                    r.address = r.sitio;
+                });
+                allRequests = dashboardRequests; // Link to global variable for script.js
+                isAdminLoggedIn = true;          // So charts render dark mode correctly
+                renderDashboardTable(dashboardRequests);
+                try { renderCharts(); } catch (e) { if (!isAutoRefresh) console.warn("[Dashboard] Charts skipped:", e.message); }
+            })
+            .catch(err => {
+                console.error("[Dashboard] Failed to load requests:", err);
+                console.error("[Dashboard] Error details:", err.message, err.stack);
+            });
+    }
 
-                        const displayReqs = showingAllRequests ? reqs : reqs.slice(0, 5);
+    function renderDashboardTable(reqs) {
+        const tbody = document.getElementById("requests-tbody");
+        const empty = document.getElementById("table-empty");
+        const seeMore = document.getElementById("requests-see-more-container");
+        tbody.innerHTML = "";
 
-                        displayReqs.forEach(req => {
-                            const bc = req.status === "Approved" ? "badge-approved" : req.status === "Rejected" ? "badge-rejected" : "badge-pending";
-                            const row = document.createElement("tr");
-                            row.className = "hover:bg-white/50 transition-colors cursor-pointer";
+        if (reqs.length === 0) {
+            empty.classList.remove("hidden");
+            if (seeMore) seeMore.classList.add("hidden");
+            return;
+        }
+        empty.classList.add("hidden");
 
-                            // Add View Cert button if approved
-                            const actionBtn = req.status === "Approved"
-                                ? `<button onclick="showCertificatePreview(dashboardRequests.find(r=>r.id===${req.id})); event.stopImmediatePropagation()"
+        const displayReqs = showingAllRequests ? reqs : reqs.slice(0, 5);
+
+        displayReqs.forEach(req => {
+            const bc = req.status === "Approved" ? "badge-approved" : req.status === "Rejected" ? "badge-rejected" : "badge-pending";
+            const row = document.createElement("tr");
+            row.className = "hover:bg-white/50 transition-colors cursor-pointer";
+
+            // Add View Cert button if approved
+            const actionBtn = req.status === "Approved"
+                ? `<button onclick="showCertificatePreview(dashboardRequests.find(r=>r.id===${req.id})); event.stopImmediatePropagation()"
                     class="px-4 sm:px-6 py-1.5 sm:py-2 text-xs border border-[#00B894]/40
                            hover:bg-[#00B894] hover:text-white hover:border-[#00B894]
                            transition-all rounded-xl font-semibold text-[#00B894]">
                     VIEW CERT
                 </button>`
-                                : `<button onclick="openAdminReview(${req.id}); event.stopImmediatePropagation()"
+                : `<button onclick="openAdminReview(${req.id}); event.stopImmediatePropagation()"
                     class="px-4 sm:px-6 py-1.5 sm:py-2 text-xs border border-[#2C7BE5]/40
                            hover:bg-[#2C7BE5] hover:text-white hover:border-[#2C7BE5]
                            transition-all rounded-xl font-semibold text-[#2C7BE5]">
                     REVIEW
                 </button>`;
 
-                            row.innerHTML = `
+            row.innerHTML = `
             <td class="px-6 sm:px-8 py-4 sm:py-6 font-mono text-[#2C7BE5] text-xs sm:text-sm font-medium">${req.tracking}</td>
             <td class="px-6 sm:px-8 py-4 sm:py-6 font-medium">${req.name}</td>
             <td class="px-6 sm:px-8 py-4 sm:py-6 text-[#333333]/70 text-xs sm:text-sm">${req.type}</td>
@@ -482,62 +510,62 @@
             <td class="px-6 sm:px-8 py-4 sm:py-6 text-right">
                 ${actionBtn}
             </td>`;
-                            row.onclick = () => openAdminReview(req.id);
-                            tbody.appendChild(row);
-                        });
+            row.onclick = () => openAdminReview(req.id);
+            tbody.appendChild(row);
+        });
 
-                        if (seeMore) {
-                            if (reqs.length > 5) {
-                                seeMore.classList.remove("hidden");
-                                const btn = document.getElementById("requests-see-more-btn");
-                                if (btn) {
-                                    btn.innerHTML = showingAllRequests 
-                                        ? 'See Less <i class="fa-solid fa-chevron-up ml-1"></i>' 
-                                        : 'See More <i class="fa-solid fa-chevron-down ml-1"></i>';
-                                }
-                            } else {
-                                seeMore.classList.add("hidden");
-                            }
-                        }
-                    }
+        if (seeMore) {
+            if (reqs.length > 5) {
+                seeMore.classList.remove("hidden");
+                const btn = document.getElementById("requests-see-more-btn");
+                if (btn) {
+                    btn.innerHTML = showingAllRequests
+                        ? 'See Less <i class="fa-solid fa-chevron-up ml-1"></i>'
+                        : 'See More <i class="fa-solid fa-chevron-down ml-1"></i>';
+                }
+            } else {
+                seeMore.classList.add("hidden");
+            }
+        }
+    }
 
-                    function toggleAllRequests() {
-                        showingAllRequests = !showingAllRequests;
-                        renderDashboardTable(dashboardRequests);
-                    }
+    function toggleAllRequests() {
+        showingAllRequests = !showingAllRequests;
+        renderDashboardTable(dashboardRequests);
+    }
 
-                    function filterDashboard() { showingAllRequests = false; loadDashboardRequests(); }
-                    function refreshDashboard() { showingAllRequests = false; loadDashboardRequests(); loadDashboardCharts(); showToast("Dashboard refreshed.", "Done", "success"); }
+    function refreshDashboard() { window.location.reload(); }
+    function filterDashboard() { showingAllRequests = false; loadDashboardRequests(); }
 
-                    // ── Review modal ──
-                    // NOTE: fieldLabels is already declared in script.js (global scope).
-                    // Do NOT re-declare it here with const/let — it causes a SyntaxError
-                    // that silently kills this entire script block.
+    // ── Review modal ──
+    // NOTE: fieldLabels is already declared in script.js (global scope).
+    // Do NOT re-declare it here with const/let — it causes a SyntaxError
+    // that silently kills this entire script block.
 
-                    function openAdminReview(id) {
-                        const req = dashboardRequests.find(r => r.id === id);
-                        if (!req) return;
-                        currentReviewRequest = req;
+    function openAdminReview(id) {
+        const req = dashboardRequests.find(r => r.id === id);
+        if (!req) return;
+        currentReviewRequest = req;
 
-                        const rows = Object.entries(req.form_data || {})
-                            .filter(([k, v]) => v && k !== "scholarshipData")
-                            .map(([k, v]) => ({ label: fieldLabels[k] || k, value: v }));
+        const rows = Object.entries(req.form_data || {})
+            .filter(([k, v]) => v && k !== "scholarshipData")
+            .map(([k, v]) => ({ label: fieldLabels[k] || k, value: v }));
 
-                        rows.push(
-                            { label: "Certificate Type", value: req.type },
-                            { label: "Purpose", value: req.purpose || "—" },
-                            { label: "Appointment", value: req.appointment || "Not set" },
-                            { label: "Date Submitted", value: req.date }
-                        );
+        rows.push(
+            { label: "Certificate Type", value: req.type },
+            { label: "Purpose", value: req.purpose || "—" },
+            { label: "Appointment", value: req.appointment || "Not set" },
+            { label: "Date Submitted", value: req.date }
+        );
 
-                        if (req.form_data?.scholarshipData) {
-                            const sd = req.form_data.scholarshipData;
-                            if (sd.studentName) rows.push({ label: "Student Name", value: sd.studentName });
-                            if (sd.school) rows.push({ label: "School", value: sd.school });
-                            if (sd.yearLevel) rows.push({ label: "Year Level", value: sd.yearLevel });
-                        }
+        if (req.form_data?.scholarshipData) {
+            const sd = req.form_data.scholarshipData;
+            if (sd.studentName) rows.push({ label: "Student Name", value: sd.studentName });
+            if (sd.school) rows.push({ label: "School", value: sd.school });
+            if (sd.yearLevel) rows.push({ label: "Year Level", value: sd.yearLevel });
+        }
 
-                        document.getElementById("review-content").innerHTML = `
+        document.getElementById("review-content").innerHTML = `
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
             ${rows.map(f => `
                 <div class="review-field">
@@ -545,271 +573,271 @@
                     <div class="font-semibold">${f.value}</div>
                 </div>`).join('')}
         </div>
-        <div class="pt-4 border-t border-white/60 text-xs text-[#333333]/40 mt-4">
+        <div class="pt-4 border-t border-white/60 text-xs text-[#333333]/40 mt-4 text-center">
             Tracking: ${req.tracking} • Submitted on ${req.date}
         </div>`;
 
-                        document.getElementById("review-tracking").textContent = req.tracking;
-                        openModal("review-modal");
-                    }
+        document.getElementById("review-tracking").textContent = req.tracking;
+        openModal("review-modal");
+    }
 
-                    function closeReviewModal() { closeModal("review-modal"); }
+    function closeReviewModal() { closeModal("review-modal"); }
 
-                    function updateRequestStatus(newStatus) {
-                        if (!currentReviewRequest) return;
+    function updateRequestStatus(newStatus) {
+        if (!currentReviewRequest) return;
 
-                        const csrfTokenEl = document.querySelector('[name=csrfmiddlewaretoken]');
-                        // Get CSRF from cookie if not in DOM
-                        const csrfVal = csrfTokenEl ? csrfTokenEl.value : getCookie("csrftoken");
+        const csrfTokenEl = document.querySelector('[name=csrfmiddlewaretoken]');
+        // Get CSRF from cookie if not in DOM
+        const csrfVal = csrfTokenEl ? csrfTokenEl.value : getCookie("csrftoken");
 
-                        fetch(`/api/update/${currentReviewRequest.id}/`, {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                                "X-CSRFToken": csrfVal,
-                            },
-                            body: JSON.stringify({ status: newStatus }),
-                        })
-                            .then(r => r.json())
-                            .then(data => {
-                                if (data.ok) {
-                                    closeReviewModal();
-                                    loadDashboardRequests();
-                                    // Also refresh stats
-                                    fetch("{% url 'admin_stats_api' %}")
-                                        .then(r => r.json())
-                                        .then(s => {
-                                            animateCounter("stat-today", s.today);
-                                            animateCounter("stat-pending", s.pending);
-                                            animateCounter("stat-approved", s.approved);
-                                            animateCounter("stat-month", s.total);
-                                        });
-                                    showToast(
-                                        newStatus === "Approved" ? "Certificate approved!" : "Request rejected.",
-                                        newStatus === "Approved" ? "Approved" : "Rejected",
-                                        newStatus === "Approved" ? "success" : "error"
-                                    );
-                                } else {
-                                    showToast(data.error || "Something went wrong.", "Error", "error");
-                                }
-                            })
-                            .catch(err => {
-                                console.error(err);
-                                showToast("Network error.", "Error", "error");
-                            });
-                    }
+        fetch(`/api/update/${currentReviewRequest.id}/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfVal,
+            },
+            body: JSON.stringify({ status: newStatus }),
+        })
+            .then(r => r.json())
+            .then(data => {
+                if (data.ok) {
+                    closeReviewModal();
+                    loadDashboardRequests();
+                    // Also refresh stats
+                    fetch("{% url 'admin_stats_api' %}")
+                        .then(r => r.json())
+                        .then(s => {
+                            animateCounter("stat-today", s.today);
+                            animateCounter("stat-pending", s.pending);
+                            animateCounter("stat-approved", s.approved);
+                            animateCounter("stat-month", s.total);
+                        });
+                    showToast(
+                        newStatus === "Approved" ? "Certificate approved!" : "Request rejected.",
+                        newStatus === "Approved" ? "Approved" : "Rejected",
+                        newStatus === "Approved" ? "success" : "error"
+                    );
+                } else {
+                    showToast(data.error || "Something went wrong.", "Error", "error");
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                showToast("Network error.", "Error", "error");
+            });
+    }
 
-                    // Helper: animate counter
-                    function animateCounter(id, target) {
-                        const el = document.getElementById(id); if (!el) return;
-                        const start = parseInt(el.textContent) || 0, diff = target - start, t0 = performance.now();
-                        const step = now => {
-                            const p = Math.min((now - t0) / 600, 1);
-                            el.textContent = Math.round(start + diff * (1 - Math.pow(1 - p, 3)));
-                            if (p < 1) requestAnimationFrame(step);
-                        };
-                        requestAnimationFrame(step);
-                    }
+    // Helper: animate counter
+    function animateCounter(id, target) {
+        const el = document.getElementById(id); if (!el) return;
+        const start = parseInt(el.textContent) || 0, diff = target - start, t0 = performance.now();
+        const step = now => {
+            const p = Math.min((now - t0) / 600, 1);
+            el.textContent = Math.round(start + diff * (1 - Math.pow(1 - p, 3)));
+            if (p < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+    }
 
-                    // Helper: get CSRF cookie
-                    function getCookie(name) {
-                        const v = `; ${document.cookie}`;
-                        const parts = v.split(`; ${name}=`);
-                        if (parts.length === 2) return parts.pop().split(';').shift();
-                        return '';
-                    }
+    // Helper: get CSRF cookie
+    function getCookie(name) {
+        const v = `; ${document.cookie}`;
+        const parts = v.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return '';
+    }
 
-                    // ── Setup backdrop close for review modal ──
-                    (function () {
-                        const el = document.getElementById("review-modal");
-                        if (el) el.addEventListener("click", e => { if (e.target === el) closeModal("review-modal"); });
-                        const certEl = document.getElementById("cert-preview-modal");
-                        if (certEl) certEl.addEventListener("click", e => { if (e.target === certEl) closeModal("cert-preview-modal"); });
-                    })();
+    // ── Setup backdrop close for review modal ──
+    (function () {
+        const el = document.getElementById("review-modal");
+        if (el) el.addEventListener("click", e => { if (e.target === el) closeModal("review-modal"); });
+        const certEl = document.getElementById("cert-preview-modal");
+        if (certEl) certEl.addEventListener("click", e => { if (e.target === certEl) closeModal("cert-preview-modal"); });
+    })();
 
-                    // ── Login History ──
-                    let allLoginLogs = [];
-                    let showingAllLogs = false;
+    // ── Login History ──
+    let allLoginLogs = [];
+    let showingAllLogs = false;
 
-                    function loadLoginLogs() {
-                        fetch("{% url 'login_logs_api' %}")
-                            .then(r => {
-                                if (!r.ok) throw new Error("HTTP " + r.status);
-                                return r.json();
-                            })
-                            .then(data => {
-                                allLoginLogs = data.logs || [];
-                                showingAllLogs = false;
-                                renderLoginLogs();
-                            })
-                            .catch(err => console.error("Failed to load login logs:", err));
-                    }
+    function loadLoginLogs() {
+        fetch("{% url 'login_logs_api' %}")
+            .then(r => {
+                if (!r.ok) throw new Error("HTTP " + r.status);
+                return r.json();
+            })
+            .then(data => {
+                allLoginLogs = data.logs || [];
+                showingAllLogs = false;
+                renderLoginLogs();
+            })
+            .catch(err => console.error("Failed to load login logs:", err));
+    }
 
-                    function renderLoginLogs() {
-                        const tbody = document.getElementById("login-logs-tbody");
-                        const empty = document.getElementById("login-logs-empty");
-                        const seeMore = document.getElementById("login-logs-see-more-container");
-                        if (!tbody) return;
-                        tbody.innerHTML = "";
+    function renderLoginLogs() {
+        const tbody = document.getElementById("login-logs-tbody");
+        const empty = document.getElementById("login-logs-empty");
+        const seeMore = document.getElementById("login-logs-see-more-container");
+        if (!tbody) return;
+        tbody.innerHTML = "";
 
-                        if (allLoginLogs.length === 0) {
-                            empty.classList.remove("hidden");
-                            if (seeMore) seeMore.classList.add("hidden");
-                            return;
-                        }
-                        empty.classList.add("hidden");
+        if (allLoginLogs.length === 0) {
+            empty.classList.remove("hidden");
+            if (seeMore) seeMore.classList.add("hidden");
+            return;
+        }
+        empty.classList.add("hidden");
 
-                        const displayLogs = showingAllLogs ? allLoginLogs : allLoginLogs.slice(0, 5);
+        const displayLogs = showingAllLogs ? allLoginLogs : allLoginLogs.slice(0, 5);
 
-                        displayLogs.forEach(log => {
-                            const statusColor = log.status === "Success"
-                                ? "badge-approved" : "badge-rejected";
-                            const row = document.createElement("tr");
-                            row.className = "hover:bg-white/50 transition-colors";
-                            row.innerHTML = `
+        displayLogs.forEach(log => {
+            const statusColor = log.status === "Success"
+                ? "badge-approved" : "badge-rejected";
+            const row = document.createElement("tr");
+            row.className = "hover:bg-white/50 transition-colors";
+            row.innerHTML = `
                                 <td class="px-6 sm:px-8 py-4 font-medium">${log.email}</td>
                                 <td class="px-6 sm:px-8 py-4 text-[#333333]/60 text-xs">${log.timestamp}</td>
                                 <td class="px-6 sm:px-8 py-4 font-mono text-xs text-[#2C7BE5]">${log.ip_address}</td>
                                 <td class="px-6 sm:px-8 py-4"><span class="${statusColor}">${log.status}</span></td>`;
-                            tbody.appendChild(row);
-                        });
+            tbody.appendChild(row);
+        });
 
-                        if (seeMore) {
-                            if (allLoginLogs.length > 5) {
-                                seeMore.classList.remove("hidden");
-                                const btn = document.getElementById("login-logs-see-more-btn");
-                                if (btn) {
-                                    btn.innerHTML = showingAllLogs 
-                                        ? 'See Less <i class="fa-solid fa-chevron-up ml-1"></i>' 
-                                        : 'See More <i class="fa-solid fa-chevron-down ml-1"></i>';
-                                }
-                            } else {
-                                seeMore.classList.add("hidden");
-                            }
-                        }
-                    }
+        if (seeMore) {
+            if (allLoginLogs.length > 5) {
+                seeMore.classList.remove("hidden");
+                const btn = document.getElementById("login-logs-see-more-btn");
+                if (btn) {
+                    btn.innerHTML = showingAllLogs
+                        ? 'See Less <i class="fa-solid fa-chevron-up ml-1"></i>'
+                        : 'See More <i class="fa-solid fa-chevron-down ml-1"></i>';
+                }
+            } else {
+                seeMore.classList.add("hidden");
+            }
+        }
+    }
 
-                    function toggleAllLoginLogs() {
-                        showingAllLogs = !showingAllLogs;
-                        renderLoginLogs();
-                    }
+    function toggleAllLoginLogs() {
+        showingAllLogs = !showingAllLogs;
+        renderLoginLogs();
+    }
 
-                    // Prevent script.js initializeApp from running and breaking the dashboard
-                    window.onload = function () {
-                        applyStoredDarkMode();
-                        // Do NOT call switchView or loadFromLocalStorage
-                    };
+    // Prevent script.js initializeApp from running and breaking the dashboard
+    window.onload = function () {
+        applyStoredDarkMode();
+        // Do NOT call switchView or loadFromLocalStorage
+    };
 
-                    // ── Analytical Charts ──
-                    function loadDashboardCharts() {
-                        const isDark = document.documentElement.classList.contains('dark');
-                        Chart.defaults.color = isDark ? '#9ba1a8' : '#6b7280';
-                        Chart.defaults.borderColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
-                        Chart.defaults.animation = false;
+    // ── Analytical Charts ──
+    function loadDashboardCharts() {
+        const isDark = document.documentElement.classList.contains('dark');
+        Chart.defaults.color = isDark ? '#9ba1a8' : '#6b7280';
+        Chart.defaults.borderColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
+        Chart.defaults.animation = false;
 
-                        fetch("/api/stats/")
-                            .then(r => r.json())
-                            .then(data => {
-                                // 1. Type Distribution (Pie)
-                                const typeCanvas = document.getElementById("typeChart");
-                                if (typeCanvas && data.type_distribution) {
-                                    const labels = data.type_distribution.map(d => d.certificate_type);
-                                    const values = data.type_distribution.map(d => d.count);
-                                    
-                                    if (typeChartInstance) typeChartInstance.destroy();
-                                    typeChartInstance = new Chart(typeCanvas, {
-                                        type: 'pie',
-                                        data: {
-                                            labels: labels,
-                                            datasets: [{
-                                                data: values,
-                                                backgroundColor: ['#2C7BE5', '#00B894', '#FFB020', '#FF5D5D', '#9155FD', '#17A2B8', '#6C757D', '#20C997'],
-                                                borderWidth: 1,
-                                                borderColor: '#ffffff'
-                                            }]
-                                        },
-                                        options: { maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: {size: 10} } } } }
-                                    });
-                                }
+        fetch("/api/stats/")
+            .then(r => r.json())
+            .then(data => {
+                // 1. Type Distribution (Pie)
+                const typeCanvas = document.getElementById("typeChart");
+                if (typeCanvas && data.type_distribution) {
+                    const labels = data.type_distribution.map(d => d.certificate_type);
+                    const values = data.type_distribution.map(d => d.count);
 
-                                // 2. Weekly Distribution (Line)
-                                const weekCanvas = document.getElementById("weeklyChart");
-                                if (weekCanvas && data.weekly_distribution) {
-                                    const labels = data.weekly_distribution.map(d => d.date);
-                                    const values = data.weekly_distribution.map(d => d.count);
-                                    
-                                    if (weeklyChartInstance) weeklyChartInstance.destroy();
-                                    weeklyChartInstance = new Chart(weekCanvas, {
-                                        type: 'line',
-                                        data: {
-                                            labels: labels,
-                                            datasets: [{
-                                                label: 'Requests',
-                                                data: values,
-                                                borderColor: '#2C7BE5',
-                                                backgroundColor: '#2C7BE5',
-                                                borderWidth: 3,
-                                                fill: false,
-                                                tension: 0.1
-                                            }]
-                                        },
-                                        options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
-                                    });
-                                }
+                    if (typeChartInstance) typeChartInstance.destroy();
+                    typeChartInstance = new Chart(typeCanvas, {
+                        type: 'pie',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                data: values,
+                                backgroundColor: ['#2C7BE5', '#00B894', '#FFB020', '#FF5D5D', '#9155FD', '#17A2B8', '#6C757D', '#20C997'],
+                                borderWidth: 1,
+                                borderColor: '#ffffff'
+                            }]
+                        },
+                        options: { maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } } } }
+                    });
+                }
 
-                                // 3. Monthly Distribution (Bar)
-                                const monthCanvas = document.getElementById("monthlyChart");
-                                if (monthCanvas && data.monthly_distribution) {
-                                    const labels = data.monthly_distribution.map(d => d.date);
-                                    const values = data.monthly_distribution.map(d => d.count);
-                                    
-                                    if (monthlyChartInstance) monthlyChartInstance.destroy();
-                                    monthlyChartInstance = new Chart(monthCanvas, {
-                                        type: 'bar',
-                                        data: {
-                                            labels: labels,
-                                            datasets: [{
-                                                label: 'Requests',
-                                                data: values,
-                                                backgroundColor: '#00B894',
-                                                borderRadius: 4
-                                            }]
-                                        },
-                                        options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } } } }
-                                    });
-                                }
+                // 2. Weekly Distribution (Line)
+                const weekCanvas = document.getElementById("weeklyChart");
+                if (weekCanvas && data.weekly_distribution) {
+                    const labels = data.weekly_distribution.map(d => d.date);
+                    const values = data.weekly_distribution.map(d => d.count);
 
-                                // 4. Yearly Distribution (Line)
-                                const yearCanvas = document.getElementById("yearlyChart");
-                                if (yearCanvas && data.yearly_distribution) {
-                                    const labels = data.yearly_distribution.map(d => d.month);
-                                    const values = data.yearly_distribution.map(d => d.count);
-                                    
-                                    if (yearlyChartInstance) yearlyChartInstance.destroy();
-                                    yearlyChartInstance = new Chart(yearCanvas, {
-                                        type: 'line',
-                                        data: {
-                                            labels: labels,
-                                            datasets: [{
-                                                label: 'Requests',
-                                                data: values,
-                                                borderColor: '#9155FD',
-                                                backgroundColor: 'rgba(145, 85, 253, 0.35)',
-                                                borderWidth: 2,
-                                                fill: 'origin',
-                                                tension: 0.4
-                                            }]
-                                        },
-                                        options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
-                                    });
-                                }
-                            })
-                            .catch(err => console.error("Error loading charts:", err));
-                    }
+                    if (weeklyChartInstance) weeklyChartInstance.destroy();
+                    weeklyChartInstance = new Chart(weekCanvas, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Requests',
+                                data: values,
+                                borderColor: '#2C7BE5',
+                                backgroundColor: '#2C7BE5',
+                                borderWidth: 3,
+                                fill: false,
+                                tension: 0.1
+                            }]
+                        },
+                        options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+                    });
+                }
 
-                    // ── Initial load ──
-                    loadDashboardRequests();
-                    loadDashboardCharts();
-                    loadLoginLogs();
-                </script>
-                {% endblock %}
+                // 3. Monthly Distribution (Bar)
+                const monthCanvas = document.getElementById("monthlyChart");
+                if (monthCanvas && data.monthly_distribution) {
+                    const labels = data.monthly_distribution.map(d => d.date);
+                    const values = data.monthly_distribution.map(d => d.count);
+
+                    if (monthlyChartInstance) monthlyChartInstance.destroy();
+                    monthlyChartInstance = new Chart(monthCanvas, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Requests',
+                                data: values,
+                                backgroundColor: '#00B894',
+                                borderRadius: 4
+                            }]
+                        },
+                        options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } } } }
+                    });
+                }
+
+                // 4. Yearly Distribution (Line)
+                const yearCanvas = document.getElementById("yearlyChart");
+                if (yearCanvas && data.yearly_distribution) {
+                    const labels = data.yearly_distribution.map(d => d.month);
+                    const values = data.yearly_distribution.map(d => d.count);
+
+                    if (yearlyChartInstance) yearlyChartInstance.destroy();
+                    yearlyChartInstance = new Chart(yearCanvas, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Requests',
+                                data: values,
+                                borderColor: '#9155FD',
+                                backgroundColor: 'rgba(145, 85, 253, 0.35)',
+                                borderWidth: 2,
+                                fill: 'origin',
+                                tension: 0.4
+                            }]
+                        },
+                        options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+                    });
+                }
+            })
+            .catch(err => console.error("Error loading charts:", err));
+    }
+
+    // ── Initial load ──
+    loadDashboardRequests();
+    loadDashboardCharts();
+    loadLoginLogs();
+</script>
+{% endblock %}

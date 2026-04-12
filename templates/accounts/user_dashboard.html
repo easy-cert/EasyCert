@@ -16,8 +16,8 @@
                 <h1 class="text-2xl sm:text-3xl font-bold tracking-tight"><span class="easycert-easy">Easy</span><span
                         class="text-[#28DF97]">Cert</span></h1>
                 <p class="text-xs text-[#00B894] font-medium -mt-1">
-                    {% if user.barangay %}Barangay {{ user.barangay.barangay_name }}{% else %}Barangay {{
-                    membership.barangay.barangay_name }}{% endif %}
+                    {% if user.barangay %}Barangay {{ user.barangay.barangay_name }}{% else %}Barangay
+                    {{ membership.barangay.barangay_name }}{% endif %}
                 </p>
             </div>
         </div>
@@ -268,11 +268,13 @@
         {% endif %}
 
         <style>
-            .request-row, .ticket-row {
+            .request-row,
+            .ticket-row {
                 transition: opacity 0.3s ease, max-height 0.3s ease;
             }
 
-            .hidden-row, .hidden-ticket-row {
+            .hidden-row,
+            .hidden-ticket-row {
                 display: none;
                 opacity: 0;
             }
@@ -282,12 +284,14 @@
                 opacity: 1;
             }
 
-            .hidden-row.show-row, .hidden-ticket-row.show-row {
+            .hidden-row.show-row,
+            .hidden-ticket-row.show-row {
                 display: table-row;
                 opacity: 1;
             }
 
-            #toggleHistoryIcon.rotated, #toggleTicketIcon.rotated {
+            #toggleHistoryIcon.rotated,
+            #toggleTicketIcon.rotated {
                 transform: rotate(180deg);
             }
         </style>
@@ -379,7 +383,8 @@
                 </thead>
                 <tbody class="text-sm divide-y divide-white/50">
                     {% for t in my_tickets %}
-                    <tr class="hover:bg-white/50 transition-colors ticket-row {% if forloop.counter > 5 %}hidden-ticket-row{% endif %}">
+                    <tr
+                        class="hover:bg-white/50 transition-colors ticket-row {% if forloop.counter > 5 %}hidden-ticket-row{% endif %}">
                         <td class="px-6 sm:px-8 py-4 sm:py-5 font-mono text-[#2C7BE5] text-xs font-medium">
                             #{{ t.id }}
                         </td>
@@ -415,8 +420,7 @@
             <button id="toggleTicketBtn" onclick="toggleTicketHistory()" class="inline-flex items-center gap-x-2 px-6 py-2.5 bg-[#2C7BE5]/10 hover:bg-[#2C7BE5]/20
                        text-[#2C7BE5] font-semibold text-sm rounded-2xl transition-all">
                 <span id="toggleTicketText">See More</span>
-                <i id="toggleTicketIcon"
-                    class="fa-solid fa-chevron-down text-xs transition-transform duration-300"></i>
+                <i id="toggleTicketIcon" class="fa-solid fa-chevron-down text-xs transition-transform duration-300"></i>
             </button>
         </div>
         {% endif %}
@@ -502,13 +506,13 @@
         document.getElementById('support-form').reset();
     }
 
-    document.getElementById('support-modal').addEventListener('click', function(e) {
+    document.getElementById('support-modal').addEventListener('click', function (e) {
         if (e.target === this) {
             closeSupportModal();
         }
     });
 
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && !document.getElementById('support-modal').classList.contains('hidden')) {
             closeSupportModal();
         }
@@ -578,52 +582,42 @@
         setInterval(() => {
             // Do not poll if support modal is open
             if (!document.getElementById('support-modal').classList.contains('hidden')) return;
-            
+
             fetch(window.location.href, { credentials: 'same-origin' })
-            .then(res => res.text())
-            .then(html => {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, "text/html");
-                
-                const newRequestsTbody = doc.getElementById('requests-tbody') ? doc.getElementById('requests-tbody').innerHTML : "";
-                const currentRequestsTbody = document.getElementById('requests-tbody') ? document.getElementById('requests-tbody').innerHTML : "";
-                
-                const newSupportTbody = doc.getElementById('support-tbody') ? doc.getElementById('support-tbody').innerHTML : "";
-                const currentSupportTbody = document.getElementById('support-tbody') ? document.getElementById('support-tbody').innerHTML : "";
-                
-                let changed = false;
-                
-                // Compare by stripping whitespaces to avoid minor parsing diffs triggering a false positive
-                if (newRequestsTbody && newRequestsTbody.replace(/\s/g, '') !== currentRequestsTbody.replace(/\s/g, '')) {
-                    document.getElementById('requests-tbody').innerHTML = newRequestsTbody;
-                    if (typeof historyExpanded !== 'undefined' && historyExpanded) {
-                        document.querySelectorAll('#requests-tbody .hidden-row').forEach(r => r.classList.add('show-row'));
-                    }
-                    changed = true;
-                }
-                
-                if (newSupportTbody && newSupportTbody.replace(/\s/g, '') !== currentSupportTbody.replace(/\s/g, '')) {
-                    document.getElementById('support-tbody').innerHTML = newSupportTbody;
-                    if (typeof ticketExpanded !== 'undefined' && ticketExpanded) {
-                        document.querySelectorAll('#support-tbody .hidden-ticket-row').forEach(r => r.classList.add('show-row'));
-                    }
-                    changed = true;
-                }
-                
-                if (changed) {
-                    if (typeof showToast === "function") showToast("Dashboard records updated!", "Real-Time Sync", "info");
-                    
-                    // Update stats counters
-                    const statSelectors = ['.text-[#00B894]', '.text-amber-500', '.text-red-500', '.text-[#2C7BE5]'];
-                    statSelectors.forEach(selectClass => {
-                        const newEl = doc.querySelector(`.grid.grid-cols-2.sm\\:grid-cols-4 ${selectClass}`);
-                        const curEl = document.querySelector(`.grid.grid-cols-2.sm\\:grid-cols-4 ${selectClass}`);
-                        if (newEl && curEl) {
-                            curEl.textContent = newEl.textContent;
+                .then(res => res.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, "text/html");
+
+                    const newRequestsTbody = doc.getElementById('requests-tbody') ? doc.getElementById('requests-tbody').innerHTML : "";
+                    const currentRequestsTbody = document.getElementById('requests-tbody') ? document.getElementById('requests-tbody').innerHTML : "";
+
+                    const newSupportTbody = doc.getElementById('support-tbody') ? doc.getElementById('support-tbody').innerHTML : "";
+                    const currentSupportTbody = document.getElementById('support-tbody') ? document.getElementById('support-tbody').innerHTML : "";
+
+                    let changed = false;
+
+                    // Compare by stripping whitespaces to avoid minor parsing diffs triggering a false positive
+                    if (newRequestsTbody && newRequestsTbody.replace(/\s/g, '') !== currentRequestsTbody.replace(/\s/g, '')) {
+                        document.getElementById('requests-tbody').innerHTML = newRequestsTbody;
+                        if (typeof historyExpanded !== 'undefined' && historyExpanded) {
+                            document.querySelectorAll('#requests-tbody .hidden-row').forEach(r => r.classList.add('show-row'));
                         }
-                    });
-                }
-            });
+                        changed = true;
+                    }
+
+                    if (newSupportTbody && newSupportTbody.replace(/\s/g, '') !== currentSupportTbody.replace(/\s/g, '')) {
+                        document.getElementById('support-tbody').innerHTML = newSupportTbody;
+                        if (typeof ticketExpanded !== 'undefined' && ticketExpanded) {
+                            document.querySelectorAll('#support-tbody .hidden-ticket-row').forEach(r => r.classList.add('show-row'));
+                        }
+                        changed = true;
+                    }
+
+                    if (changed) {
+                        window.location.reload();
+                    }
+                });
         }, 10000); // 10s auto-refresh
     });
 </script>

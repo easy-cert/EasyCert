@@ -572,6 +572,60 @@
         }
         return cookieValue;
     }
+
+    // --- Resident Dashboard Real-Time Soft-Polling ---
+    document.addEventListener("DOMContentLoaded", () => {
+        setInterval(() => {
+            // Do not poll if support modal is open
+            if (!document.getElementById('support-modal').classList.contains('hidden')) return;
+            
+            fetch(window.location.href, { credentials: 'same-origin' })
+            .then(res => res.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, "text/html");
+                
+                const newRequestsTbody = doc.getElementById('requests-tbody') ? doc.getElementById('requests-tbody').innerHTML : "";
+                const currentRequestsTbody = document.getElementById('requests-tbody') ? document.getElementById('requests-tbody').innerHTML : "";
+                
+                const newSupportTbody = doc.getElementById('support-tbody') ? doc.getElementById('support-tbody').innerHTML : "";
+                const currentSupportTbody = document.getElementById('support-tbody') ? document.getElementById('support-tbody').innerHTML : "";
+                
+                let changed = false;
+                
+                // Compare by stripping whitespaces to avoid minor parsing diffs triggering a false positive
+                if (newRequestsTbody && newRequestsTbody.replace(/\s/g, '') !== currentRequestsTbody.replace(/\s/g, '')) {
+                    document.getElementById('requests-tbody').innerHTML = newRequestsTbody;
+                    if (typeof historyExpanded !== 'undefined' && historyExpanded) {
+                        document.querySelectorAll('#requests-tbody .hidden-row').forEach(r => r.classList.add('show-row'));
+                    }
+                    changed = true;
+                }
+                
+                if (newSupportTbody && newSupportTbody.replace(/\s/g, '') !== currentSupportTbody.replace(/\s/g, '')) {
+                    document.getElementById('support-tbody').innerHTML = newSupportTbody;
+                    if (typeof ticketExpanded !== 'undefined' && ticketExpanded) {
+                        document.querySelectorAll('#support-tbody .hidden-ticket-row').forEach(r => r.classList.add('show-row'));
+                    }
+                    changed = true;
+                }
+                
+                if (changed) {
+                    if (typeof showToast === "function") showToast("Dashboard records updated!", "Real-Time Sync", "info");
+                    
+                    // Update stats counters
+                    const statSelectors = ['.text-[#00B894]', '.text-amber-500', '.text-red-500', '.text-[#2C7BE5]'];
+                    statSelectors.forEach(selectClass => {
+                        const newEl = doc.querySelector(`.grid.grid-cols-2.sm\\:grid-cols-4 ${selectClass}`);
+                        const curEl = document.querySelector(`.grid.grid-cols-2.sm\\:grid-cols-4 ${selectClass}`);
+                        if (newEl && curEl) {
+                            curEl.textContent = newEl.textContent;
+                        }
+                    });
+                }
+            });
+        }, 10000); // 10s auto-refresh
+    });
 </script>
 
 {% endblock %}

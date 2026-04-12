@@ -22,15 +22,10 @@
         </div>
 
         <div class="flex items-center gap-x-1 bg-white/80 rounded-3xl p-1 shadow-inner order-3 sm:order-2">
-            <a href="{% url 'admin_dashboard' %}"
+            <a href="{% url 'superadmin_dashboard' %}"
                 class="relative px-4 sm:px-6 py-2 sm:py-3 rounded-3xl font-semibold transition-all flex items-center gap-x-2 text-sm sm:text-base text-[#333333]/60 hover:text-[#2C7BE5] hover:bg-[#2C7BE5]/5">
-                <i class="fa-solid fa-file-signature text-[#2C7BE5]"></i>
-                <span class="hidden sm:inline">Certificates</span>
-            </a>
-            <a href="{% url 'admin_memberships' %}"
-                class="relative px-4 sm:px-6 py-2 sm:py-3 rounded-3xl font-semibold transition-all flex items-center gap-x-2 text-sm sm:text-base text-[#333333]/60 hover:text-[#2C7BE5] hover:bg-[#2C7BE5]/5">
-                <i class="fa-solid fa-users text-[#00B894]"></i>
-                <span class="hidden sm:inline">Memberships</span>
+                <i class="fa-solid fa-chart-line"></i>
+                <span class="hidden sm:inline">System Dashboard</span>
             </a>
             <button class="relative px-4 sm:px-6 py-2 sm:py-3 rounded-3xl font-semibold transition-all flex items-center gap-x-2 text-sm sm:text-base bg-[#2C7BE5] text-white shadow-md">
                 <i class="fa-solid fa-headset"></i>
@@ -216,20 +211,36 @@
     let ticketsData = [];
     let currentTicketId = null;
     let ticketExpanded = false;
+    let lastTicketsHash = "";
 
     document.addEventListener("DOMContentLoaded", () => {
         runSearch();
+        setInterval(() => {
+            runSearch(true);
+        }, 10000);
     });
 
     function getCsrf() {
         return '{{ csrf_token }}';
     }
 
-    function runSearch() {
+    function runSearch(isAutoRefresh = false) {
+        if (isAutoRefresh && !document.getElementById("modal-overlay").classList.contains("hidden")) return;
+
         const status = document.getElementById('status-filter').value;
         fetch(`/api/support/?status=${status}`)
             .then(res => res.json())
             .then(data => {
+                let newHash = JSON.stringify(data.tickets || []);
+                if (isAutoRefresh) {
+                    if (lastTicketsHash !== "" && lastTicketsHash !== newHash) {
+                        if (typeof showToast === "function") showToast("New support ticket update received!", "Real-Time Sync", "info");
+                    } else {
+                        lastTicketsHash = newHash;
+                        return;
+                    }
+                }
+                lastTicketsHash = newHash;
                 ticketsData = data.tickets || [];
                 updateStats(data.stats);
                 renderTable(ticketsData);
@@ -266,9 +277,13 @@
         if(document.getElementById('toggleTicketIcon')) document.getElementById('toggleTicketIcon').classList.remove('rotated');
 
         tickets.forEach((t, index) => {
-            let statusClass = "bg-amber-50 text-amber-600 border-amber-200";
-            if (t.status === "In Progress") statusClass = "bg-blue-50 text-[#2C7BE5] border-blue-200";
-            if (t.status === "Resolved") statusClass = "bg-[#00B894]/10 text-[#00B894] border-[#00B894]/20";
+            let statusBadge = `<span class="px-3 py-1.5 bg-amber-50 text-amber-600 border border-amber-200 text-[10px] font-bold uppercase tracking-wider rounded-lg dark:bg-amber-900/30 dark:border-amber-800 dark:text-amber-400">${t.status}</span>`;
+            if (t.status === "In Progress") {
+                statusBadge = `<span class="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg" style="color: #2C7BE5; background: rgba(44,123,229,0.1); border: 1px solid rgba(44,123,229,0.2);">${t.status}</span>`;
+            }
+            if (t.status === "Resolved") {
+                statusBadge = `<span class="px-3 py-1.5 bg-[#00B894]/10 text-[#00B894] border border-[#00B894]/20 text-[10px] font-bold uppercase tracking-wider rounded-lg dark:bg-[#00B894]/20 dark:border-[#00B894]/30">${t.status}</span>`;
+            }
 
             let messagePreview = t.message.substring(0, 50);
             if (t.message.length > 50) messagePreview += "...";
@@ -284,13 +299,12 @@
                 <td class="px-8 py-6">
                     <p class="font-mono text-xs text-[#2C7BE5] font-bold mb-1">#${t.id}</p>
                     <p class="font-bold text-[#0D1B2A] leading-tight">${t.user_name}</p>
+                    <p class="text-[10px] font-semibold text-[#333333]/50 tracking-wider uppercase mt-1 flex items-center gap-x-1"><i class="fa-solid fa-location-dot text-[#2C7BE5]/40"></i> ${t.barangay_name}</p>
                 </td>
                 <td class="px-6 py-6 font-bold text-[#333333]">${t.concern_type}</td>
                 <td class="px-6 py-6 text-xs text-[#333333]/60">${messagePreview}</td>
                 <td class="px-6 py-6">
-                    <span class="px-3 py-1.5 ${statusClass} text-[10px] font-bold uppercase tracking-wider rounded-lg border">
-                        ${t.status}
-                    </span>
+                    ${statusBadge}
                 </td>
                 <td class="px-8 py-6 text-right text-xs text-[#333333]/50 font-medium">${t.created_at}</td>
             `;
@@ -331,7 +345,7 @@
 
         document.getElementById('modal-ticket-id').textContent = t.id;
         document.getElementById('modal-concern-type').textContent = t.concern_type;
-        document.getElementById('modal-user-info').textContent = `From ${t.user_name} (${t.user_email})`;
+        document.getElementById('modal-user-info').textContent = `From ${t.user_name} (${t.user_email}) • ${t.barangay_name}`;
         document.getElementById('modal-message').textContent = t.message;
         
         let bb = document.getElementById('modal-status-badge');

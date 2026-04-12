@@ -24,6 +24,12 @@
                 System Dashboard
             </a>
             <div class="h-6 w-px bg-black/10 hidden sm:block"></div>
+            <a href="{% url 'admin_support' %}"
+                class="hidden sm:flex items-center gap-x-2 text-sm font-medium text-[#333333]/60 hover:text-[#2C7BE5] transition-colors">
+                <i class="fa-solid fa-headset"></i>
+                Customer Service
+            </a>
+            <div class="h-6 w-px bg-black/10 hidden sm:block"></div>
             <a href="{% url 'logout' %}"
                 class="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl flex items-center gap-x-2 text-sm font-medium border border-red-200 transition-all shadow-sm">
                 <i class="fa-solid fa-right-from-bracket"></i>
@@ -87,41 +93,45 @@
                 </h3>
             </div>
 
-            <div class="glass-dark rounded-[2.5rem] overflow-hidden border border-white/20 shadow-2xl">
+            <div
+                class="bg-white dark:bg-[#0F172A] rounded-[2.5rem] overflow-hidden border border-slate-200 dark:border-slate-800 shadow-xl">
                 <div class="overflow-x-auto">
-                    <table class="w-full">
+                    <table class="w-full border-collapse">
                         <thead>
                             <tr
-                                class="text-left text-[10px] font-black text-[#333333]/50 uppercase tracking-[0.1em] border-b border-black/5">
-                                <th class="px-8 py-6">ADMINISTRATOR</th>
-                                <th class="px-6 py-6">JURISDICTION</th>
-                                <th class="px-6 py-6">STATUS</th>
-                                <th class="px-8 py-6 text-right">ACTIONS</th>
+                                class="text-left text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-transparent">
+                                <th class="px-8 py-5">ADMINISTRATOR</th>
+                                <th class="px-6 py-5">JURISDICTION</th>
+                                <th class="px-6 py-5">STATUS</th>
+                                <th class="px-8 py-5 text-right">ACTIONS</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-black/5">
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
                             {% for admin in admins %}
-                            <tr class="group hover:bg-white/40 transition-all duration-300">
-                                <td class="px-8 py-7">
+                            <tr
+                                class="group hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors duration-200">
+                                <td class="px-6 py-5">
                                     <div class="flex items-center gap-x-4">
                                         <div
                                             class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#2C7BE5] to-[#1a68d1] flex items-center justify-center text-white font-bold text-lg shadow-lg group-hover:rotate-6 transition-transform">
                                             {{ admin.full_name|slice:":1" }}
                                         </div>
                                         <div>
-                                            <p class="font-bold text-[#0D1B2A] text-lg leading-tight">
+                                            <p class="font-bold text-[#0D1B2A] dark:text-white text-lg leading-tight">
                                                 {{ admin.full_name }}</p>
-                                            <p class="text-xs text-[#333333]/50">{{ admin.email }}</p>
+                                            <p class="text-xs text-[#333333]/50 dark:text-white/50">
+                                                {{ admin.email }}
+                                            </p>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-1 py-7">
+                                <td class="px-1 py-5">
                                     <span
-                                        class="px-2 py-1.5 bg-[#2C7BE5]/10 text-[#2C7BE5] text-sm font-bold rounded-xl border border-[#2C7BE5]/20">
+                                        class="px-3 py-1.5 bg-[#2C7BE5]/10 text-[#2C7BE5] dark:bg-[#2C7BE5]/20 text-sm font-bold rounded-lg border border-[#2C7BE5]/20 whitespace-nowrap">
                                         {{ admin.barangay.barangay_name }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-7">
+                                <td class="px-6 py-5">
                                     {% if admin.is_active %}
                                     <div class="flex items-center gap-x-2 text-[#00B894] font-bold text-sm">
                                         <div class="w-2 h-2 rounded-full bg-[#00B894] animate-pulse"></div>
@@ -134,7 +144,7 @@
                                     </div>
                                     {% endif %}
                                 </td>
-                                <td class="px-8 py-7 text-right">
+                                <td class="px-8 py-5 text-right">
                                     <div class="flex items-center justify-end gap-x-2">
                                         <button data-id="{{ admin.id }}" data-name="{{ admin.full_name|escapejs }}"
                                             onclick="openResetModal(this.dataset.id, this.dataset.name)"
@@ -161,8 +171,10 @@
                             {% empty %}
                             <tr>
                                 <td colspan="4" class="px-8 py-20 text-center">
-                                    <i class="fa-solid fa-user-shield text-5xl text-[#333333]/20 mb-4 block"></i>
-                                    <p class="text-[#333333]/40 font-medium">No barangay administrators accounts yet.
+                                    <i
+                                        class="fa-solid fa-user-shield text-5xl text-[#333333]/20 dark:text-white/20 mb-4 block"></i>
+                                    <p class="text-[#333333]/40 dark:text-white/40 font-medium">No barangay
+                                        administrators accounts yet.
                                     </p>
                                 </td>
                             </tr>

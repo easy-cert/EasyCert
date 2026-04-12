@@ -34,11 +34,7 @@
                 <span class="sm:hidden">Members</span>
                 <span id="badge-members" class="absolute -top-1.5 -right-1.5 sm:-top-1 sm:-right-1 px-1.5 min-w-[1.25rem] h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow border-2 border-white transform scale-0 transition-transform duration-300 origin-center hidden">0</span>
             </a>
-            <a href="{% url 'admin_support' %}"
-                class="relative px-3 sm:px-6 py-2 sm:py-3 rounded-3xl font-semibold transition-all flex items-center gap-x-2 text-sm sm:text-base text-[#333333]/60 hover:text-[#2C7BE5] hover:bg-[#2C7BE5]/5">
-                <i class="fa-solid fa-headset"></i>
-                <span class="hidden sm:inline">Support</span>
-            </a>
+
         </div>
 
         <div class="flex items-center gap-x-3 sm:gap-x-6 order-2 sm:order-3">
@@ -368,6 +364,7 @@
                     let dashboardRequests = [];
                     let currentReviewRequest = null;
                     let showingAllRequests = false;
+                    let lastRequestsHash = "";
 
                     // Set date display
                     document.getElementById("dashboard-date").textContent = new Date().toLocaleDateString("en-PH", {
@@ -375,7 +372,9 @@
                     });
 
                     // ── Load requests from Django API ──
-                    function loadDashboardRequests() {
+                    function loadDashboardRequests(isAutoRefresh = false) {
+                        if (isAutoRefresh && !document.getElementById("review-modal").classList.contains("hidden")) return;
+
                         const status = document.getElementById("status-filter").value;
                         const type = document.getElementById("type-filter").value;
                         const search = document.getElementById("search-input").value.trim();
@@ -385,7 +384,7 @@
                         if (type) url += "type=" + encodeURIComponent(type) + "&";
                         if (search) url += "q=" + encodeURIComponent(search) + "&";
 
-                        console.log("[Dashboard] Fetching requests from:", url);
+                        if (!isAutoRefresh) console.log("[Dashboard] Fetching requests from:", url);
 
                         fetch(url, { credentials: 'same-origin' })
                             .then(r => {
@@ -407,7 +406,20 @@
                             })
                             .then(data => {
                                 if (!data) return;
-                                console.log("[Dashboard] Received", (data.requests || []).length, "requests");
+                                
+                                let newHash = JSON.stringify(data.requests || []);
+                                if (isAutoRefresh) {
+                                    if (lastRequestsHash !== "" && lastRequestsHash !== newHash) {
+                                        if (typeof showToast === "function") showToast("New requests update received!", "Real-Time Sync", "info");
+                                    } else {
+                                        lastRequestsHash = newHash;
+                                        return; // No layout update if no change
+                                    }
+                                }
+                                
+                                lastRequestsHash = newHash;
+                                if (!isAutoRefresh) console.log("[Dashboard] Received", (data.requests || []).length, "requests");
+                                
                                 dashboardRequests = data.requests || [];
                                 // Map Django fields to what script.js expects
                                 dashboardRequests.forEach(r => {
@@ -418,7 +430,7 @@
                                 allRequests = dashboardRequests; // Link to global variable for script.js
                                 isAdminLoggedIn = true;          // So charts render dark mode correctly
                                 renderDashboardTable(dashboardRequests);
-                                try { renderCharts(); } catch(e) { console.warn("[Dashboard] Charts skipped:", e.message); }
+                                try { renderCharts(); } catch(e) { if(!isAutoRefresh) console.warn("[Dashboard] Charts skipped:", e.message); }
                             })
                             .catch(err => {
                                 console.error("[Dashboard] Failed to load requests:", err);

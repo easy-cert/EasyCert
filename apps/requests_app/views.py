@@ -16,6 +16,7 @@ from apps.barangays.models import BarangayMembership
 from apps.accounts.models import User, Notification
 from apps.accounts.decorators import (
     admin_only, admin_only_api, approved_member_required_api,
+    superadmin_only, superadmin_only_api
 )
 
 
@@ -738,15 +739,14 @@ def submit_support_ticket_api(request):
             attachment=attachment
         )
         
-        # Notify admins
-        if barangay:
-            admins = User.objects.filter(role=User.ADMIN, barangay=barangay)
-            for admin in admins:
-                Notification.objects.create(
-                    user=admin,
-                    message=f"New Support Ticket: {concern_type} from {user.full_name}",
-                    notification_type="system"
-                )
+        # Notify super admins
+        super_admins = User.objects.filter(is_super_admin=True)
+        for admin in super_admins:
+            Notification.objects.create(
+                user=admin,
+                message=f"New Support Ticket: {concern_type} from {user.full_name}",
+                notification_type="system"
+            )
 
         return JsonResponse({"ok": True, "ticket_id": ticket.id})
     except Exception as e:
@@ -755,7 +755,7 @@ def submit_support_ticket_api(request):
         return JsonResponse({"ok": False, "error": "An error occurred while submitting."})
 
 
-@admin_only
+@superadmin_only
 def admin_support_view(request):
     """Admin page to manage customer service support tickets."""
     context = {
@@ -769,13 +769,10 @@ def admin_support_view(request):
     return render(request, "requests_app/admin_support.html", context)
 
 
-@admin_only_api
+@superadmin_only_api
 def admin_support_api(request):
     """AJAX endpoint — returns all support tickets for the admin table."""
     qs = SupportTicket.objects.all().select_related("user", "barangay").order_by("-created_at")
-
-    if request.user.is_barangay_admin and request.user.barangay:
-        qs = qs.filter(barangay=request.user.barangay)
 
     status = request.GET.get("status")
     if status:
@@ -787,6 +784,7 @@ def admin_support_api(request):
             "id": t.id,
             "user_name": t.user.full_name,
             "user_email": t.user.email,
+            "barangay_name": t.barangay.barangay_name if t.barangay else "No Barangay",
             "concern_type": t.concern_type,
             "message": t.message,
             "status": t.status,
@@ -805,7 +803,7 @@ def admin_support_api(request):
     return JsonResponse({"tickets": data, "stats": stats})
 
 
-@admin_only_api
+@superadmin_only_api
 @require_POST
 def admin_support_reply_api(request):
     """AJAX endpoint — admin replies to a support ticket and changes status."""
@@ -818,9 +816,6 @@ def admin_support_reply_api(request):
         return JsonResponse({"error": "Invalid JSON."}, status=400)
 
     ticket = get_object_or_404(SupportTicket, pk=ticket_id)
-
-    if request.user.is_barangay_admin and ticket.barangay != request.user.barangay:
-        return JsonResponse({"error": "Unauthorized."}, status=403)
 
     if new_status in dict(SupportTicket.STATUS_CHOICES):
         ticket.status = new_status

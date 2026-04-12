@@ -621,13 +621,6 @@
                                 <div class="font-medium text-[#333333]/50">Appointment</div><div class="font-semibold">${data.appointment}</div>
                                 <div class="font-medium text-[#333333]/50">Date Filed</div> <div>${data.date}</div>
                             </div>
-                            ${data.status === 'Approved' ? `
-                            <div class="mt-4 pt-4 border-t border-white/50">
-                                <button onclick="viewTrackedCertificate()"
-                                    class="w-full py-3 bg-gradient-to-r from-[#2C7BE5] to-[#00B894] text-white font-semibold text-sm rounded-2xl flex items-center justify-center gap-x-2 hover:opacity-90 transition-opacity">
-                                    <i class="fa-solid fa-file-certificate"></i> View Certificate
-                                </button>
-                            </div>` : ''}
                         </div>`;
                     } else {
                         resultDiv.innerHTML = `

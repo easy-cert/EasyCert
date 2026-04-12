@@ -92,7 +92,7 @@
                     <table class="w-full">
                         <thead>
                             <tr
-                                class="text-left text-[10px] font-black text-[#333333]/40 uppercase tracking-[0.2em] border-b border-black/5">
+                                class="text-left text-[10px] font-black text-[#333333]/50 uppercase tracking-[0.1em] border-b border-black/5">
                                 <th class="px-8 py-6">ADMINISTRATOR</th>
                                 <th class="px-6 py-6">JURISDICTION</th>
                                 <th class="px-6 py-6">STATUS</th>
@@ -117,7 +117,7 @@
                                 </td>
                                 <td class="px-1 py-7">
                                     <span
-                                        class="px-4 py-1.5 bg-[#2C7BE5]/10 text-[#2C7BE5] text-sm font-bold rounded-xl border border-[#2C7BE5]/20">
+                                        class="px-2 py-1.5 bg-[#2C7BE5]/10 text-[#2C7BE5] text-sm font-bold rounded-xl border border-[#2C7BE5]/20">
                                         {{ admin.barangay.barangay_name }}
                                     </span>
                                 </td>
@@ -189,8 +189,8 @@
                         <p class="text-xs font-black text-[#333333]/40 uppercase tracking-widest">
                             {{ log.timestamp|date:"M d, H:i" }}</p>
                         <p class="text-sm font-bold text-[#0D1B2A] mt-1">{{ log.action|title }}</p>
-                        <p class="text-[11px] text-[#333333]/60 mt-0.5">{{ log.user.full_name|default:"System" }} • {{
-                            log.ip_address }}</p>
+                        <p class="text-[11px] text-[#333333]/60 mt-0.5">{{ log.user.full_name|default:"System" }} •
+                            {{ log.ip_address }}</p>
                     </div>
                     {% empty %}
                     <p class="text-center text-[#333333]/30 py-10 text-sm italic">No recent activities.</p>

@@ -281,6 +281,37 @@ function renderPurposeSection(withScholarship) {
         </div>` : ''
 
     return `
+        <div class="sm:col-span-2 mb-2">
+            <label class="block text-sm mb-3 font-semibold text-gray-800 dark:text-gray-200">
+                Residency Status <span class="text-red-400">*</span>
+            </label>
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <label class="radio-card glass p-4 rounded-2xl cursor-pointer border-2 border-transparent hover:border-[#2C7BE5] transition-all flex items-center gap-x-3" onclick="selectResidency(this, 'Registered')">
+                    <input type="radio" name="residency-status" value="Registered" class="hidden" required>
+                    <i class="fa-solid fa-address-card text-[#2C7BE5] text-lg"></i>
+                    <div>
+                        <div class="font-semibold text-sm text-gray-800 dark:text-gray-200">Registered</div>
+                        <div class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Officially registered</div>
+                    </div>
+                </label>
+                <label class="radio-card glass p-4 rounded-2xl cursor-pointer border-2 border-transparent hover:border-[#2C7BE5] transition-all flex items-center gap-x-3" onclick="selectResidency(this, 'Non-Registered')">
+                    <input type="radio" name="residency-status" value="Non-Registered" class="hidden" required>
+                    <i class="fa-solid fa-person-walking-luggage text-[#2C7BE5] text-lg"></i>
+                    <div>
+                        <div class="font-semibold text-sm text-gray-800 dark:text-gray-200">Non-Registered</div>
+                        <div class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Newly moved / Temporary</div>
+                    </div>
+                </label>
+            </div>
+            
+            <div id="sitio-coordinator-group" class="hidden mt-4 p-5 bg-[#2C7BE5]/5 dark:bg-[#2C7BE5]/10 rounded-2xl border border-[#2C7BE5]/20 dark:border-[#2C7BE5]/30">
+                <label class="block text-sm mb-2 font-medium text-gray-800 dark:text-gray-200">
+                    Who is your Sitio Coordinator? <span class="text-red-400">*</span>
+                </label>
+                <input id="sitio-coordinator" name="sitio-coordinator" type="text" placeholder="Name of your sitio coordinator" class="form-input w-full">
+            </div>
+        </div>
+        <hr class="my-6 border-gray-200 dark:border-white/10 w-full sm:col-span-2">
         <div class="sm:col-span-2">
             <input type="hidden" id="purpose" value="">
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">${tiles}</div>
@@ -335,6 +366,36 @@ function selectPurpose(el, value, withScholarship) {
     // Other reveal
     const og = document.getElementById('other-purpose-group')
     if (og) og.classList.toggle('hidden', value !== 'Other')
+}
+
+function selectResidency(el, status) {
+    // Reset all radio cards
+    const group = el.closest('.grid');
+    if (group) {
+        group.querySelectorAll('.radio-card').forEach(c => {
+            c.classList.remove('selected', 'border-[#2C7BE5]', 'bg-[#2C7BE5]/5');
+        });
+    }
+    el.classList.add('selected', 'border-[#2C7BE5]', 'bg-[#2C7BE5]/5');
+
+    // Set radio checked
+    const radio = el.querySelector('input[type="radio"]');
+    if (radio) radio.checked = true;
+
+    // Toggle Coordinator Field
+    const coordGroup = document.getElementById('sitio-coordinator-group');
+    const coordInput = document.getElementById('sitio-coordinator');
+
+    if (coordGroup && coordInput) {
+        if (status === 'Non-Registered') {
+            coordGroup.classList.remove('hidden');
+            coordInput.required = true;
+        } else {
+            coordGroup.classList.add('hidden');
+            coordInput.required = false;
+            coordInput.value = '';
+        }
+    }
 }
 
 function selectRadioCard(el, groupId) {
@@ -490,6 +551,15 @@ function collectFormData() {
             }
         })
     })
+
+    // Residency Selection (attached to Purpose Section)
+    const residencyChecked = document.querySelector('input[name="residency-status"]:checked')
+    if (residencyChecked) {
+        fields['residency-status'] = residencyChecked.value;
+        if (residencyChecked.value === 'Non-Registered') {
+            fields['sitio-coordinator'] = g('sitio-coordinator')
+        }
+    }
 
     const rawPurpose = g('purpose')
     const purpose = rawPurpose === 'Other' ? (g('other-purpose-text') || 'Other') : rawPurpose
@@ -894,7 +964,8 @@ const fieldLabels = {
     "income": "Annual Income (₱)", "years-of-living": "Years of Living",
     "monthly-income": "Monthly Income (₱)", "work": "Occupation",
     "permit-type": "Application Type", "business-type": "Business Type",
-    "business-name": "Business Name", "capital": "Capital (₱)", "gross-income": "Gross Income (₱)"
+    "business-name": "Business Name", "capital": "Capital (₱)", "gross-income": "Gross Income (₱)",
+    "residency-status": "Residency Status", "sitio-coordinator": "Sitio Coordinator"
 }
 
 function openReviewModal(index) {

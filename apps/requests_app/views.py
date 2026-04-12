@@ -697,3 +697,144 @@ def export_residents_csv(request):
     )
 
     return response
+
+
+# ─────────────────────────────────────────────
+# CUSTOMER SERVICE (SUPPORT TICKETS)
+# ─────────────────────────────────────────────
+
+from .models import SupportTicket
+
+@login_required
+@require_POST
+def submit_support_ticket_api(request):
+    """AJAX endpoint — resident submits a support ticket."""
+    user = request.user
+    
+    # Try to derive barangay
+    barangay = None
+    if user.barangay_id:
+        barangay = user.barangay
+    else:
+        membership = BarangayMembership.objects.filter(
+            user=user, status=BarangayMembership.APPROVED
+        ).select_related("barangay").first()
+        if membership:
+            barangay = membership.barangay
+
+    concern_type = request.POST.get("concern_type")
+    message = request.POST.get("message")
+    attachment = request.FILES.get("attachment")
+
+    if not concern_type or not message:
+        return JsonResponse({"ok": False, "error": "Concern type and message are required."}, status=400)
+
+    try:
+        ticket = SupportTicket.objects.create(
+            user=user,
+            barangay=barangay,
+            concern_type=concern_type,
+            message=message,
+            attachment=attachment
+        )
+        
+        # Notify admins
+        if barangay:
+            admins = User.objects.filter(role=User.ADMIN, barangay=barangay)
+            for admin in admins:
+                Notification.objects.create(
+                    user=admin,
+                    message=f"New Support Ticket: {concern_type} from {user.full_name}",
+                    notification_type="system"
+                )
+
+        return JsonResponse({"ok": True, "ticket_id": ticket.id})
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Error submitting support ticket: {e}")
+        return JsonResponse({"ok": False, "error": "An error occurred while submitting."})
+
+
+@admin_only
+def admin_support_view(request):
+    """Admin page to manage customer service support tickets."""
+    context = {
+        "active_tab": "support",
+        "active_page": "dashboard" # to keep header styling if any
+    }
+    if request.user.is_authenticated:
+        context["my_notifications"] = request.user.notifications.all()[:20]
+        context["unread_notifications_count"] = request.user.notifications.filter(is_read=False).count()
+
+    return render(request, "requests_app/admin_support.html", context)
+
+
+@admin_only_api
+def admin_support_api(request):
+    """AJAX endpoint — returns all support tickets for the admin table."""
+    qs = SupportTicket.objects.all().select_related("user", "barangay").order_by("-created_at")
+
+    if request.user.is_barangay_admin and request.user.barangay:
+        qs = qs.filter(barangay=request.user.barangay)
+
+    status = request.GET.get("status")
+    if status:
+        qs = qs.filter(status=status)
+
+    data = []
+    for t in qs[:200]:
+        data.append({
+            "id": t.id,
+            "user_name": t.user.full_name,
+            "user_email": t.user.email,
+            "concern_type": t.concern_type,
+            "message": t.message,
+            "status": t.status,
+            "admin_reply": t.admin_reply,
+            "attachment_url": t.attachment.url if t.attachment else None,
+            "created_at": t.created_at.strftime("%Y-%m-%d %H:%M")
+        })
+
+    stats = {
+        "pending": qs.filter(status="Pending").count(),
+        "in_progress": qs.filter(status="In Progress").count(),
+        "resolved": qs.filter(status="Resolved").count(),
+        "total": qs.count(),
+    }
+
+    return JsonResponse({"tickets": data, "stats": stats})
+
+
+@admin_only_api
+@require_POST
+def admin_support_reply_api(request):
+    """AJAX endpoint — admin replies to a support ticket and changes status."""
+    try:
+        data = json.loads(request.body)
+        ticket_id = data.get("ticket_id")
+        reply_message = data.get("reply_message", "")
+        new_status = data.get("status")
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON."}, status=400)
+
+    ticket = get_object_or_404(SupportTicket, pk=ticket_id)
+
+    if request.user.is_barangay_admin and ticket.barangay != request.user.barangay:
+        return JsonResponse({"error": "Unauthorized."}, status=403)
+
+    if new_status in dict(SupportTicket.STATUS_CHOICES):
+        ticket.status = new_status
+    
+    if reply_message:
+        ticket.admin_reply = reply_message
+
+    ticket.save()
+
+    # Notify User
+    Notification.objects.create(
+        user=ticket.user,
+        message=f"Update on your Support Ticket #{ticket.id}: {ticket.status}",
+        notification_type="system"
+    )
+
+    return JsonResponse({"ok": True, "status": ticket.status})

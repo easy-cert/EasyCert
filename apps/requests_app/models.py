@@ -140,3 +140,50 @@ class CertificateRequest(models.Model):
         # Fallback: use a longer random number to virtually eliminate collisions
         num = random.randint(100000, 999999)
         return f"EC-{year}-{num}"
+
+
+class SupportTicket(models.Model):
+    """
+    Customer Service Support Ticket model for residents to submit
+    concerns/issues to their barangay admins.
+    """
+    CONCERN_CHOICES = [
+        ("Delayed Request", "Delayed Request"),
+        ("Wrong Information", "Wrong Information"),
+        ("Payment Issue", "Payment Issue"),
+        ("System Bug", "System Bug"),
+        ("Other", "Other"),
+    ]
+
+    STATUS_CHOICES = [
+        ("Pending", "Pending"),
+        ("In Progress", "In Progress"),
+        ("Resolved", "Resolved"),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="support_tickets"
+    )
+    barangay = models.ForeignKey(
+        Barangay,
+        on_delete=models.CASCADE,
+        related_name="support_tickets",
+        null=True, blank=True
+    )
+    concern_type = models.CharField(max_length=50, choices=CONCERN_CHOICES)
+    message = models.TextField()
+    attachment = models.FileField(upload_to="support_attachments/", blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
+    admin_reply = models.TextField(blank=True, default="")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        db_table = "support_tickets"
+
+    def __str__(self):
+        return f"Ticket #{self.id} — {self.concern_type} ({self.status})"

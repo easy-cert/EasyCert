@@ -523,8 +523,9 @@ def user_dashboard_view(request):
     if not membership:
         return redirect("select_barangay")
 
-    from apps.requests_app.models import CertificateRequest
+    from apps.requests_app.models import CertificateRequest, SupportTicket
     my_requests = CertificateRequest.objects.filter(user=user).order_by("-date_requested")
+    my_tickets = SupportTicket.objects.filter(user=user).order_by("-created_at")
 
     stats = {
         "total": my_requests.count(),
@@ -536,6 +537,7 @@ def user_dashboard_view(request):
     return render(request, "accounts/user_dashboard.html", {
         "membership": membership,
         "my_requests": my_requests[:20],
+        "my_tickets": my_tickets[:20],
         "stats": stats,
         "active_page": "dashboard",
     })

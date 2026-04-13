@@ -1,1 +1,1 @@
-web: gunicorn easycert_django.wsgi --log-file -
+web: gunicorn easycert_django.wsgi --bind 0.0.0.0:$PORT --log-file -

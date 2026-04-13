@@ -52,9 +52,11 @@ def login_view(request):
 
     if request.method == "POST":
         form = LoginForm(request.POST)
+        logger.info(f"[login_view] POST received. Form bound: {form.is_bound}")
         if form.is_valid():
             email = form.cleaned_data["email"].lower()
             password = form.cleaned_data["password"]
+            logger.info(f"[login_view] Form is valid. Attempting login for email: {email}")
             
             # Security: Check for lockout
             user_candidate = User.objects.filter(email=email).first()
@@ -64,6 +66,7 @@ def login_view(request):
             if user_candidate:
                 if user_candidate.failed_login_attempts >= 5:
                     if user_candidate.last_failed_login and (timezone.now() - user_candidate.last_failed_login) < timedelta(minutes=15):
+                        logger.info(f"[login_view] Account locked for email: {email} (failed_attempts={user_candidate.failed_login_attempts})")
                         from .models import AuditLog
                         AuditLog.objects.create(
                             user=user_candidate,
@@ -74,9 +77,12 @@ def login_view(request):
                         messages.error(request, "Account temporarily locked due to multiple failed attempts. Please try again in 15 minutes.")
                         return render(request, "accounts/login.html", {"form": form})
             
+            logger.info(f"[login_view] Calling authenticate() for email: {email}")
             user = authenticate(request, email=email, password=password)
+            logger.info(f"[login_view] authenticate() returned: {user!r}")
             
             if user is not None:
+                logger.info(f"[login_view] Authentication succeeded for user: {user.email} (id={user.id}, role={user.role})")
                 # SUCCESS - Reset lockout
                 user.failed_login_attempts = 0
                 user.save(update_fields=['failed_login_attempts'])
@@ -103,6 +109,7 @@ def login_view(request):
                 )
 
                 # Generate a secure 6-digit OTP
+                logger.info(f"[login_view] Generating OTP for user: {user.email}")
                 otp_code = ''.join(random.choices(string.digits, k=6))
                 hashed_code = LoginOTP.hash_code(otp_code)
                 expires = timezone.now() + timedelta(minutes=5)
@@ -171,8 +178,10 @@ def login_view(request):
                 request.session['pending_login_backend'] = "apps.accounts.backends.EmailBackend"
                 request.session['pending_next_url'] = request.GET.get("next", "")
                 
+                logger.info(f"[login_view] OTP session set for user: {user.email}. Redirecting to verify_otp.")
                 return redirect('verify_otp')
             else:
+                logger.info(f"[login_view] Authentication failed for email: {email}. authenticate() returned None.")
                 # FAILURE - Increment lockout
                 if user_candidate:
                     user_candidate.failed_login_attempts += 1
@@ -194,6 +203,8 @@ def login_view(request):
                         )
                 
                 messages.error(request, "Invalid email or password.")
+        else:
+            logger.info(f"[login_view] Form is invalid. Errors: {form.errors.as_json()}")
     else:
         form = LoginForm()
     return render(request, "accounts/login.html", {"form": form})

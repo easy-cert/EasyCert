@@ -242,7 +242,15 @@
                             {% if req.status == "Approved" %}
                             <span class="badge-approved">Approved</span>
                             {% elif req.status == "Rejected" %}
-                            <span class="badge-rejected">Rejected</span>
+                            <div class="flex flex-col items-start gap-y-1">
+                                <span class="badge-rejected">Rejected</span>
+                                {% if req.admin_notes %}
+                                <button onclick="showRejectionModal('{{ req.admin_notes|escapejs }}')"
+                                    class="text-[10px] sm:text-xs text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-x-1.5 font-semibold border border-red-200 shadow-sm mt-1">
+                                    <i class="fa-solid fa-circle-info"></i> View Reason
+                                </button>
+                                {% endif %}
+                            </div>
                             {% else %}
                             <span class="badge-pending">Pending</span>
                             {% endif %}
@@ -494,7 +502,53 @@
     </div>
 </div>
 
+<!-- REJECTION REASON MODAL -->
+<div id="rejection-modal"
+    class="fixed inset-0 hidden items-center justify-center z-[99999] p-4 bg-slate-900/40 backdrop-blur-md">
+    <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl p-7 transform transition-all">
+        <div class="flex justify-between items-start mb-5">
+            <h3 class="text-xl font-bold text-red-600 flex items-center gap-x-2">
+                <i class="fa-solid fa-circle-exclamation"></i> Rejection Reason
+            </h3>
+            <button onclick="closeRejectionModal()"
+                class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-[#333333]/50 transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="bg-red-50 text-red-700 p-5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap font-medium border border-red-100"
+            id="rejection-modal-content">
+        </div>
+        <div class="mt-6 flex justify-end">
+            <button onclick="closeRejectionModal()"
+                class="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors text-sm">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
+    function showRejectionModal(message) {
+        document.getElementById('rejection-modal-content').textContent = message;
+        document.getElementById('rejection-modal').classList.remove('hidden');
+        document.getElementById('rejection-modal').classList.add('flex');
+    }
+
+    function closeRejectionModal() {
+        document.getElementById('rejection-modal').classList.add('hidden');
+        document.getElementById('rejection-modal').classList.remove('flex');
+    }
+
+    document.getElementById('rejection-modal').addEventListener('click', function (e) {
+        if (e.target === this) closeRejectionModal();
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !document.getElementById('rejection-modal').classList.contains('hidden')) {
+            closeRejectionModal();
+        }
+    });
+
     function openSupportModal() {
         document.getElementById('support-modal').classList.remove('hidden');
         document.getElementById('support-modal').classList.add('flex');

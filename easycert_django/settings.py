@@ -50,7 +50,7 @@ AUTH_USER_MODEL = "accounts.User"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'easycert_django.middleware.DualSessionMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'easycert_django.middleware.OTPMiddleware',

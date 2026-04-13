@@ -125,7 +125,8 @@ def login_view(request):
                     )
                     email_sent = True
                 except Exception as e:
-                    logger.error(f"OTP email fail: {str(e)}")
+                    logger.error(f"OTP email failed for user {user.email}: {str(e)}", exc_info=True)
+                    messages.error(request, "Verification email could not be sent. Please try again.")
 
                 # Determine if this is a known device
                 known_device = UserDevice.objects.filter(
@@ -151,7 +152,8 @@ def login_view(request):
                             fail_silently=False,
                         )
                     except Exception as e:
-                        logger.error(f"Security Alert email failed: {str(e)}")
+                        logger.error(f"Security alert email failed for user {user.email}: {str(e)}", exc_info=True)
+                        messages.warning(request, "Security alert email could not be sent. Please try again.")
                     
                     Notification.objects.create(
                         user=user,
@@ -320,7 +322,7 @@ def verify_otp_view(request):
                 )
                 messages.success(request, "A new verification code has been sent to your email.")
             except Exception as e:
-                logger.error(f"OTP resend email fail: {str(e)}")
+                logger.error(f"OTP resend email failed for user {user.email}: {str(e)}", exc_info=True)
                 messages.error(request, "Failed to send email. Please try again.")
                 
             return redirect('verify_otp')

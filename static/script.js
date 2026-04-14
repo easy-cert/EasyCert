@@ -779,26 +779,8 @@ function adminRegister() {
 }
 
 function adminLogin() {
-    const u = document.getElementById("admin-username").value.trim()
-    const p = document.getElementById("admin-password").value
-    const creds = { "admin": "1234", "captain": "captain123", "secretary": "sec456" }
-    if (creds[u] === p) {
-        isAdminLoggedIn = true
-        currentAdminRole = u === "captain" ? "Barangay Captain" : u === "secretary" ? "Barangay Secretary" : "Admin Staff"
-        document.getElementById("admin-login-screen").classList.add("hidden")
-        document.getElementById("admin-dashboard-content").classList.remove("hidden")
-        document.getElementById("admin-role-display").textContent = currentAdminRole
-        document.getElementById("dashboard-date").textContent = new Date().toLocaleDateString("en-PH", {
-            weekday: "long", year: "numeric", month: "long", day: "numeric"
-        })
-        refreshAdminData()
-        startAdminAutoRefresh()
-        showToast(`Logged in as ${currentAdminRole}.`, "Welcome back!", "success")
-    } else {
-        showToast("Check your credentials and try again.", "Login Failed", "error")
-        document.getElementById("admin-password").classList.add("border-red-400")
-        setTimeout(() => document.getElementById("admin-password").classList.remove("border-red-400"), 2000)
-    }
+    // Legacy mock login removed in favor of Django backend authentication.
+    showToast("Please use the official login form.", "Authentication Required", "info")
 }
 
 function adminLogout() {
@@ -1429,9 +1411,14 @@ function initializeApp() {
     csrfToken = generateCSRF()
     initHeroCanvas()
 
-    console.log('%cEasyCert v3.0 Ready — Dynamic Forms per Certificate!\n Admin: admin / 1234', 'font-family:monospace;color:#00B894;font-size:12px')
-    const welcomeMsg = `${window.BARANGAY_NAME}, ${window.BARANGAY_LOCATION}`;
-    setTimeout(() => showToast(welcomeMsg, "Welcome to EasyCert!", "info"), 1200)
+    console.log('%cEasyCert v3.0 Ready — Secure Django Backend Active.', 'font-family:monospace;color:#00B894;font-size:12px')
+    
+    // Suppress welcome toast on login/register pages to avoid confusion
+    const path = window.location.pathname;
+    if (!path.includes('/login/') && !path.includes('/register/')) {
+        const welcomeMsg = `${window.BARANGAY_NAME}, ${window.BARANGAY_LOCATION}`;
+        setTimeout(() => showToast(welcomeMsg, "Welcome to EasyCert!", "info"), 1200)
+    }
 }
 
 window.onload = initializeApp

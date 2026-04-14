@@ -53,10 +53,6 @@ def login_view(request):
     if request.method == "POST":
         form = LoginForm(request.POST)
 
-        print("Form is valid:", form.is_valid())
-        print("Form errors:", form.errors)
-        print("Non-field errors:", form.non_field_errors)
-        # =====================================================
         if form.is_valid():
             email = form.cleaned_data["email"].lower()
             password = form.cleaned_data["password"]

@@ -52,10 +52,16 @@ def login_view(request):
 
     if request.method == "POST":
         form = LoginForm(request.POST)
+
+        print("Form is valid:", form.is_valid())
+        print("Form errors:", form.errors)
+        print("Non-field errors:", form.non_field_errors)
+        # =====================================================
         if form.is_valid():
             email = form.cleaned_data["email"].lower()
             password = form.cleaned_data["password"]
-            
+            logger.info("Login form valid — authenticating user: %s", email)
+
             # Security: Check for lockout
             user_candidate = User.objects.filter(email=email).first()
             from django.utils import timezone
@@ -73,14 +79,18 @@ def login_view(request):
                         )
                         messages.error(request, "Account temporarily locked due to multiple failed attempts. Please try again in 15 minutes.")
                         return render(request, "accounts/login.html", {"form": form})
-            
+
+            logger.info("Calling authenticate() for: %s", email)
             user = authenticate(request, email=email, password=password)
-            
+            logger.info("authenticate() returned: %s", user)
+
             if user is not None:
+                logger.info("Authentication succeeded for user.id=%s", user.id)
+
                 # SUCCESS - Reset lockout
                 user.failed_login_attempts = 0
                 user.save(update_fields=['failed_login_attempts'])
-                
+
                 # ── OTP ENFORCEMENT ──
                 from .models import UserDevice, LoginOTP, Notification, AuditLog
                 from django.contrib.sessions.models import Session
@@ -88,91 +98,99 @@ def login_view(request):
                 import string
                 from django.core.mail import send_mail
                 from django.conf import settings
-                import logging
 
-                logger = logging.getLogger(__name__)
-                ip_address = request.META.get('REMOTE_ADDR')
-                user_agent = request.META.get('HTTP_USER_AGENT', 'Unknown')
-
-                # Log the successful but incomplete (pre-OTP) login
-                AuditLog.objects.create(
-                    user=user,
-                    action="login_step1_success",
-                    ip_address=ip_address,
-                    details={"user_agent": user_agent}
-                )
-
-                # Generate a secure 6-digit OTP
-                otp_code = ''.join(random.choices(string.digits, k=6))
-                hashed_code = LoginOTP.hash_code(otp_code)
-                expires = timezone.now() + timedelta(minutes=5)
-                
-                # Store hashed OTP
-                LoginOTP.objects.create(user=user, code=hashed_code, expires_at=expires)
-
-                # Email Delivery
-                email_sent = False
                 try:
-                    send_mail(
-                        "Your EasyCert Login Verification Code",
-                        f"Hello {user.full_name},\n\n"
-                        f"A login attempt was detected for your account.\n\n"
-                        f"Your verification code is: {otp_code}\n\n"
-                        f"This code will expire in 5 minutes.",
-                        settings.DEFAULT_FROM_EMAIL,
-                        [user.email],
-                        fail_silently=False,
+                    ip_address = request.META.get('REMOTE_ADDR')
+                    user_agent = request.META.get('HTTP_USER_AGENT', 'Unknown')
+
+                    # Log the successful but incomplete (pre-OTP) login
+                    AuditLog.objects.create(
+                        user=user,
+                        action="login_step1_success",
+                        ip_address=ip_address,
+                        details={"user_agent": user_agent}
                     )
-                    email_sent = True
-                except Exception as e:
-                    logger.error(f"OTP email failed for user {user.email}: {str(e)}", exc_info=True)
-                    messages.error(request, "Verification email could not be sent. Please try again.")
 
-                # Determine if this is a known device
-                known_device = UserDevice.objects.filter(
-                    user=user, 
-                    ip_address=ip_address, 
-                    user_agent=user_agent,
-                    is_trusted=True
-                ).exists()
+                    # Generate a secure 6-digit OTP
+                    otp_code = ''.join(random.choices(string.digits, k=6))
+                    hashed_code = LoginOTP.hash_code(otp_code)
+                    expires = timezone.now() + timedelta(minutes=5)
 
-                if not known_device:
-                    # New Device detected! Send alert immediately.
+                    # Store hashed OTP
+                    LoginOTP.objects.create(user=user, code=hashed_code, expires_at=expires)
+
+                    # Email Delivery
+                    email_sent = False
                     try:
                         send_mail(
-                            "🚨 Security Alert: New Device Login Attempt",
+                            "Your EasyCert Login Verification Code",
                             f"Hello {user.full_name},\n\n"
-                            f"An unrecognized device has attempted to sign in to your EasyCert account ({user.email}).\n\n"
-                            f"Location/IP: {ip_address}\n"
-                            f"Browser/Device: {user_agent}\n\n"
-                            "If this was not you, we highly recommend resetting your PIN immediately.\n"
-                            "A one-time verification code has been generated and sent to you to proceed.",
+                            f"A login attempt was detected for your account.\n\n"
+                            f"Your verification code is: {otp_code}\n\n"
+                            f"This code will expire in 5 minutes.",
                             settings.DEFAULT_FROM_EMAIL,
                             [user.email],
                             fail_silently=False,
                         )
+                        email_sent = True
                     except Exception as e:
-                        logger.error(f"Security alert email failed for user {user.email}: {str(e)}", exc_info=True)
-                        messages.warning(request, "Security alert email could not be sent. Please try again.")
-                    
+                        logger.error("OTP email failed for user %s: %s", user.email, e, exc_info=True)
+                        messages.error(request, "Verification email could not be sent. Please try again.")
+
+                    # Determine if this is a known device
+                    known_device = UserDevice.objects.filter(
+                        user=user,
+                        ip_address=ip_address,
+                        user_agent=user_agent,
+                        is_trusted=True
+                    ).exists()
+
+                    if not known_device:
+                        # New Device detected! Send alert immediately.
+                        try:
+                            send_mail(
+                                "🚨 Security Alert: New Device Login Attempt",
+                                f"Hello {user.full_name},\n\n"
+                                f"An unrecognized device has attempted to sign in to your EasyCert account ({user.email}).\n\n"
+                                f"Location/IP: {ip_address}\n"
+                                f"Browser/Device: {user_agent}\n\n"
+                                "If this was not you, we highly recommend resetting your PIN immediately.\n"
+                                "A one-time verification code has been generated and sent to you to proceed.",
+                                settings.DEFAULT_FROM_EMAIL,
+                                [user.email],
+                                fail_silently=False,
+                            )
+                        except Exception as e:
+                            logger.error("Security alert email failed for user %s: %s", user.email, e, exc_info=True)
+                            messages.warning(request, "Security alert email could not be sent. Please try again.")
+
+                        Notification.objects.create(
+                            user=user,
+                            message=f"Security Alert: Login attempt from an unrecognized device ({ip_address}).",
+                            notification_type="security"
+                        )
+
                     Notification.objects.create(
                         user=user,
-                        message=f"Security Alert: Login attempt from an unrecognized device ({ip_address}).",
-                        notification_type="security"
+                        message=f"Your verification code is: {otp_code}. (Attempts from {ip_address})",
+                        notification_type="otp"
                     )
 
-                Notification.objects.create(
-                    user=user,
-                    message=f"Your verification code is: {otp_code}. (Attempts from {ip_address})",
-                    notification_type="otp"
-                )
+                    request.session['pending_otp_user_id'] = user.id
+                    request.session['pending_login_backend'] = "apps.accounts.backends.EmailBackend"
+                    request.session['pending_next_url'] = request.GET.get("next", "")
 
-                request.session['pending_otp_user_id'] = user.id
-                request.session['pending_login_backend'] = "apps.accounts.backends.EmailBackend"
-                request.session['pending_next_url'] = request.GET.get("next", "")
-                
-                return redirect('verify_otp')
+                    logger.info("Redirecting user.id=%s to verify_otp", user.id)
+                    return redirect('verify_otp')
+
+                except Exception as exc:
+                    logger.error(
+                        "OTP flow failed for user.id=%s — redirect to verify_otp was not reached: %s",
+                        user.id, exc, exc_info=True
+                    )
+                    messages.error(request, "An unexpected error occurred. Please try again.")
             else:
+                logger.info("Authentication failed for email: %s", email)
                 # FAILURE - Increment lockout
                 if user_candidate:
                     user_candidate.failed_login_attempts += 1

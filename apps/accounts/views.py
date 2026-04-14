@@ -51,17 +51,7 @@ def login_view(request):
         request.session.pop("pending_next_url", None)
 
     if request.method == "POST":
-        # ==================== DEBUG PRINTS ====================
-        print("=== POST DATA RECEIVED ===")
-        print(dict(request.POST))
-        print("=========================")
-        
         form = LoginForm(request.POST)
-
-        print("Form is valid:", form.is_valid())
-        print("Form errors:", form.errors)
-        print("Non-field errors:", form.non_field_errors)
-        # =====================================================
         if form.is_valid():
             email = form.cleaned_data["email"].lower()
             password = form.cleaned_data["password"]

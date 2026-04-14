@@ -198,7 +198,6 @@ def login_view(request):
         form = LoginForm()
     return render(request, "accounts/login.html", {"form": form})
 
-
 def verify_otp_view(request):
     """
     OTP verification view for simultaneous logins.

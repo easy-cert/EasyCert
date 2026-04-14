@@ -175,6 +175,7 @@ class SupportTicket(models.Model):
     concern_type = models.CharField(max_length=50, choices=CONCERN_CHOICES)
     message = models.TextField()
     attachment = models.FileField(upload_to="support_attachments/", blank=True, null=True)
+    attachment_url = models.URLField(max_length=500, blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
     admin_reply = models.TextField(blank=True, default="")
     

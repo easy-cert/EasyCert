@@ -18,6 +18,7 @@ from apps.accounts.decorators import (
     admin_only, admin_only_api, approved_member_required_api,
     superadmin_only, superadmin_only_api
 )
+from utils.blob_upload import upload_to_blob
 
 
 # ─────────────────────────────────────────────
@@ -731,12 +732,23 @@ def submit_support_ticket_api(request):
         return JsonResponse({"ok": False, "error": "Concern type and message are required."}, status=400)
 
     try:
+        # Upload to Vercel Blob if attachment exists
+        blob_url = None
+        if attachment:
+            try:
+                blob_url = upload_to_blob(attachment)
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).error(f"Vercel Blob Upload failed: {e}")
+                # Fallback: ticket will still be created but blob_url will be null
+
         ticket = SupportTicket.objects.create(
             user=user,
             barangay=barangay,
             concern_type=concern_type,
             message=message,
-            attachment=attachment
+            attachment=attachment, # Legacy FileField
+            attachment_url=blob_url # Vercel Blob URL
         )
         
         # Notify super admins
@@ -789,7 +801,7 @@ def admin_support_api(request):
             "message": t.message,
             "status": t.status,
             "admin_reply": t.admin_reply,
-            "attachment_url": t.attachment.url if t.attachment else None,
+            "attachment_url": t.attachment_url or (t.attachment.url if t.attachment else None),
             "created_at": t.created_at.strftime("%Y-%m-%d %H:%M")
         })
 

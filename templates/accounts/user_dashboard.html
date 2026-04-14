@@ -411,8 +411,19 @@
                                 style="color: #F59E0B; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2);">Pending</span>
                             {% endif %}
                         </td>
-                        <td class="px-6 sm:px-8 py-4 sm:py-5 text-[#333333]/70 text-xs">
-                            {{ t.admin_reply|default:"—"|truncatechars:40 }}
+                        <td class="px-6 sm:px-8 py-4 sm:py-5">
+                            <div class="flex flex-col items-start gap-y-1">
+                                <span class="text-[#333333]/70 dark:text-white/60 text-xs truncate max-w-[150px]">
+                                    {{ t.admin_reply|default:"—" }}
+                                </span>
+                                {% if t.admin_reply %}
+                                <button
+                                    onclick="viewTicketDetails('{{ t.id }}', '{{ t.concern_type|escapejs }}', '{{ t.message|escapejs }}', '{{ t.status|escapejs }}', '{{ t.admin_reply|escapejs }}', '{{ t.created_at|date:'M d, Y' }}')"
+                                    class="text-[10px] text-[#2C7BE5] hover:text-[#1e5ab3] dark:text-[#5fa1f7] dark:hover:text-[#8dbbff] font-bold flex items-center gap-x-1 transition-colors">
+                                    <i class="fa-solid fa-eye text-[9px]"></i> View Full Reply
+                                </button>
+                                {% endif %}
+                            </div>
                         </td>
                         <td class="px-6 sm:px-8 py-4 sm:py-5 text-[#333333]/50 text-xs">
                             {{ t.created_at|date:"M d, Y" }}
@@ -505,23 +516,94 @@
 <!-- REJECTION REASON MODAL -->
 <div id="rejection-modal"
     class="fixed inset-0 hidden items-center justify-center z-[99999] p-4 bg-slate-900/40 backdrop-blur-md">
-    <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl p-7 transform transition-all">
+    <div
+        class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2rem] shadow-2xl p-7 transform transition-all border border-white/20 dark:border-white/10">
         <div class="flex justify-between items-start mb-5">
             <h3 class="text-xl font-bold text-red-600 flex items-center gap-x-2">
                 <i class="fa-solid fa-circle-exclamation"></i> Rejection Reason
             </h3>
             <button onclick="closeRejectionModal()"
-                class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-[#333333]/50 transition-colors">
+                class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-[#333333]/50 dark:text-white/50 transition-colors">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
-        <div class="bg-red-50 text-red-700 p-5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap font-medium border border-red-100"
+        <div class="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 p-5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap font-medium border border-red-100 dark:border-red-900/30"
             id="rejection-modal-content">
         </div>
         <div class="mt-6 flex justify-end">
             <button onclick="closeRejectionModal()"
-                class="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors text-sm">
+                class="px-6 py-2.5 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-white/70 font-bold rounded-xl transition-colors text-sm">
                 Close
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- TICKET DETAIL MODAL -->
+<div id="ticket-detail-modal"
+    class="fixed inset-0 hidden items-center justify-center z-[99999] p-4 bg-slate-900/40 backdrop-blur-md">
+    <div
+        class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-[2.5rem] shadow-2xl p-8 transform transition-all border border-white/20 dark:border-white/10">
+        <div class="flex justify-between items-start mb-6">
+            <div>
+                <h3 class="text-2xl font-black text-[#0D1B2A] dark:text-white flex items-center gap-x-3">
+                    <i class="fa-solid fa-headset text-amber-500"></i> Ticket Details
+                </h3>
+                <p class="text-[#333333]/60 dark:text-white/50 text-xs mt-1 font-medium tracking-wide uppercase"
+                    id="detail-ticket-id"></p>
+            </div>
+            <button onclick="closeTicketDetailModal()"
+                class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-[#333333]/50 dark:text-white/50 transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="space-y-6">
+            <!-- Concern & Date -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-slate-50 dark:bg-white/5 p-4 rounded-2xl border border-slate-100 dark:border-white/10">
+                    <p
+                        class="text-[10px] font-bold text-[#333333]/40 dark:text-white/30 uppercase tracking-widest mb-1">
+                        Concern Type</p>
+                    <p class="font-bold text-[#2C7BE5] dark:text-[#5fa1f7]" id="detail-concern-type"></p>
+                </div>
+                <div class="bg-slate-50 dark:bg-white/5 p-4 rounded-2xl border border-slate-100 dark:border-white/10">
+                    <p
+                        class="text-[10px] font-bold text-[#333333]/40 dark:text-white/30 uppercase tracking-widest mb-1">
+                        Date Submitted</p>
+                    <p class="font-bold text-slate-700 dark:text-white/80" id="detail-date"></p>
+                </div>
+            </div>
+
+            <!-- Original Message -->
+            <div class="bg-slate-50 dark:bg-white/5 p-5 rounded-3xl border border-slate-100 dark:border-white/10">
+                <p class="text-[10px] font-bold text-[#333333]/40 dark:text-white/30 uppercase tracking-widest mb-2">My
+                    Message</p>
+                <p class="text-sm text-slate-600 dark:text-white/70 italic leading-relaxed" id="detail-message"></p>
+            </div>
+
+            <!-- Admin Reply -->
+            <div
+                class="bg-amber-50 dark:bg-amber-900/20 p-6 rounded-[2rem] border border-amber-100 dark:border-amber-900/30 relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-3 opacity-10">
+                    <i class="fa-solid fa-reply-all text-4xl text-amber-600"></i>
+                </div>
+                <div class="relative z-10">
+                    <div class="flex items-center gap-x-2 mb-3">
+                        <div class="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+                        <p class="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-widest">
+                            Admin Response</p>
+                    </div>
+                    <p class="text-sm text-amber-900 dark:text-amber-100 font-medium leading-relaxed whitespace-pre-wrap"
+                        id="detail-admin-reply"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8">
+            <button onclick="closeTicketDetailModal()"
+                class="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold rounded-2xl shadow-xl transition-transform active:scale-95 text-sm uppercase tracking-widest">
+                Close Details
             </button>
         </div>
     </div>
@@ -538,6 +620,16 @@
         document.getElementById('rejection-modal').classList.add('hidden');
         document.getElementById('rejection-modal').classList.remove('flex');
     }
+
+    document.getElementById('ticket-detail-modal').addEventListener('click', function (e) {
+        if (e.target === this) closeTicketDetailModal();
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !document.getElementById('ticket-detail-modal').classList.contains('hidden')) {
+            closeTicketDetailModal();
+        }
+    });
 
     document.getElementById('rejection-modal').addEventListener('click', function (e) {
         if (e.target === this) closeRejectionModal();
@@ -570,6 +662,28 @@
         if (e.key === 'Escape' && !document.getElementById('support-modal').classList.contains('hidden')) {
             closeSupportModal();
         }
+    });
+
+    function viewTicketDetails(id, concern, message, status, reply, date) {
+        document.getElementById('detail-ticket-id').textContent = 'Ticket #' + id;
+        document.getElementById('detail-concern-type').textContent = concern;
+        document.getElementById('detail-message').textContent = message;
+        document.getElementById('detail-admin-reply').textContent = reply || 'Waiting for response...';
+        document.getElementById('detail-date').textContent = date;
+
+        const modal = document.getElementById('ticket-detail-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeTicketDetailModal() {
+        const modal = document.getElementById('ticket-detail-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    document.getElementById('ticket-detail-modal').addEventListener('click', function (e) {
+        if (e.target === this) closeTicketDetailModal();
     });
 
     async function submitSupportTicket(e) {

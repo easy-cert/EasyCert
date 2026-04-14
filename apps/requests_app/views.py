@@ -740,7 +740,7 @@ def submit_support_ticket_api(request):
         )
         
         # Notify super admins
-        super_admins = User.objects.filter(is_super_admin=True)
+        super_admins = User.objects.filter(role=User.SUPERADMIN)
         for admin in super_admins:
             Notification.objects.create(
                 user=admin,

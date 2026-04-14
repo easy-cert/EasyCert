@@ -14,9 +14,14 @@ import dj_database_url
 from dotenv import load_dotenv
 from pathlib import Path
 
-load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env
+env_path = BASE_DIR / '.env'
+print(f"DEBUG: Loading .env from {env_path}")
+print(f"DEBUG: .env exists: {env_path.exists()}")
+load_dotenv(dotenv_path=env_path, override=True)
 
 
 # Quick-start development settings - unsuitable for production
@@ -157,5 +162,6 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+print(f"DEBUG_USER: '{EMAIL_HOST_USER}'")
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

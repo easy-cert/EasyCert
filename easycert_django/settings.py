@@ -17,10 +17,10 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load environment variables from .env
+# Load environment variables from .env (only for local development)
 env_path = BASE_DIR / '.env'
-if not os.environ.get('RAILWAY_ENVIRONMENT'):
-    load_dotenv(dotenv_path=env_path, override=True)
+if not os.environ.get('VERCEL') and not os.environ.get('RAILWAY_ENVIRONMENT'):
+    load_dotenv(dotenv_path=env_path, override=False)
 
 
 # Quick-start development settings - unsuitable for production

@@ -2,3 +2,5 @@ easycert_django/.env
 all_data.json
 db.sqlite3
 .env
+__pycache__
+*.pyc

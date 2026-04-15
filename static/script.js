@@ -1282,7 +1282,7 @@ function closeModal(id) {
 }
 
 function setupBackdropClose() {
-    ["request-modal", "success-modal", "track-modal", "review-modal", "cert-preview-modal"].forEach(id => {
+    ["request-modal", "success-modal", "track-modal", "review-modal", "cert-preview-modal", "application-modal", "resident-modal", "delete-modal"].forEach(id => {
         const el = document.getElementById(id); if (!el) return
         el.addEventListener("click", e => { if (e.target === el) closeModal(id) })
     })
@@ -1330,7 +1330,7 @@ function startNewRequest() { scrollToCertificates() }
 document.addEventListener("keydown", e => {
     if ((e.metaKey || e.ctrlKey) && e.key === "k") { e.preventDefault(); showTrackModal() }
     if (e.key === "Escape") {
-        ["request-modal", "success-modal", "track-modal", "review-modal", "cert-preview-modal"].forEach(id => {
+        ["request-modal", "success-modal", "track-modal", "review-modal", "cert-preview-modal", "application-modal", "resident-modal", "delete-modal", "ticket-modal"].forEach(id => {
             const el = document.getElementById(id)
             if (el && !el.classList.contains("hidden")) closeModal(id)
         })

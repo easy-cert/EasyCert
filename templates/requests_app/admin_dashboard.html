@@ -673,6 +673,13 @@
         if (el) el.addEventListener("click", e => { if (e.target === el) closeModal("review-modal"); });
         const certEl = document.getElementById("cert-preview-modal");
         if (certEl) certEl.addEventListener("click", e => { if (e.target === certEl) closeModal("cert-preview-modal"); });
+
+        document.addEventListener("keydown", e => {
+            if (e.key === "Escape") {
+                if (el && !el.classList.contains("hidden")) closeModal("review-modal");
+                if (certEl && !certEl.classList.contains("hidden")) closeModal("cert-preview-modal");
+            }
+        });
     })();
 
     // ── Login History ──

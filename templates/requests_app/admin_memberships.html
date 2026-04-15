@@ -464,8 +464,10 @@
         document.getElementById('edit-resident-id').value = '';
         document.getElementById('submit-btn').textContent = 'SAVE RECORD';
 
-        document.getElementById('resident-modal').classList.remove('hidden');
-        document.getElementById('resident-modal').classList.add('flex');
+        const modal = document.getElementById('resident-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = "hidden";
     }
 
     function openEditModal(id) {
@@ -483,13 +485,17 @@
         // Birthdate is not in data currently, would need api update
         document.getElementById('submit-btn').textContent = 'UPDATE RECORD';
 
-        document.getElementById('resident-modal').classList.remove('hidden');
-        document.getElementById('resident-modal').classList.add('flex');
+        const modal = document.getElementById('resident-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = "hidden";
     }
 
     function closeResidentModal() {
-        document.getElementById('resident-modal').classList.add('hidden');
-        document.getElementById('resident-modal').classList.remove('flex');
+        const modal = document.getElementById('resident-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = "";
     }
 
     function handleResidentSubmit(e) {
@@ -528,13 +534,17 @@
     function openDeleteModal(id, name) {
         currentId = id;
         document.getElementById('delete-name').textContent = name;
-        document.getElementById('delete-modal').classList.remove('hidden');
-        document.getElementById('delete-modal').classList.add('flex');
+        const modal = document.getElementById('delete-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = "hidden";
     }
 
     function closeDeleteModal() {
-        document.getElementById('delete-modal').classList.add('hidden');
-        document.getElementById('delete-modal').classList.remove('flex');
+        const modal = document.getElementById('delete-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = "";
     }
 
     function executeResidentDelete() {
@@ -574,9 +584,13 @@
                     <p class="text-[10px] font-semibold text-[#333333]/40 uppercase tracking-widest mb-1">Status</p>
                     <p class="font-bold text-sm uppercase">${mem.status}</p>
                 </div>
-                 <div>
+                <div>
                     <p class="text-[10px] font-semibold text-[#333333]/40 uppercase tracking-widest mb-1">Age</p>
                     <p class="font-bold text-sm">${mem.age || '—'}</p>
+                </div>
+                <div>
+                    <p class="text-[10px] font-semibold text-[#333333]/40 uppercase tracking-widest mb-1">Contact Number</p>
+                    <p class="font-bold text-sm text-[#2C7BE5]">${mem.contact || '—'}</p>
                 </div>
                 <div class="col-span-2">
                     <p class="text-[10px] font-semibold text-[#333333]/40 uppercase tracking-widest mb-1">Declared Home Address</p>
@@ -587,13 +601,17 @@
         `;
 
         cancelRejectUI();
-        document.getElementById('application-modal').classList.remove('hidden');
-        document.getElementById('application-modal').classList.add('flex');
+        const modal = document.getElementById('application-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = "hidden";
     }
 
     function closeAppModal() {
-        document.getElementById('application-modal').classList.add('hidden');
-        document.getElementById('application-modal').classList.remove('flex');
+        const modal = document.getElementById('application-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = "";
     }
 
     function approveApplication() {
@@ -642,6 +660,33 @@
                 }
             });
     }
+
+    // Modal click-outside and Escape key listeners
+    document.addEventListener('DOMContentLoaded', () => {
+        const modals = [
+            { id: 'resident-modal', close: closeResidentModal },
+            { id: 'delete-modal', close: closeDeleteModal },
+            { id: 'application-modal', close: closeAppModal }
+        ];
+
+        modals.forEach(m => {
+            const el = document.getElementById(m.id);
+            if (el) {
+                el.addEventListener('click', e => {
+                    if (e.target === el) m.close();
+                });
+            }
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                modals.forEach(m => {
+                    const el = document.getElementById(m.id);
+                    if (el && !el.classList.contains('hidden')) m.close();
+                });
+            }
+        });
+    });
 
 </script>
 <style>

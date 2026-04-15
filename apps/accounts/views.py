@@ -221,7 +221,9 @@ def verify_otp_view(request):
     OTP verification view for simultaneous logins.
     """
     user_id = request.session.get('pending_otp_user_id')
+    logger.debug(f"verify_otp_view: pending_otp_user_id found: {user_id}")
     if not user_id:
+        logger.warning("verify_otp_view: No pending_otp_user_id in session. Redirecting to login.")
         return redirect('login')
         
     user = get_object_or_404(User, id=user_id)
@@ -279,7 +281,14 @@ def verify_otp_view(request):
                 backend = request.session.get('pending_login_backend', "apps.accounts.backends.EmailBackend")
                 next_url = request.session.pop('pending_next_url', None)
                 
-                login(request, user, backend=backend)
+                logger.debug(f"verify_otp_view: Attempting login for user={user.email} with backend={backend}")
+                try:
+                    login(request, user, backend=backend)
+                    logger.info(f"verify_otp_view: Login successful for user={user.email}")
+                except Exception as login_exc:
+                    logger.error(f"verify_otp_view: Django login() failed for user={user.email}: {login_exc}", exc_info=True)
+                    messages.error(request, "Login failed. Please try again or contact support.")
+                    return redirect('login')
                 
                 # 5. Register this device as trusted
                 ip_address = request.META.get('REMOTE_ADDR')
@@ -297,7 +306,7 @@ def verify_otp_view(request):
                 request.session.pop('pending_otp_user_id', None)
                 request.session.pop('pending_login_backend', None)
                 
-                logger.info(f"OTP successful for user {user.email}")
+                logger.info(f"OTP successful code matched for user {user.email}")
                 messages.success(request, "Verification successful! All other sessions were logged out.")
                 
                 if next_url:

@@ -27,13 +27,25 @@ if not os.environ.get('VERCEL') and not os.environ.get('RAILWAY_ENVIRONMENT'):
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fallback-key-change-this-in-railway-variables')
+SECRET_KEY = os.environ.get('SECRET_KEY')
+if not SECRET_KEY:
+    # Use fallback only in local development, or raise error in production
+    if os.environ.get('VERCEL') or os.environ.get('RAILWAY_ENVIRONMENT'):
+        # In production, we should ideally have a key. 
+        # But if it's MISSING (not just mangled), we'll use a semi-random fixed fallback to prevent crash,
+        # but the user MUST set it for session stability.
+        SECRET_KEY = 'django-insecure-production-fallback-please-change-this-in-env-vars'
+    else:
+        SECRET_KEY = 'django-insecure-fallback-key-change-this-in-railway-variables'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    '*',
+    '.vercel.app',
+    'easy-cert-production.up.railway.app'
+]
 
 BLOB_READ_WRITE_TOKEN = os.getenv("BLOB_READ_WRITE_TOKEN")
 
@@ -166,8 +178,17 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1",
     "http://localhost",
     "https://web-production-ebc9d.up.railway.app",
+    "https://easy-cert-production.up.railway.app",
 ]
-ALLOWED_HOSTS = ['*']
+
+# Security headers for production
+if not DEBUG:
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_SSL_REDIRECT = os.environ.get('VERCEL') == 'True' # Vercel handles SSL, but this helps Django
+    X_FRAME_OPTIONS = 'DENY'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'

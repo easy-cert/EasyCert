@@ -1,4 +1,8 @@
+import logging
+
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 class DualSessionMiddleware:
     """
@@ -45,8 +49,7 @@ class DualSessionMiddleware:
                 max_age = cookie_data.get('max-age') or settings.SESSION_COOKIE_AGE
                 expires = cookie_data.get('expires')
                 
-                print(f"DEBUG: Middleware setting {admin_session_key}: val={cookie_data.value[:10]}... max_age={max_age}, expires={expires}")
-                logger.info(f"Middleware setting {admin_session_key} for {request.path}: max_age={max_age}")
+                logger.debug(f"Middleware setting {admin_session_key} for {request.path}: max_age={max_age}")
 
                 response.set_cookie(admin_session_key, cookie_data.value, 
                     max_age=max_age,

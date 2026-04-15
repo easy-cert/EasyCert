@@ -585,10 +585,16 @@ def user_dashboard_view(request):
         })
     except Exception as e:
         import traceback
+        from django.http import HttpResponse
         tb = traceback.format_exc()
         logger.error(f"user_dashboard_view: ERROR for user={user.email}: {str(e)}\n{tb}")
-        print(f"CRITICAL: user_dashboard_view: ERROR for user={user.email}: {str(e)}\n{tb}")
-        raise e
+        print(f"CRITICAL: user_dashboard_view: ERROR for user={user.email}: {str(e)}\n{tb}", flush=True)
+        # TEMPORARY: Show traceback in browser so we can diagnose on Vercel
+        return HttpResponse(
+            f"<h2>Dashboard Debug (TEMPORARY)</h2><pre>{tb}</pre>",
+            status=500,
+            content_type="text/html"
+        )
 
 
 # ─────────────────────────────────────────────

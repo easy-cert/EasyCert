@@ -177,6 +177,8 @@ LOGOUT_REDIRECT_URL = "/accounts/login/"
 CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1",
     "http://localhost",
+    "https://*.vercel.app",
+    "https://easy-cert.vercel.app",
     "https://web-production-ebc9d.up.railway.app",
     "https://easy-cert-production.up.railway.app",
 ]

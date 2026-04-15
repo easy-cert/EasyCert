@@ -16,7 +16,8 @@
                 <h1 class="text-2xl sm:text-3xl font-bold tracking-tight"><span class="easycert-easy">Easy</span><span
                         class="text-[#28DF97]">Cert</span></h1>
                 <p class="text-xs text-[#00B894] font-medium -mt-1">
-                    {% if user.barangay %}Barangay {{ user.barangay.barangay_name|default:"Unknown" }}{% elif membership and membership.barangay %}Barangay
+                    {% if user.barangay %}Barangay {{ user.barangay.barangay_name|default:"Unknown" }}
+                    {% elif membership and membership.barangay %}Barangay
                     {{ membership.barangay.barangay_name|default:"Unknown" }}{% else %}EasyCert Resident{% endif %}
                 </p>
             </div>
@@ -84,9 +85,13 @@
             <p class="text-sm text-[#333333]/60">
                 <i class="fa-solid fa-building-columns mr-1 text-[#2C7BE5]"></i>
                 {% if user.barangay %}
-                {{ user.barangay.barangay_name }} • {{ user.barangay.location }}
+                {{ user.barangay.barangay_name|default:"Unknown Barangay" }} •
+                {{user.barangay.location|default:"Unknown Location" }}
+                {% elif membership and membership.barangay %}
+                {{ membership.barangay.barangay_name|default:"Unknown Barangay" }} •
+                {{ membership.barangay.location|default:"Unknown Location" }}
                 {% else %}
-                {{ membership.barangay.barangay_name }} • {{ membership.barangay.location }}
+                EasyCert Resident • Verified Member
                 {% endif %}
             </p>
         </div>

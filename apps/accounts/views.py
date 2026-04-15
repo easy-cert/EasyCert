@@ -547,18 +547,25 @@ def user_dashboard_view(request):
     logger.debug(f"user_dashboard_view: Loading for user={user.email}")
 
     try:
+        print("DEBUG: STEP 1 - Fetching membership")
         membership = BarangayMembership.objects.filter(
             user=user, status=BarangayMembership.APPROVED
-        ).first()
+        ).select_related('barangay').first()
         
         if not membership:
             logger.warning(f"user_dashboard_view: No approved membership for user={user.email}. Redirecting.")
             return redirect("select_barangay")
 
+        print("DEBUG: STEP 2 - Importing models")
         from apps.requests_app.models import CertificateRequest, SupportTicket
-        my_requests = CertificateRequest.objects.filter(user=user).order_by("-date_requested")
+        
+        print("DEBUG: STEP 3 - Querying requests")
+        my_requests = CertificateRequest.objects.filter(user=user).select_related('barangay').order_by("-date_requested")
+        
+        print("DEBUG: STEP 4 - Querying tickets")
         my_tickets = SupportTicket.objects.filter(user=user).order_by("-created_at")
 
+        print("DEBUG: STEP 5 - Calculating stats")
         stats = {
             "total": my_requests.count(),
             "pending": my_requests.filter(status="Pending").count(),
@@ -566,13 +573,13 @@ def user_dashboard_view(request):
             "rejected": my_requests.filter(status="Rejected").count(),
         }
 
+        print("DEBUG: STEP 6 - Rendering template")
         logger.debug(f"user_dashboard_view: Rendering template for user={user.email}")
-        print(f"DEBUG: user_dashboard_view: Rendering template for user={user.email}")
         
         return render(request, "accounts/user_dashboard.html", {
             "membership": membership,
-            "my_requests": my_requests[:20],
-            "my_tickets": my_tickets[:20],
+            "my_requests": list(my_requests[:20]), # Evaluate queryset now to catch errors
+            "my_tickets": list(my_tickets[:20]),
             "stats": stats,
             "active_page": "dashboard",
         })

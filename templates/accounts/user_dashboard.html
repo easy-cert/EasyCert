@@ -16,8 +16,8 @@
                 <h1 class="text-2xl sm:text-3xl font-bold tracking-tight"><span class="easycert-easy">Easy</span><span
                         class="text-[#28DF97]">Cert</span></h1>
                 <p class="text-xs text-[#00B894] font-medium -mt-1">
-                    {% if user.barangay %}Barangay {{ user.barangay.barangay_name }}{% else %}Barangay
-                    {{ membership.barangay.barangay_name }}{% endif %}
+                    {% if user.barangay %}Barangay {{ user.barangay.barangay_name|default:"Unknown" }}{% elif membership and membership.barangay %}Barangay
+                    {{ membership.barangay.barangay_name|default:"Unknown" }}{% else %}EasyCert Resident{% endif %}
                 </p>
             </div>
         </div>
@@ -418,7 +418,7 @@
                                 </span>
                                 {% if t.admin_reply %}
                                 <button
-                                    onclick="viewTicketDetails('{{ t.id }}', '{{ t.concern_type|escapejs }}', '{{ t.message|escapejs }}', '{{ t.status|escapejs }}', '{{ t.admin_reply|escapejs }}', '{{ t.created_at|date:'M d, Y' }}')"
+                                    onclick="viewTicketDetails('{{ t.id|escapejs }}', '{{ t.concern_type|escapejs }}', '{{ t.message|escapejs }}', '{{ t.status|escapejs }}', '{{ t.admin_reply|escapejs }}', '{{ t.created_at|date:'M d, Y'|escapejs }}')"
                                     class="text-[10px] text-[#2C7BE5] hover:text-[#1e5ab3] dark:text-[#5fa1f7] dark:hover:text-[#8dbbff] font-bold flex items-center gap-x-1 transition-colors">
                                     <i class="fa-solid fa-eye text-[9px]"></i> View Full Reply
                                 </button>

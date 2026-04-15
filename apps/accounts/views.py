@@ -567,6 +567,8 @@ def user_dashboard_view(request):
         }
 
         logger.debug(f"user_dashboard_view: Rendering template for user={user.email}")
+        print(f"DEBUG: user_dashboard_view: Rendering template for user={user.email}")
+        
         return render(request, "accounts/user_dashboard.html", {
             "membership": membership,
             "my_requests": my_requests[:20],
@@ -575,8 +577,10 @@ def user_dashboard_view(request):
             "active_page": "dashboard",
         })
     except Exception as e:
-        logger.error(f"user_dashboard_view: ERROR for user={user.email}: {str(e)}", exc_info=True)
-        # Optional: return a custom error page or re-raise for 500
+        import traceback
+        tb = traceback.format_exc()
+        logger.error(f"user_dashboard_view: ERROR for user={user.email}: {str(e)}\n{tb}")
+        print(f"CRITICAL: user_dashboard_view: ERROR for user={user.email}: {str(e)}\n{tb}")
         raise e
 
 

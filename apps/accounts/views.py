@@ -544,31 +544,40 @@ def membership_pending_view(request):
 def user_dashboard_view(request):
     """Personal dashboard for approved residents."""
     user = request.user
+    logger.debug(f"user_dashboard_view: Loading for user={user.email}")
 
-    membership = BarangayMembership.objects.filter(
-        user=user, status=BarangayMembership.APPROVED
-    ).first()
-    if not membership:
-        return redirect("select_barangay")
+    try:
+        membership = BarangayMembership.objects.filter(
+            user=user, status=BarangayMembership.APPROVED
+        ).first()
+        
+        if not membership:
+            logger.warning(f"user_dashboard_view: No approved membership for user={user.email}. Redirecting.")
+            return redirect("select_barangay")
 
-    from apps.requests_app.models import CertificateRequest, SupportTicket
-    my_requests = CertificateRequest.objects.filter(user=user).order_by("-date_requested")
-    my_tickets = SupportTicket.objects.filter(user=user).order_by("-created_at")
+        from apps.requests_app.models import CertificateRequest, SupportTicket
+        my_requests = CertificateRequest.objects.filter(user=user).order_by("-date_requested")
+        my_tickets = SupportTicket.objects.filter(user=user).order_by("-created_at")
 
-    stats = {
-        "total": my_requests.count(),
-        "pending": my_requests.filter(status="Pending").count(),
-        "approved": my_requests.filter(status="Approved").count(),
-        "rejected": my_requests.filter(status="Rejected").count(),
-    }
+        stats = {
+            "total": my_requests.count(),
+            "pending": my_requests.filter(status="Pending").count(),
+            "approved": my_requests.filter(status="Approved").count(),
+            "rejected": my_requests.filter(status="Rejected").count(),
+        }
 
-    return render(request, "accounts/user_dashboard.html", {
-        "membership": membership,
-        "my_requests": my_requests[:20],
-        "my_tickets": my_tickets[:20],
-        "stats": stats,
-        "active_page": "dashboard",
-    })
+        logger.debug(f"user_dashboard_view: Rendering template for user={user.email}")
+        return render(request, "accounts/user_dashboard.html", {
+            "membership": membership,
+            "my_requests": my_requests[:20],
+            "my_tickets": my_tickets[:20],
+            "stats": stats,
+            "active_page": "dashboard",
+        })
+    except Exception as e:
+        logger.error(f"user_dashboard_view: ERROR for user={user.email}: {str(e)}", exc_info=True)
+        # Optional: return a custom error page or re-raise for 500
+        raise e
 
 
 # ─────────────────────────────────────────────

@@ -181,6 +181,11 @@ CSRF_TRUSTED_ORIGINS = [
     "https://easy-cert-production.up.railway.app",
 ]
 
+# Session Settings - Ensure logins persist after browser close
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
+
 # Security headers for production
 if not DEBUG:
     CSRF_COOKIE_SECURE = True

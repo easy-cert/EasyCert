@@ -41,14 +41,18 @@ class DualSessionMiddleware:
             # Map session cookie
             if self.session_cookie in response.cookies:
                 cookie_data = response.cookies[self.session_cookie]
+                # Fallback to SESSION_COOKIE_AGE if max_age is not set on the morsel
+                max_age = cookie_data.get('max-age') or settings.SESSION_COOKIE_AGE
+                expires = cookie_data.get('expires')
+                
                 response.set_cookie(admin_session_key, cookie_data.value, 
-                    max_age=cookie_data.get('max-age'),
-                    expires=cookie_data.get('expires'),
+                    max_age=max_age,
+                    expires=expires,
                     path=cookie_data.get('path', '/'),
                     domain=cookie_data.get('domain'),
-                    secure=cookie_data.get('secure'),
-                    httponly=cookie_data.get('httponly'),
-                    samesite=cookie_data.get('samesite')
+                    secure=cookie_data.get('secure') or False,
+                    httponly=cookie_data.get('httponly') or True,
+                    samesite=cookie_data.get('samesite', 'Lax')
                 )
                 del response.cookies[self.session_cookie]
 
@@ -60,9 +64,9 @@ class DualSessionMiddleware:
                     expires=cookie_data.get('expires'),
                     path=cookie_data.get('path', '/'),
                     domain=cookie_data.get('domain'),
-                    secure=cookie_data.get('secure'),
-                    httponly=cookie_data.get('httponly'),
-                    samesite=cookie_data.get('samesite')
+                    secure=cookie_data.get('secure') or False,
+                    httponly=cookie_data.get('httponly') or False, # CSRF usually not httponly
+                    samesite=cookie_data.get('samesite', 'Lax')
                 )
                 del response.cookies[self.csrf_cookie]
 

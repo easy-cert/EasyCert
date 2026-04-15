@@ -133,8 +133,10 @@
 </div>
 
 <!-- REVIEW APPLICATION/TICKET MODAL -->
-<div id="ticket-modal" class="fixed inset-0 hidden items-center justify-center z-[99999] p-4 bg-slate-900/40 backdrop-blur-md">
-    <div class="bg-white w-full max-w-xl rounded-[3rem] shadow-2xl p-10 transform transition-all relative">
+<div id="ticket-modal" class="fixed inset-0 hidden items-center justify-center z-[99999] p-4"
+     style="background: var(--modal-overlay); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);">
+    <div class="modal w-full max-w-xl rounded-[3rem] shadow-2xl p-10 transform transition-all relative border"
+         style="background: var(--bg-card); border-color: var(--border-primary); box-shadow: 0 24px 64px var(--shadow-main);">
         <div class="flex justify-between items-start mb-6 border-b border-black/5 pb-6">
             <div>
                 <div class="flex items-center gap-x-2 mb-1">

@@ -257,9 +257,9 @@
 
 <!-- REVIEW MODAL -->
 <div id="review-modal" class="fixed inset-0 hidden items-center justify-center z-[99999] p-4"
-    style="background: rgba(220,235,255,0.50); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
-    <div class="modal w-full max-w-2xl rounded-3xl max-h-[90vh] overflow-y-auto"
-        style="background: rgba(255,255,255,0.78); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); border: 1px solid rgba(255,255,255,0.75); box-shadow: 0 8px 40px rgba(44,123,229,0.14);">
+    style="background: var(--modal-overlay); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);">
+    <div class="modal w-full max-w-2xl rounded-3xl max-h-[90vh] overflow-y-auto border"
+        style="background: var(--bg-card); border-color: var(--border-primary); box-shadow: 0 24px 64px var(--shadow-main);">
         <div class="p-6 sm:p-8">
             <div class="flex items-start justify-between mb-6 sm:mb-8">
                 <div>
@@ -304,9 +304,10 @@
 </div>
 
 <!-- CERTIFICATE PREVIEW MODAL -->
-<div id="cert-preview-modal" class="fixed inset-0 hidden items-center justify-center z-[99999] p-3 sm:p-4"
-    style="background: rgba(220,235,255,0.50); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
-    <div class="max-w-[850px] w-full max-h-[95vh] overflow-y-auto">
+<div id="cert-preview-modal" class="fixed inset-0 hidden items-center justify-center z-[99999] p-4"
+    style="background: var(--modal-overlay); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);">
+    <div class="modal w-full max-w-5xl rounded-3xl max-h-[95vh] overflow-y-auto border"
+        style="background: var(--bg-card); border-color: var(--border-primary); box-shadow: 0 24px 64px var(--shadow-main);">
         <div class="flex justify-end mb-3 sm:mb-4">
             <button onclick="closeCertModal()"
                 class="px-5 sm:px-6 py-2.5 sm:py-3 bg-white/90 hover:bg-black/5 text-[#333333] rounded-3xl flex items-center gap-x-2 text-sm">
